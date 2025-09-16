@@ -1,0 +1,70 @@
+/* Page background (matches your login aesthetic) */
+.home-bg {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(14,165,233,.20), transparent 60%),
+    radial-gradient(1000px 500px at 110% 10%, rgba(99,102,241,.18), transparent 60%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+/* Frosted look for AppBar */
+.glass-bar {
+  background: rgba(255,255,255,.75) !important;
+  backdrop-filter: blur(8px) saturate(1.1);
+  border-bottom: 1px solid rgba(15,23,42,.06);
+}
+
+/* Cards */
+.hero-card {
+  padding: 22px;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(8px) saturate(1.05);
+}
+.tiny-card {
+  padding: 18px;
+  background: rgba(255,255,255,.92);
+}
+.note-card {
+  padding: 16px;
+  background: rgba(255,255,255,.92);
+}
+
+/* Today rows */
+.today-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  color: #0f172a;
+}
+.today-row .push {
+  margin-left: auto;
+}
+
+/* Quick action cards */
+.action-card {
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: center;
+  column-gap: 12px;
+  border: 1px solid rgba(2,6,23,.06);
+  background: #fff;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .2s ease;
+  border-radius: 16px;
+}
+.action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -12px rgba(2,6,23,.25);
+}
+.action-icon {
+  font-size: 26px;
+  color: #3b82f6;
+  display: grid;
+  place-items: center;
+}
+.action-text {
+  font-weight: 700;
+  color: #0f172a;
+}
