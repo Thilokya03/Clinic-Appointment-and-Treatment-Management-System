@@ -1,41 +1,77 @@
-import { useState } from 'react'
-import { Link } from "react-router-dom";
-import "./navibar.css"
-import { MdOutlineLightMode } from "react-icons/md";
-import { MdNightlightRound } from "react-icons/md";
+import { useState, useEffect } from "react";
+import { NavLink, Link } from "react-router-dom";
+import { MdOutlineLightMode, MdNightlightRound } from "react-icons/md";
 import { LuCircleUser } from "react-icons/lu";
+import { RxHamburgerMenu } from "react-icons/rx";
+import "./navibar.css";
 
+function Navibar({ theme, setTheme }) {
+  const [open, setOpen] = useState(false);
 
+  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
+  const closeMenu = () => setOpen(false);
 
-
-function Navibar() {
-  
+  useEffect(() => {
+    const closeOnResize = () => window.innerWidth > 1024 && setOpen(false);
+    window.addEventListener("resize", closeOnResize);
+    return () => window.removeEventListener("resize", closeOnResize);
+  }, []);
 
   return (
-    <div className="navibar">
-        <Link>
-            <div className="navibar-logo">
-                <h1>MyApp</h1>
-            </div>
-        </Link>
-        <div className="navibar-links">
-            <ul>
-                <li><Link to='/'> Home </Link></li>
-                <li><Link to='/'> Doctors </Link></li>
-                <li><Link to='/login'> Login </Link></li>
-                <li><Link to='/'> About </Link></li>
-            </ul>
-        </div>
-        <div className="navibar-icons">
-            <div className='theam-icon'>
-                <MdOutlineLightMode size={40} />
-            </div>
-            <div className='user-icon'>
-                <LuCircleUser size={40} />
-            </div>
-        </div>
-    </div>
-  )
+    <header className={`navibar ${theme === "dark" ? "navibar-dark" : ""}`}>
+      <Link to="/" className="brand" onClick={closeMenu} aria-label="Go to home">
+        <div className="brand-mark">C</div>
+        <span className="brand-text">CATMS</span>
+      </Link>
+
+      <nav className="links">
+        <NavLink to="/" end className={({ isActive }) => (isActive ? "link active" : "link")}>
+          Home
+        </NavLink>
+        <NavLink to="/doctor" className={({ isActive }) => (isActive ? "link active" : "link")}>
+          Doctors
+        </NavLink>
+        <NavLink to="/login" className={({ isActive }) => (isActive ? "link active" : "link")}>
+          Login
+        </NavLink>
+        <NavLink to="/about" className={({ isActive }) => (isActive ? "link active" : "link")}>
+          About
+        </NavLink>
+      </nav>
+
+      <div className="actions">
+        <button className="icon-btn" onClick={toggleTheme} aria-label="Toggle theme">
+          {theme === "light" ? <MdOutlineLightMode size={22} /> : <MdNightlightRound size={22} />}
+        </button>
+        <button className="avatar-btn" aria-label="Profile">
+          <LuCircleUser size={22} />
+        </button>
+        <button
+          className="hamburger"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Open navigation menu"
+          aria-expanded={open}
+        >
+          <RxHamburgerMenu size={22} />
+        </button>
+      </div>
+
+      <div className={`mobile-drawer ${open ? "open" : ""}`}>
+        <NavLink to="/" end className="m-link" onClick={closeMenu}>
+          Home
+        </NavLink>
+        <NavLink to="/doctor" className="m-link" onClick={closeMenu}>
+          Doctors
+        </NavLink>
+        <NavLink to="/login" className="m-link" onClick={closeMenu}>
+          Login
+        </NavLink>
+        <NavLink to="/about" className="m-link" onClick={closeMenu}>
+          About
+        </NavLink>
+      </div>
+    </header>
+  );
 }
 
-export default Navibar
+export default Navibar;

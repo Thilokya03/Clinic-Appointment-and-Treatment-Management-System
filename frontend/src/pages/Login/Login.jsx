@@ -23,7 +23,7 @@ import {
   ToggleButtonGroup,
   ToggleButton,
 } from "@mui/material";
-import { Visibility, VisibilityOff, Google } from "@mui/icons-material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const theme = createTheme({
   palette: {
