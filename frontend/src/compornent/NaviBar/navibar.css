@@ -1,0 +1,97 @@
+.navibar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 40px;
+  background: linear-gradient(90deg, #ff5f9e, #ff85c1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navibar-logo {
+  align-items: center;
+  cursor: pointer;
+}
+
+.navibar-logo h1 {
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.navibar-links {
+  list-style: none;
+  display: flex;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+}
+
+.navibar-links li {
+  display: inline-block;
+  padding: 0 40px;
+  
+}
+
+.navibar-links a {
+  
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1rem;
+  position: relative;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.navibar-links a::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  background: #fff;
+  left: 0;
+  bottom: -5px;
+  transition: width 0.3s ease;
+  
+
+}
+
+.navibar-links a:hover {
+  color: #ffe6f1;
+
+}
+
+.navibar-links a:hover::after {
+  width: 100%;
+}
+
+.navibar-icons{
+    display: flex;
+    gap: 30px;
+}
+
+.theam-icon{
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.user-icon{
+    cursor: pointer;
+    transition: 0.5s;
+    border-radius: 100%;
+}
+
+.theam-icon:hover{
+    transform: scale(1.1);
+    transition: 0.5s ;
+}
+.user-icon:hover{
+    transform: scale(1.1);
+    transform: 0.5s ;
+}
