@@ -1,6 +1,6 @@
 /* Page background (matches your login aesthetic) */
 .home-bg {
-  min-height: 100vh;
+  min-height: 90vh;
   background:
     radial-gradient(1200px 600px at 10% -10%, rgba(14,165,233,.20), transparent 60%),
     radial-gradient(1000px 500px at 110% 10%, rgba(99,102,241,.18), transparent 60%),

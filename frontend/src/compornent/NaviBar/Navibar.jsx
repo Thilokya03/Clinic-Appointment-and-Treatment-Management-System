@@ -12,6 +12,11 @@ function Navibar({ theme, setTheme }) {
   const closeMenu = () => setOpen(false);
 
   useEffect(() => {
+    localStorage.setItem("theme", theme);
+    console.log(theme);
+  }, [theme])
+
+  useEffect(() => {
     const closeOnResize = () => window.innerWidth > 1024 && setOpen(false);
     window.addEventListener("resize", closeOnResize);
     return () => window.removeEventListener("resize", closeOnResize);

@@ -1,32 +1,25 @@
-import { useState , useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import './App.css'
-import Login from './pages/Login/Login'
-import Home from './pages/Home/Home'
-import Navibar from './compornent/NaviBar/Navibar'
+import Navibar from "./compornent/NaviBar/Navibar"
+import Sidebar from "./compornent/LeftSlideBar/LeftslideBar";
+import Home from "./pages/Home/Home";
+import Login from "./pages/Login/Login";
+import "./App.css";
 
 function App() {
-
-  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
-
-  useEffect(() => {
-      localStorage.setItem("theam", theme);
-      console.log(theme);
-  }, [theme])
-
   return (
-    <>
-      
-      <Router>
-        <Navibar theme={theme} setTheme={setTheme}/>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </Router>
-
-    </>
-  )
+    <Router>
+      <div className="app-layout">
+        <Sidebar />
+        <div className="main-area">
+          <Navibar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;
