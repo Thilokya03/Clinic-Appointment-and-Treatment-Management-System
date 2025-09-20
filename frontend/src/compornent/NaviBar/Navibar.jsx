@@ -34,6 +34,9 @@ function Navibar({ theme, setTheme }) {
         <NavLink to="/login" className={({ isActive }) => (isActive ? "link active" : "link")}>
           Login
         </NavLink>
+        <NavLink to="/register" className={({ isActive }) => (isActive ? "link active" : "link")}>
+          Register
+        </NavLink>
         <NavLink to="/about" className={({ isActive }) => (isActive ? "link active" : "link")}>
           About
         </NavLink>
@@ -65,6 +68,9 @@ function Navibar({ theme, setTheme }) {
         </NavLink>
         <NavLink to="/login" className="m-link" onClick={closeMenu}>
           Login
+        </NavLink>
+        <NavLink to="/register" className="m-link" onClick={closeMenu}>
+          Register
         </NavLink>
         <NavLink to="/about" className="m-link" onClick={closeMenu}>
           About

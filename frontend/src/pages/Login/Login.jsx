@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Login.css";
+import { Link as RouterLink } from "react-router-dom";
 
 // MUI
 import {
@@ -96,8 +97,8 @@ export default function Login() {
               <Box
                 sx={{
                   width: 60, height: 60, borderRadius: 3,
-                  display: "grid", placeItems: "center", color: "white", fontSize: 26, boxShadow: 3,
-                  background: "linear-gradient(135deg, #3b82f6 0%, #22c55e 100%)",
+                  display: "grid", placeItems: "center", color: "White", fontSize: 26, boxShadow: 3,
+                  background: "linear-gradient(135deg, #4a8bf3ff 0%, #22c55e 100%)",
                 }}
               >
                 🩺
@@ -170,11 +171,16 @@ export default function Login() {
                 Sign In
               </Button>
 
+              
               <Divider sx={{ my: 2 }}>
-                <Typography variant="caption" color="text.secondary">If you don't have an account </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  If you don't have an account?{" "}
+                  <Link component={RouterLink} to="/register" underline="hover">
+                    Register
+                  </Link>
+                </Typography>
               </Divider>
-
-            
+              
 
               <Typography variant="caption" color="text.secondary" display="block" align="center" mt={3}>
                 © {new Date().getFullYear()} MedSync • Security · Privacy · Terms
