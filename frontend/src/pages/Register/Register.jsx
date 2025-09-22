@@ -18,6 +18,8 @@ import {
   Divider,
   Snackbar,
   Alert,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -34,6 +36,7 @@ const theme = createTheme({
 });
 
 export default function Register() {
+  const [role, setRole] = useState("");
   const [name, setName] = useState("");
   const [dobDay, setDobDay] = useState("");
   const [dobMonth, setDobMonth] = useState("");
@@ -73,7 +76,11 @@ export default function Register() {
   const onSubmit = (e) => {
     e.preventDefault();
 
-     if (name.trim().length < 2) {
+      // Check role
+    if (!role) {
+      return setToast({ open: true, message: "Please select a role.", severity: "error", });
+    }
+    if (name.trim().length < 2) {
       return setToast({ open: true, message: "Enter a valid name.", severity: "error" });
     }
     if (!dobDay || !dobMonth || !dobYear) { // ✅ fixed
@@ -105,6 +112,10 @@ export default function Register() {
     }
 
     const dob = `${dobYear}-${dobMonth}-${dobDay}`;
+
+    const info = [role, name, email, password, dob, gender].join(", ")
+    console.log("Registration Info:", info);
+    alert(`Registration Info:\n${info}`);
 
 // TODO: Send registration data to backend
 
@@ -145,7 +156,21 @@ export default function Register() {
             </Box>
 
             {/* Form */}
+            
             <Box component="form" onSubmit={onSubmit} sx={{ mt: 1 }}>
+              <Typography variant="caption" color="text.secondary">Select Role</Typography>
+              <ToggleButtonGroup
+                value={role}
+                exclusive
+                onChange={(_, v) => v && setRole(v)}
+                fullWidth
+                sx={{ my: 1 }}
+                color="primary"
+              >
+                <ToggleButton value="patient">Patient</ToggleButton>
+                <ToggleButton value="staff">Staff</ToggleButton>    
+              </ToggleButtonGroup>
+
               <TextField
                 label="Full Name"
                 value={name}
