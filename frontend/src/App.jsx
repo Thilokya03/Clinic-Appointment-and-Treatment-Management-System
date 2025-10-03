@@ -5,6 +5,7 @@ import Home from './pages/Home/Home'
 import Register from './pages/Register/Register';
 import Navibar from './compornent/NaviBar/Navibar'
 import Sidebar from "./compornent/LeftSlideBar/LeftslideBar";
+import  Doctors  from "./pages/Doctor/Doctors";
 import "./App.css";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/doctors" element={<Doctors />} />
           </Routes>
         </div>
       </div>

@@ -33,7 +33,7 @@ function Navibar({ theme, setTheme }) {
         <NavLink to="/" end className={({ isActive }) => (isActive ? "link active" : "link")}>
           Home
         </NavLink>
-        <NavLink to="/doctor" className={({ isActive }) => (isActive ? "link active" : "link")}>
+        <NavLink to="/doctors" className={({ isActive }) => (isActive ? "link active" : "link")}>
           Doctors
         </NavLink>
         <NavLink to="/login" className={({ isActive }) => (isActive ? "link active" : "link")}>
