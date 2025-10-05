@@ -18,8 +18,7 @@ import {
   Divider,
   Snackbar,
   Alert,
-  ToggleButtonGroup,
-  ToggleButton,
+  FormControl, InputLabel, Select, MenuItem 
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -36,11 +35,14 @@ const theme = createTheme({
 });
 
 export default function Register() {
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState(""); 
+  const [username, setUserName] = useState("");
+  const [specialties, setSpecialties] = useState([]);
+  const [branch, setBranch] = useState("");
   const [name, setName] = useState("");
-  const [dobDay, setDobDay] = useState("");
-  const [dobMonth, setDobMonth] = useState("");
-  const [dobYear, setDobYear] = useState("");
+  const [age , setAge ] = useState("");
+  const [dob , setDob ] = useState(""); 
+  const [nic , setNIC ] = useState(""); 
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [contactNo, setContactNo] = useState("");
@@ -64,13 +66,6 @@ export default function Register() {
     setToast((t) => ({ ...t, open: false }));
   };
 
-  const days = Array.from({ length: 31 }, (_, i) => i + 1);
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-  ];
-  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
-  
   const navigate = useNavigate();
 
   const onSubmit = (e) => {
@@ -81,6 +76,9 @@ export default function Register() {
       return setToast({ open: true, message: "Please select a role.", severity: "error", });
     }
     if (name.trim().length < 2) {
+      return setToast({ open: true, message: "Enter a valid name.", severity: "error" });
+    }
+    if (username.trim().length < 2) {
       return setToast({ open: true, message: "Enter a valid name.", severity: "error" });
     }
     if (!dobDay || !dobMonth || !dobYear) { // ✅ fixed
@@ -110,12 +108,9 @@ export default function Register() {
     if (!gender) {
     return setToast({ open: true,  message: "Please select your gender.", severity: "error"});
     }
-
-    const dob = `${dobYear}-${dobMonth}-${dobDay}`;
-
-    const info = [role, name, email, password, dob, gender].join(", ")
-    console.log("Registration Info:", info);
-    alert(`Registration Info:\n${info}`);
+    if (!dob) {
+    return setToast({ open: true,  message: "Please select your Date od birth.", severity: "error"});
+    }
 
 // TODO: Send registration data to backend
 
@@ -157,19 +152,25 @@ export default function Register() {
 
             {/* Form */}
             
-            <Box component="form" onSubmit={onSubmit} sx={{ mt: 1 }}>
-              <Typography variant="caption" color="text.secondary">Select Role</Typography>
-              <ToggleButtonGroup
-                value={role}
-                exclusive
-                onChange={(_, v) => v && setRole(v)}
-                fullWidth
-                sx={{ my: 1 }}
-                color="primary"
-              >
-                <ToggleButton value="patient">Patient</ToggleButton>
-                <ToggleButton value="staff">Staff</ToggleButton>    
-              </ToggleButtonGroup>
+            <Box component="form" onSubmit={onSubmit} sx={{ mt: 1 }}> 
+              {/* role Select */}
+              <FormControl fullWidth margin="normal" required sx={{ backgroundColor: "#ffffffff", borderRadius: 1 }}>
+                <InputLabel id="role-label" sx={{ color: "#555555" }}>Select Role</InputLabel>
+                <Select
+                  labelId="role-label"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  slotProps={{
+                    select: { sx: { color: "#000000", backgroundColor: "#f8f7f3ff" } },
+                  }}
+                >
+                  <MenuItem value="patient">Patient</MenuItem>
+                  <MenuItem value="admin">Admin</MenuItem>
+                  <MenuItem value="nurse">Nurse</MenuItem>
+                  <MenuItem value="doctor">Doctor</MenuItem>
+                  <MenuItem value="other">Other</MenuItem>
+                </Select>
+              </FormControl>
 
               <TextField
                 label="Full Name"
@@ -177,7 +178,12 @@ export default function Register() {
                 onChange={(e) => setName(e.target.value)}
                 fullWidth margin="normal" required
               />
-
+              <TextField
+                label="User Name"
+                value={name}
+                onChange={(e) => setUserName(e.target.value)}
+                fullWidth margin="normal" required
+              />
               <TextField
                 label="Address"
                 value={address}
@@ -206,6 +212,105 @@ export default function Register() {
                       /> Female
                   </label>
               </div>
+              <TextField
+                label="Contact Number"
+                value={contactNo}
+                onChange={(e) => setContactNo(e.target.value)}
+                fullWidth margin="normal" required
+              />
+              <TextField
+                label="NIC"
+                value={nic}
+                onChange={(e) => setNIC(e.target.value)}
+                fullWidth margin="normal" required
+              />          
+              <TextField
+                label="Age"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                fullWidth margin="normal" required
+              />
+              <TextField
+                label="Date of Birth"
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                fullWidth
+                margin="normal"
+                required 
+              InputLabelProps={{ shrink: true }}
+              slotProps={{
+                  inputLabel: { shrink: true },
+                  htmlInput: {
+                    style: { color: "#555555"},
+                  },
+                }}
+              sx={{
+                // Target the native calendar picker icon
+                "& input::-webkit-calendar-picker-indicator": {
+                  filter: "invert(50%)",  
+                  opacity: 100,
+                  display: "block",
+                  cursor: "pointer",
+                },
+              }}
+              />
+              {role === "patient" && (
+                <TextField
+                  label="Emergency Contact Name"
+                  value={emergencyContactName}
+                  onChange={(e) => setEmergencyContactName(e.target.value)}
+                  fullWidth margin="normal" required
+                />
+              )}
+              {role === "patient" && (
+                <TextField
+                  label="Emergency Contact Number"
+                  value={emergencyContactNo}
+                  onChange={(e) => setEmergencyContactNo(e.target.value)}
+                  fullWidth margin="normal" required
+                />
+              )}
+
+              {role !== "patient"  && (
+                <>
+                  {/* Branch Selection */}
+                  <FormControl fullWidth margin="normal" required>
+                    <InputLabel id="branch-label">Branch</InputLabel>
+                    <Select
+                      labelId="branch-label"
+                      value={branch}
+                      onChange={(e) => setBranch(e.target.value)}
+                    >
+                      <MenuItem value="colombo">Colombo</MenuItem>
+                      <MenuItem value="galle">Galle</MenuItem>
+                      <MenuItem value="kandy">Kandy</MenuItem>
+                      {/* Add more branches dynamically from backend if needed */}
+                    </Select>
+                  </FormControl>
+                </>
+              )}
+              {role === "doctor" && (
+              <>
+                  {/* Specialties Multi-Select */}
+                  <FormControl fullWidth margin="normal" required>
+                    <InputLabel id="specialty-label">Specialties</InputLabel>
+                    <Select
+                      labelId="specialty-label"
+                      multiple
+                      value={specialties}
+                      onChange={(e) => setSpecialties(e.target.value)}
+                      renderValue={(selected) => selected.join(", ")}
+                    >
+                      <MenuItem value="cardiology">Cardiology</MenuItem>
+                      <MenuItem value="orthopedics">Orthopedics</MenuItem>
+                      <MenuItem value="neurology">Neurology</MenuItem>
+                      <MenuItem value="pediatrics">Pediatrics</MenuItem>
+                      {/* Add more specialties as needed */}
+                    </Select>
+                  </FormControl>
+                  </>
+              )}
 
 
               <TextField
@@ -213,62 +318,6 @@ export default function Register() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                fullWidth margin="normal" required
-              />
-
-              <TextField
-                label="Contact Number"
-                value={contactNo}
-                onChange={(e) => setContactNo(e.target.value)}
-                fullWidth margin="normal" required
-              />
-
-              <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "10px", marginBottom: "10px" }}>
-                <span>Date of Birth :</span>
-                <Box display="flex" gap={2} mt={2} >
-                    <TextField
-                    select label="Day" value={dobDay}
-                    onChange={(e) => setDobDay(e.target.value)}
-                    sx={{ flex: 1, minWidth: 90, minHeight: 50}}
-                    SelectProps={{ native: true }}
-                    >
-                    <option value=""></option>
-                    {days.map((d) => <option key={d} value={d}>{d}</option>)}
-                    </TextField>
-
-                    <TextField
-                    select label="Month" value={dobMonth}
-                    onChange={(e) => setDobMonth(e.target.value)}
-                    sx={{ flex: 1, minWidth: 90 }}
-                    SelectProps={{ native: true }}
-                    >
-                    <option value=""></option>
-                    {months.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-                    </TextField>
-
-                    <TextField
-                    select label="Year" value={dobYear}
-                    onChange={(e) => setDobYear(e.target.value)}
-                    sx={{ flex: 1, minWidth: 90 }}
-                    SelectProps={{ native: true }}
-                    >
-                    <option value=""></option>
-                    {years.map((y) => <option key={y} value={y}>{y}</option>)}
-                    </TextField>
-                </Box>
-              </div>
-
-              <TextField
-                label="Emergency Contact Name"
-                value={emergencyContactName}
-                onChange={(e) => setEmergencyContactName(e.target.value)}
-                fullWidth margin="normal" required
-              />
-
-              <TextField
-                label="Emergency Contact Number"
-                value={emergencyContactNo}
-                onChange={(e) => setEmergencyContactNo(e.target.value)}
                 fullWidth margin="normal" required
               />
 
