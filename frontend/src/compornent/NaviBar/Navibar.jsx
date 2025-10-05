@@ -4,9 +4,11 @@ import { NavLink, Link } from "react-router-dom";
 import { MdOutlineLightMode, MdNightlightRound } from "react-icons/md";
 import { LuCircleUser } from "react-icons/lu";
 import { RxHamburgerMenu } from "react-icons/rx";
+import LogoLight from "../../assert/logo-light.png";
+import LogoDark from "../../assert/logo-dark.png";
 import "./navibar.css";
 
-export default function Navibar({ theme = "light", setTheme = () => {} }) {
+export default function Navibar({ theme = "light", setTheme = () => { } }) {
   const [open, setOpen] = useState(false);
 
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
@@ -23,8 +25,8 @@ export default function Navibar({ theme = "light", setTheme = () => {} }) {
       {/* Brand */}
       <Link to="/" className="brand" onClick={closeMenu} aria-label="Go to home">
         <div className="brand__mark" aria-hidden>
-          <span className="brand__glow" />
-          <span className="brand__letter">C</span>
+
+          <img src={theme === 'light'? LogoLight : LogoDark} alt="Logo" className="brand__logo" />
         </div>
         <span className="brand__text">CATMS</span>
       </Link>
