@@ -18,9 +18,9 @@ const treatmentRoutes = require("./Routes/treatmentRoutes");
 app.use("/api/staff", staffRoutes);
 app.use("/api/patient", patientRoutes);
 app.use("/api/branch", branchRoutes);
-app.use("/appointment", appointmentRoutes);
+app.use("/api/appointment", appointmentRoutes);
 app.use("/api/payment", paymentRoutes);
-app.use("/treatment", treatmentRoutes);
+app.use("/api/treatment", treatmentRoutes);
 //-------------------------
 
 app.listen(3000, () => {

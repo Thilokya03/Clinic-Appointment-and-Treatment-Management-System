@@ -3,8 +3,9 @@ const router = express.Router();
 const db = require("../db");
 const { message } = require("statuses");
 const { route } = require("./patientRoutes");
+const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
 
-router.post('/', async(req, res) =>{
+router.post('/',staffAuth(['Admin']), async(req, res) =>{
     const {branch, name, address} = req.body;
     try{
         await db.execute(`INSERT INTO branch (branch, name, address) VALUES (?, ?, ?)`, [branch, name, address]);
@@ -14,14 +15,14 @@ router.post('/', async(req, res) =>{
     }
 });
 
-router.get('/', async(req, res) =>{
-    try{
-        const rows = await db.execute(`SELECT * FROM branch`);
-        res.json(rows)
-    }catch(err){
-        res.status(500).json({error: err.message});
-    }
-});
+// router.get('/', async(req, res) =>{
+//     try{
+//         const rows = await db.execute(`SELECT * FROM branch`);
+//         res.json(rows)
+//     }catch(err){
+//         res.status(500).json({error: err.message});
+//     }
+// });
 
 router.get('/:id', async(req, res) =>{
     const branch_id = req.params.id;
@@ -33,7 +34,7 @@ router.get('/:id', async(req, res) =>{
     }
 });
 
-router.delete('/:id', async(req, res) => {
+router.delete('/:id',staffAuth(['Admin']), async(req, res) => {
     const branch_id = req.params.id;
     try{
         await db.execute(`DELETE FROM branch WHERE branch_id = ?`, [branch_id]);
@@ -44,3 +45,4 @@ router.delete('/:id', async(req, res) => {
 });
 
 
+module.exports = router;

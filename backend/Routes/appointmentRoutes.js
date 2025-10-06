@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-
+const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
 
 //********************************ADD new appointment********************************* */
-router.post('/', async(req, res) =>{
+router.post('/',patientAuth, async(req, res) =>{
     const {appointment_id, patient_id, doctor_id, status, appointment_date, start_time, end_time, notes, appointment_fee} = req.body;
     try{
         await db.execute(`INSERT INTO appointment (appointment_id, patient_id, doctor_id, status, appontment_date, start_time, end_time, notes, appointment_fee) VALUES (?, ?, ?,?, ?, ?,?, ?, ?)`, 
@@ -29,8 +29,8 @@ router.get('/:id', async(req, res) =>{
 
 //********************************GET all appontment of a patient ********************************* */
 
-router.get('/patient/:id', async(req, res) =>{
-    const patient_id = req.params.id;
+router.get('/patient',patientAuth, async(req, res) =>{
+    const patient_id = req.user.id;
     try{
         const row = await db.execute(`SELECT * FROM appointment WHERE patient_id = ?`, [patient_id]);
         res.json(row)
@@ -41,8 +41,8 @@ router.get('/patient/:id', async(req, res) =>{
 
 //********************************GET all appontment of a doctor ********************************* */
 
-router.get('/doctor/:id', async(req, res) =>{
-    const doctor_id = req.params.id;
+router.get('/doctor',staffAuth(['Doctor', 'Admin']), async(req, res) =>{
+    const doctor_id = req.user.id;
     try{
         const row = await db.execute(`SELECT * FROM appointment WHERE doctor_id = ?`, [doctor_id]);
         res.json(row)
@@ -66,7 +66,7 @@ router.get('/doctor/:id', async(req, res) =>{
 
 //********************************* DELETE an appointment******************************************/
 
-router.delete('/:id', async(req, res) => {
+router.delete('/:id',staffAuth(['doctor', 'admin']), async(req, res) => {
     const appointment_id = req.params.id;
     try{
         await db.execute(`DELETE FROM appointment WHERE appointment_id = ?`, [appointment_id]);
@@ -77,5 +77,5 @@ router.delete('/:id', async(req, res) => {
 });
 
 
-
+module.exports = router;
 

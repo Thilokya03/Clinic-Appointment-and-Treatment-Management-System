@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
 
 //***************************ADD treatment for an appointment****************** */
-router.post('/', async(req, res) =>{
+router.post('/',staffAuth(['Doctor']), async(req, res) =>{
     const {treatment_id, catalog_id, appointment_id, description} = req.body;
     try{
         await db.execute(`INSERT INTO treatment (treatment_id, catalog_id, appointment_id, description) VALUES (?,?,?,?)`,
@@ -46,3 +47,4 @@ router.get('/treatment/:id', async(req, res) =>{
 
 
 
+module.exports = router;
