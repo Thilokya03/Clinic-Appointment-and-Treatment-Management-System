@@ -26,7 +26,7 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
       <Link to="/" className="brand" onClick={closeMenu} aria-label="Go to home">
         <div className="brand__mark" aria-hidden>
 
-          <img src={theme === 'light'? LogoLight : LogoDark} alt="Logo" className="brand__logo" />
+          <img src={theme === 'light' ? LogoLight : LogoDark} alt="Logo" className="brand__logo" />
         </div>
         <span className="brand__text">CATMS</span>
       </Link>
@@ -52,9 +52,11 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
         <button className="icon-btn" onClick={toggleTheme} aria-label="Toggle theme">
           {theme === "light" ? <MdOutlineLightMode size={20} /> : <MdNightlightRound size={20} />}
         </button>
-        <button className="avatar-btn" aria-label="Profile">
-          <LuCircleUser size={20} />
-        </button>
+        <Link to={"/login"}>
+          <button className="avatar-btn" aria-label="Profile" >
+            <LuCircleUser size={20} />
+          </button>
+        </Link>
         <button
           className="hamburger"
           onClick={() => setOpen((v) => !v)}
