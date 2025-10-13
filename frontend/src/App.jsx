@@ -45,6 +45,7 @@ export default function App() {
           <Route path="/dashboard">
             <Route index element={<Dashboard />} />
             <Route path="appointments" element={<SetAppointment />} />
+            <Route path="appointmentsbook" element={<BookAppointment />} />
           </Route>
         </Route>
 
@@ -53,7 +54,6 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
-          <Route path="/appointmentsbook" element={<BookAppointment />} />
         </Route>
       </Routes>
     </Router>
