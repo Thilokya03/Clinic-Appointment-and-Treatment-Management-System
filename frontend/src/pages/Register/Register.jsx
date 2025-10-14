@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./Register.css";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate, Link as RouterLink, Link } from "react-router-dom";
 
 // MUI
 import {
