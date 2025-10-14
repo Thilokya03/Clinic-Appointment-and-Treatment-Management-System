@@ -39,17 +39,10 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
         <NavLink to="/doctors" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
           Doctors
         </NavLink>
-<<<<<<< HEAD
-        <NavLink to="/login" className={({ isActive }) => (isActive ? "link active" : "link")}>
-          Login
-        </NavLink>
-        <NavLink to="/about" className={({ isActive }) => (isActive ? "link active" : "link")}>
-=======
         <NavLink to="/register" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
           Register
         </NavLink>
         <NavLink to="/about" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
->>>>>>> origin/main
           About
         </NavLink>
       </nav>
@@ -75,21 +68,6 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
         </button>
       </div>
 
-<<<<<<< HEAD
-      <div className={`mobile-drawer ${open ? "open" : ""}`}>
-        <NavLink to="/" end className="m-link" onClick={closeMenu}>
-          Home
-        </NavLink>
-        <NavLink to="/doctor" className="m-link" onClick={closeMenu}>
-          Doctors
-        </NavLink>
-        <NavLink to="/login" className="m-link" onClick={closeMenu}>
-          Login
-        </NavLink>
-        <NavLink to="/about" className="m-link" onClick={closeMenu}>
-          About
-        </NavLink>
-=======
       {/* Mobile drawer */}
       <div id="mobile-drawer" className={`mobile-drawer ${open ? "open" : ""}`}>
         <div className="mobile-drawer__inner">
@@ -112,7 +90,6 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
             <button className="m-btn m-btn--ghost" onClick={closeMenu}>Close</button>
           </div>
         </div>
->>>>>>> origin/main
       </div>
     </header>
   );
