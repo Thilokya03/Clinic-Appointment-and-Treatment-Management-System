@@ -6,11 +6,11 @@ const jwt = require('jsonwebtoken');
 const { error } = require("console");
 const {authenticate, patientAuth} = require('../middlewares/auth');
 
-const SECRET_KEY = 'YusriIsAnEngineer';
+const SECRET_KEY = process.env.JWT_SECRET;
 
 //**********************************SIGNUP********************************************* */
 
-router.post('/signUp', async (req, res) => {
+router.post('/signup', async (req, res) => { // TEST PASSSS
     const {patient_id, username, name, phone_no, gender, age, nic, email, password} = req.body;
 
     if(!username||!password||!email){
@@ -37,7 +37,7 @@ router.post('/signUp', async (req, res) => {
 
 //******************************************SIGNIN******************************************** */
 
-router.post('/signIn', async(req, res) => {
+router.post('/signin', async(req, res) => { //TEST PASS
   const {username, password} = req.body;
 
   if (!username||!password){
@@ -101,29 +101,31 @@ router.post('/signIn', async(req, res) => {
 
 //******************************************DELETE a patient *****************************************************
 
-router.delete('/:id',patientAuth, async(req, res) => {
-  const patient_id = req.params.id;
+router.delete('/delete', authenticate, async(req, res) => {
+  const patient_id = req.user.id;
   
-  if (req.user.id !== patient_id) {
-    return res.status(403).json({error: 'Not authorized to delete this account'});
-  }
+  // if (req.user.id !== patient_id) {
+  //   return res.status(403).json({error: 'Not authorized to delete this account'});
+  // }
   try{
     await db.execute(`DELETE FROM patient WHERE patient_id=?`,[patient_id]);
     res.status(200).json({message: "patient successfully deleted"});
   }
   catch(err){
-    res.status(500).json({error:err});
+    res.status(500).json({error:"Server error while deleting the account"});
   }
 });
 
 // **********************************************GET a patient*****************************
 
-router.get('/', patientAuth, async(req, res) => {
+router.get('/', authenticate, async(req, res) => { // TEST PASS
+  const patient_id = req.user.id;
   try {
     const [rows] = await db.execute(
       'SELECT patient_id, username, name, phone_no, gender, age, nic, email FROM patient WHERE patient_id = ?',
-      [req.user.id]
+      [patient_id]
     );
+    console.log("rows", rows);
     
     if (rows.length === 0) {
       return res.status(404).json({error: 'Patient not found'});

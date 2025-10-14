@@ -17,7 +17,7 @@ router.post('/',staffAuth(['Doctor']), async(req, res) =>{
 
 //**************************GET treatment for an appointment************************* */
 
-router.get('/:id', async(req, res) =>{
+router.get('/:id',patientAuth, async(req, res) =>{
     const treatment_id = req.params.id;
     try{
         const row = await db.execute(`SELECT * FROM appointment WHERE treatment_id = ?`, [treatment_id]);
@@ -29,7 +29,7 @@ router.get('/:id', async(req, res) =>{
 
 //**************************GET treatment catalog***************************************** */
 
-router.get('/treatment/:id', async(req, res) =>{
+router.get('/treatment/:id',patientAuth,  async(req, res) =>{
     const catalog_id = req.params.id;
     try{
         const row = await db.execute(`SELECT * FROM treatment_catalog WHERE catalog_id = ?`, [catalog_id]);
