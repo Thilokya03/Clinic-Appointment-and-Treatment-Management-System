@@ -96,7 +96,7 @@ export default function Home() {
     }
     // patient
     return [
-      { icon: <AddCircleOutline />, text: "Book Appointment", onClick: () => go("/appointments/book") },
+      { icon: <AddCircleOutline />, text: "Book Appointment", onClick: () => go("/bookappointment") },
       { icon: <CalendarMonth />, text: "My Appointments", onClick: () => go("/appointments/mine") },
       { icon: <Assignment />, text: "Prescriptions & Treatments", onClick: () => go("/treatments") },
       { icon: <ReceiptLong />, text: "Invoices & Payments", onClick: () => go("/invoices") },

@@ -15,6 +15,12 @@
   --text-muted: rgba(71, 85, 105, 0.76);
   --border-soft: rgba(148, 163, 184, 0.32);
   --shadow-soft: 0 24px 48px -28px rgba(15, 23, 42, 0.32);
+  --app-background:
+    linear-gradient(140deg, rgba(37, 99, 235, 0.16), transparent 55%),
+    linear-gradient(35deg, rgba(249, 115, 22, 0.12), transparent 65%),
+    radial-gradient(1200px 520px at -15% -10%, rgba(59, 130, 246, 0.22), transparent 60%),
+    radial-gradient(960px 520px at 110% 0%, rgba(147, 51, 234, 0.18), transparent 60%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
 }
 
 :root[data-theme='dark'] {
@@ -26,6 +32,12 @@
   --text-muted: rgba(148, 163, 184, 0.78);
   --border-soft: rgba(30, 41, 59, 0.85);
   --shadow-soft: 0 32px 64px -32px rgba(2, 6, 23, 0.85);
+  --app-background:
+    linear-gradient(160deg, rgba(37, 99, 235, 0.18), transparent 55%),
+    linear-gradient(25deg, rgba(249, 115, 22, 0.12), transparent 60%),
+    radial-gradient(980px 520px at -10% -10%, rgba(59, 130, 246, 0.22), transparent 65%),
+    radial-gradient(880px 480px at 110% 0%, rgba(147, 51, 234, 0.28), transparent 70%),
+    linear-gradient(180deg, #0b1120 0%, #020617 100%);
 }
 
 html,
@@ -35,9 +47,9 @@ body {
 }
 
 body {
-  background: var(--surface-body);
+  background: var(--app-background);
   color: var(--text-primary);
-  transition: background 200ms ease, color 200ms ease;
+  transition: background 260ms ease, color 200ms ease;
 }
 
 a {

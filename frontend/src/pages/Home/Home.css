@@ -1,10 +1,7 @@
-/* Page background (matches your login aesthetic) */
+/* Page sections inherit the global gradient */
 .home-bg {
   min-height: 90vh;
-  background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(14,165,233,.20), transparent 60%),
-    radial-gradient(1000px 500px at 110% 10%, rgba(99,102,241,.18), transparent 60%),
-    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  padding-bottom: 48px;
 }
 
 /* Frosted look for AppBar */
@@ -68,3 +65,4 @@
   font-weight: 700;
   color: #0f172a;
 }
+
