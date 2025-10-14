@@ -9,6 +9,7 @@ import Register from "./pages/Register/Register";
 import Doctors from "./pages/Doctor/Doctors";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import BookAppointment from "./pages/BookAppointment/BookAppointment";
+import SetAppointment from "./pages/SetAppointment/SetAppointment";
 
 // NOTE: keep your folder name exactly as in your project: compornent
 import BaseLayout from "./compornent/Layout/BaseLayout";
@@ -43,6 +44,8 @@ export default function App() {
         <Route element={<DashboardLayout theme={theme} setTheme={setTheme} />}>
           <Route path="/dashboard">
             <Route index element={<Dashboard />} />
+            <Route path="appointments" element={<SetAppointment />} />
+            <Route path="appointmentsbook" element={<BookAppointment />} />
           </Route>
         </Route>
 
@@ -51,7 +54,6 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
-          <Route path="/appointmentsbook" element={<BookAppointment />} />
         </Route>
       </Routes>
     </Router>

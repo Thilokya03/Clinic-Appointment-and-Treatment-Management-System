@@ -20,12 +20,17 @@
   --sidebar-tooltip-text: #0f172a;
   --sidebar-badge-border: #ffffff;
 
-  position: relative;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   width: var(--sidebar-width-open);
   min-width: var(--sidebar-width-open);
   min-height: 100dvh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 20px 18px 26px;
   gap: 14px;
   color: var(--sidebar-text);
@@ -36,7 +41,7 @@
   backdrop-filter: blur(22px) saturate(160%);
   box-shadow: var(--sidebar-shadow);
   transition: width 220ms ease, padding 220ms ease, background 220ms ease, color 160ms ease;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .sidebar--dark {

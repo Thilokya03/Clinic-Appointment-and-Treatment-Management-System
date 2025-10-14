@@ -2,19 +2,20 @@
 // Import alongside leftsidebar.css for the complete experience.
 
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import "./leftsidebar.css";
 import { RxDashboard, RxCalendar, RxPerson, RxGear, RxBell } from "react-icons/rx";
 import { LuLogOut } from "react-icons/lu";
 
-export default function Leftsidebar({
-  navItems = [
-    { label: "Dashboard", href: "/dashboard", icon: <RxDashboard /> },
-    { label: "Patients", href: "/patients", icon: <RxPerson /> },
-    { label: "Appointments", href: "/appointments", icon: <RxCalendar /> },
-    { label: "Settings", href: "/settings", icon: <RxGear /> },
-  ],
-  activeHref = "/dashboard",
+const defaultNavItems = [
+  { label: "Dashboard", href: "/dashboard", icon: <RxDashboard />, end: true },
+  { label: "Set Appointment", href: "/dashboard/appointments", icon: <RxCalendar /> },
+  { label: "Patients", href: "/dashboard/patients", icon: <RxPerson /> },
+  { label: "Settings", href: "/dashboard/settings", icon: <RxGear /> },
+];
 
+export default function Leftsidebar({
+  navItems = defaultNavItems,
   user = { name: "User", email: "user@example.com" },
   notificationsCount = 0,
   onLogout = () => {},
@@ -33,8 +34,6 @@ export default function Leftsidebar({
     >
       {/* Brand / Toggle */}
       <div className="sidebar__header">
-
-
         <button
           type="button"
           className="sidebar__toggle"
@@ -63,23 +62,20 @@ export default function Leftsidebar({
 
       {/* Navigation */}
       <nav className="sidebar__nav">
-        {navItems.map((item) => {
-          const isActive = activeHref === item.href;
-          return (
-            <a
-              key={item.href || item.label}
-              href={item.href}
-              className={`nav__link ${isActive ? "is-active" : ""}`}
-              data-tooltip={!open ? item.label : undefined}
-              aria-current={isActive ? "page" : undefined}
-            >
-              <span className="nav__icon" aria-hidden>
-                {item.icon ?? <RxDashboard />}
-              </span>
-              {open && <span className="nav__label">{item.label}</span>}
-            </a>
-          );
-        })}
+        {navItems.map((item) => (
+          <NavLink
+            key={item.href || item.label}
+            to={item.href}
+            end={item.end}
+            className={({ isActive }) => `nav__link ${isActive ? "is-active" : ""}`}
+            data-tooltip={!open ? item.label : undefined}
+          >
+            <span className="nav__icon" aria-hidden>
+              {item.icon ?? <RxDashboard />}
+            </span>
+            {open && <span className="nav__label">{item.label}</span>}
+          </NavLink>
+        ))}
       </nav>
 
       {/* Footer / User */}
