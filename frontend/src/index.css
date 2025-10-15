@@ -1,27 +1,65 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: system-ui, "Inter", "Segoe UI", sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+
+  --surface-body: #f8fafc;
+  --surface-elevated: #ffffff;
+  --surface-panel: rgba(255, 255, 255, 0.85);
+  --text-primary: #0f172a;
+  --text-muted: rgba(71, 85, 105, 0.76);
+  --border-soft: rgba(148, 163, 184, 0.32);
+  --shadow-soft: 0 24px 48px -28px rgba(15, 23, 42, 0.32);
+  --app-background:
+    linear-gradient(140deg, rgba(37, 99, 235, 0.16), transparent 55%),
+    linear-gradient(35deg, rgba(249, 115, 22, 0.12), transparent 65%),
+    radial-gradient(1200px 520px at -15% -10%, rgba(59, 130, 246, 0.22), transparent 60%),
+    radial-gradient(960px 520px at 110% 0%, rgba(147, 51, 234, 0.18), transparent 60%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --surface-body: #020617;
+  --surface-elevated: rgba(15, 23, 42, 0.9);
+  --surface-panel: rgba(15, 23, 42, 0.8);
+  --text-primary: #e2e8f0;
+  --text-muted: rgba(148, 163, 184, 0.78);
+  --border-soft: rgba(30, 41, 59, 0.85);
+  --shadow-soft: 0 32px 64px -32px rgba(2, 6, 23, 0.85);
+  --app-background:
+    linear-gradient(160deg, rgba(37, 99, 235, 0.18), transparent 55%),
+    linear-gradient(25deg, rgba(249, 115, 22, 0.12), transparent 60%),
+    radial-gradient(980px 520px at -10% -10%, rgba(59, 130, 246, 0.22), transparent 65%),
+    radial-gradient(880px 480px at 110% 0%, rgba(147, 51, 234, 0.28), transparent 70%),
+    linear-gradient(180deg, #0b1120 0%, #020617 100%);
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--app-background);
+  color: var(--text-primary);
+  transition: background 260ms ease, color 200ms ease;
+}
+
+a {
+  color: inherit;
+}
+
+a:hover {
+  color: #2563eb;
+}
+
+button {
+  font: inherit;
 }

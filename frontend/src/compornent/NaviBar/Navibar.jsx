@@ -1,11 +1,14 @@
+﻿// Navibar.jsx -- iconic gradient theme
 import { useState, useEffect } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { MdOutlineLightMode, MdNightlightRound } from "react-icons/md";
 import { LuCircleUser } from "react-icons/lu";
 import { RxHamburgerMenu } from "react-icons/rx";
+import LogoLight from "../../assert/logo-light.png";
+import LogoDark from "../../assert/logo-dark.png";
 import "./navibar.css";
 
-function Navibar({ theme, setTheme }) {
+export default function Navibar({ theme = "light", setTheme = () => { } }) {
   const [open, setOpen] = useState(false);
 
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
@@ -18,60 +21,89 @@ function Navibar({ theme, setTheme }) {
   }, []);
 
   return (
-    <header className={`navibar ${theme === "dark" ? "navibar-dark" : ""}`}>
+    <header className={`navibar ${theme === "dark" ? "navibar--dark" : ""}`}>
+      {/* Brand */}
       <Link to="/" className="brand" onClick={closeMenu} aria-label="Go to home">
-        <div className="brand-mark">C</div>
-        <span className="brand-text">CATMS</span>
+        <div className="brand__mark" aria-hidden>
+
+          <img src={theme === 'light' ? LogoLight : LogoDark} alt="Logo" className="brand__logo" />
+        </div>
+        <span className="brand__text">CATMS</span>
       </Link>
 
-      <nav className="links">
-        <NavLink to="/" end className={({ isActive }) => (isActive ? "link active" : "link")}>
+      {/* Desktop links */}
+      <nav className="links" aria-label="Primary">
+        <NavLink to="/" end className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
           Home
         </NavLink>
-        <NavLink to="/doctor" className={({ isActive }) => (isActive ? "link active" : "link")}>
+        <NavLink to="/doctors" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
           Doctors
         </NavLink>
-        <NavLink to="/login" className={({ isActive }) => (isActive ? "link active" : "link")}>
-          Login
+        <NavLink to="/register" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
+          Register
         </NavLink>
-        <NavLink to="/about" className={({ isActive }) => (isActive ? "link active" : "link")}>
+        <NavLink to="/about" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
           About
+        </NavLink>
+        {/* New Links */}
+        <NavLink to="/admin" className={({ isActive }) => (isActive ? "link active" : "link")}>
+          Admin
+        </NavLink>
+        <NavLink to="/branch-manager" className={({ isActive }) => (isActive ? "link active" : "link")}>
+          Manager
+        </NavLink>
+        <NavLink to="/staff" className={({ isActive }) => (isActive ? "link active" : "link")}>
+          Staff
+        </NavLink>
+        <NavLink to="/patient" className={({ isActive }) => (isActive ? "link active" : "link")}>
+          Patient
         </NavLink>
       </nav>
 
+      {/* Actions */}
       <div className="actions">
         <button className="icon-btn" onClick={toggleTheme} aria-label="Toggle theme">
-          {theme === "light" ? <MdOutlineLightMode size={22} /> : <MdNightlightRound size={22} />}
+          {theme === "light" ? <MdOutlineLightMode size={20} /> : <MdNightlightRound size={20} />}
         </button>
-        <button className="avatar-btn" aria-label="Profile">
-          <LuCircleUser size={22} />
-        </button>
+        <Link to={"/login"}>
+          <button className="avatar-btn" aria-label="Profile" >
+            <LuCircleUser size={20} />
+          </button>
+        </Link>
         <button
           className="hamburger"
           onClick={() => setOpen((v) => !v)}
           aria-label="Open navigation menu"
           aria-expanded={open}
+          aria-controls="mobile-drawer"
         >
-          <RxHamburgerMenu size={22} />
+          <RxHamburgerMenu size={20} />
         </button>
       </div>
 
-      <div className={`mobile-drawer ${open ? "open" : ""}`}>
-        <NavLink to="/" end className="m-link" onClick={closeMenu}>
-          Home
-        </NavLink>
-        <NavLink to="/doctor" className="m-link" onClick={closeMenu}>
-          Doctors
-        </NavLink>
-        <NavLink to="/login" className="m-link" onClick={closeMenu}>
-          Login
-        </NavLink>
-        <NavLink to="/about" className="m-link" onClick={closeMenu}>
-          About
-        </NavLink>
+      {/* Mobile drawer */}
+      <div id="mobile-drawer" className={`mobile-drawer ${open ? "open" : ""}`}>
+        <div className="mobile-drawer__inner">
+          <NavLink to="/" end className="m-link" onClick={closeMenu}>
+            Home
+          </NavLink>
+          <NavLink to="/doctors" className="m-link" onClick={closeMenu}>
+            Doctors
+          </NavLink>
+          <NavLink to="/register" className="m-link" onClick={closeMenu}>
+            Register
+          </NavLink>
+          <NavLink to="/about" className="m-link" onClick={closeMenu}>
+            About
+          </NavLink>
+          <div className="m-actions">
+            <button className="m-btn" onClick={toggleTheme}>
+              {theme === "light" ? "Dark mode" : "Light mode"}
+            </button>
+            <button className="m-btn m-btn--ghost" onClick={closeMenu}>Close</button>
+          </div>
+        </div>
       </div>
     </header>
   );
 }
-
-export default Navibar;

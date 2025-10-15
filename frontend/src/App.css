@@ -1,20 +1,82 @@
-#root {
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.main-area {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
   max-width: 100%;
-  text-align: center;
+  padding: clamp(20px, 4vw, 48px);
+  background: transparent;
+  color: inherit;
+  box-sizing: border-box;
 }
 
+.main-content--dashboard {
+  --dashboard-margin-block: clamp(18px, 4vw, 36px);
+  --dashboard-margin-inline-start: clamp(20px, 4.5vw, 44px);
+  --dashboard-margin-inline-end: clamp(18px, 4vw, 36px);
+  background: var(--surface-elevated);
+  border-radius: 28px;
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+  margin: var(--dashboard-margin-block);
+  margin-left: var(--dashboard-margin-inline-start);
+  margin-right: var(--dashboard-margin-inline-end);
+  width: calc(100% - var(--dashboard-margin-inline-start) - var(--dashboard-margin-inline-end));
+  max-width: 100%;
+  overflow: hidden;
+}
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+.site-footer {
+  margin-top: auto;
+  padding: 16px clamp(20px, 4vw, 48px);
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-muted);
+  background: var(--surface-elevated);
+  backdrop-filter: blur(12px) saturate(140%);
+}
+
+.site-footer small {
+  display: block;
+}
+
+.auth-layout {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(24px, 6vw, 64px);
+  background: transparent;
+}
+
+@media (max-width: 1024px) {
+  .main-content--dashboard {
+    --dashboard-margin-block: clamp(16px, 6vw, 32px);
+    --dashboard-margin-inline-start: clamp(18px, 6vw, 32px);
+    --dashboard-margin-inline-end: clamp(16px, 6vw, 32px);
+    border-radius: 24px;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@media (max-width: 640px) {
+  .main-content--dashboard {
+    --dashboard-margin-block: 16px;
+    --dashboard-margin-inline-start: 16px;
+    --dashboard-margin-inline-end: 16px;
+    border-radius: 18px;
   }
 }
+
