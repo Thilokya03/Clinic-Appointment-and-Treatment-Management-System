@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./App.css";
 
@@ -11,8 +11,10 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import BookAppointment from "./pages/BookAppointment/BookAppointment";
 import BranchManagers from "./pages/BranchManagers/BranchManagers";
 import Staff from "./pages/Staff/Staff";
-
-
+import AddDoctor from "./pages/AddDoctor/AddDoctor";
+import AddStaff from "./pages/AddStaff/AddStaff";
+import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
+import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
 // NOTE: keep your folder name exactly as in your project: compornent
 import BaseLayout from "./compornent/Layout/BaseLayout";
 import DashboardLayout from "./compornent/Layout/DashboardLayout";
@@ -46,8 +48,13 @@ export default function App() {
         <Route element={<DashboardLayout theme={theme} setTheme={setTheme} />}>
           <Route path="/dashboard">
             <Route index element={<Dashboard />} />
+            <Route path="branchmanagers" element={<BranchManagers />} />
+            <Route path="staff" element={<Staff />} />
+            <Route path="adddoctor" element={<AddDoctor />} />
+            <Route path="addstaff" element={<AddStaff />} />
+            <Route path="doctordashboard" element={<DoctorDashboard />} />
+            <Route path="doctorchange" element={<DoctorChangeShedule />} />
           </Route>
-          
         </Route>
 
         {/* PUBLIC PAGES (Navibar + Footer) */}
@@ -56,8 +63,14 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
           <Route path="/appointmentsbook" element={<BookAppointment />} />
-          <Route path="/branchmanagers" element={<BranchManagers />} />
-          <Route path="/staff" element={<Staff />} />
+          {/* Redirect old path to new dashboard-scoped path */}
+          <Route path="/branchmanagers" element={<Navigate to="/dashboard/branchmanagers" replace />} />
+          <Route path="/staff" element={<Navigate to="/dashboard/staff" replace />} />
+          <Route path="/adddoctor" element={<Navigate to="/dashboard/adddoctor" replace />} />
+          <Route path="/addstaff" element={<Navigate to="/dashboard/addstaff" replace />} />
+          <Route path="/doctordashboard" element={<Navigate to="/dashboard/doctordashboard" replace />} />
+          <Route path="/doctorchange" element={<Navigate to="/dashboard/doctorchange" replace />} />
+
         </Route>
       </Routes>
     </Router>

@@ -269,31 +269,28 @@ const StaffPage = () => {
             <Tab icon={<Business />} label="Insurance Company" />
             <Tab icon={<LocalHospital />} label="Treatment Catalog" />
           </Tabs>
-
           {/* Add Patient Tab */}
           <TabPanel value={tabValue} index={0}>
             <Box className="vertical-layout">
-              {/* Add Patient Card */}
-              <Card className="action-card">
+              {/* Simple Add Patient Box */}
+              <Card>
                 <CardContent>
-                  <Box className="card-header">
-                    <PersonAdd className="card-icon" />
-                    <Typography variant="h5" className="card-title">
-                      Add New Patient
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
+                    Add New Patient
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
                     Register a new patient in the system by filling the form below
                   </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<PersonAdd />}
-                    onClick={() => openAddDialog('patient')}
-                    className="add-button"
-                    size="large"
-                  >
-                    Add New Patient
-                  </Button>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<PersonAdd />}
+                      onClick={() => openAddDialog('patient')}
+                      size="large"
+                    >
+                      Add New Patient
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
 
@@ -335,27 +332,25 @@ const StaffPage = () => {
           {/* Manage Payments Tab */}
           <TabPanel value={tabValue} index={1}>
             <Box className="vertical-layout">
-              {/* Record Payment Card */}
-              <Card className="action-card">
+              {/* Simple Record Payment Box */}
+              <Card>
                 <CardContent>
-                  <Box className="card-header">
-                    <Payment className="card-icon" />
-                    <Typography variant="h5" className="card-title">
-                      Record Payment
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
+                    Record Payment
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
                     Record a new payment transaction for patient services
                   </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<Payment />}
-                    onClick={() => openAddDialog('payment')}
-                    className="add-button"
-                    size="large"
-                  >
-                    Record Payment
-                  </Button>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<Payment />}
+                      onClick={() => openAddDialog('payment')}
+                      size="large"
+                    >
+                      Record Payment
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
 
@@ -405,27 +400,25 @@ const StaffPage = () => {
           {/* Add Treatments Tab */}
           <TabPanel value={tabValue} index={2}>
             <Box className="vertical-layout">
-              {/* Add Treatment Card */}
-              <Card className="action-card">
+              {/* Simple Add Treatment Box */}
+              <Card>
                 <CardContent>
-                  <Box className="card-header">
-                    <MedicalServices className="card-icon" />
-                    <Typography variant="h5" className="card-title">
-                      Add Treatment
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
+                    Add Treatment
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
                     Add a new treatment type to the system
                   </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<MedicalServices />}
-                    onClick={() => openAddDialog('treatment')}
-                    className="add-button"
-                    size="large"
-                  >
-                    Add Treatment
-                  </Button>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<MedicalServices />}
+                      onClick={() => openAddDialog('treatment')}
+                      size="large"
+                    >
+                      Add Treatment
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
 
@@ -486,27 +479,25 @@ const StaffPage = () => {
           {/* Insurance Company Tab */}
           <TabPanel value={tabValue} index={4}>
             <Box className="vertical-layout">
-              {/* Add Insurance Company Card */}
-              <Card className="action-card">
+              {/* Simple Add Insurance Company Box */}
+              <Card>
                 <CardContent>
-                  <Box className="card-header">
-                    <Business className="card-icon" />
-                    <Typography variant="h5" className="card-title">
-                      Add Insurance Company
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
+                    Add Insurance Company
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
                     Register a new insurance provider in the system
                   </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<Business />}
-                    onClick={() => openAddDialog('insurance')}
-                    className="add-button"
-                    size="large"
-                  >
-                    Add Insurance Company
-                  </Button>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<Business />}
+                      onClick={() => openAddDialog('insurance')}
+                      size="large"
+                    >
+                      Add Insurance Company
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
 
@@ -548,27 +539,25 @@ const StaffPage = () => {
           {/* Treatment Catalog Tab */}
           <TabPanel value={tabValue} index={5}>
             <Box className="vertical-layout">
-              {/* Add to Catalog Card */}
-              <Card className="action-card">
+              {/* Simple Add to Catalog Box */}
+              <Card>
                 <CardContent>
-                  <Box className="card-header">
-                    <LocalHospital className="card-icon" />
-                    <Typography variant="h5" className="card-title">
-                      Add to Catalog
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
+                    Add to Catalog
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
                     Add new treatment to the treatment catalog
                   </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<LocalHospital />}
-                    onClick={() => openAddDialog('treatmentCatalog')}
-                    className="add-button"
-                    size="large"
-                  >
-                    Add to Catalog
-                  </Button>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<LocalHospital />}
+                      onClick={() => openAddDialog('treatmentCatalog')}
+                      size="large"
+                    >
+                      Add to Catalog
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
 
