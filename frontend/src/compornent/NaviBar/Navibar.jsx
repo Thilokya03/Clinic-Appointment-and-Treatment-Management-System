@@ -81,30 +81,6 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
         </button>
       </div>
 
-<<<<<<< HEAD
-      {/* Mobile drawer */}
-      <div id="mobile-drawer" className={`mobile-drawer ${open ? "open" : ""}`}>
-        <div className="mobile-drawer__inner">
-          <NavLink to="/" end className="m-link" onClick={closeMenu}>
-            Home
-          </NavLink>
-          <NavLink to="/doctors" className="m-link" onClick={closeMenu}>
-            Doctors
-          </NavLink>
-          <NavLink to="/register" className="m-link" onClick={closeMenu}>
-            Register
-          </NavLink>
-          <NavLink to="/about" className="m-link" onClick={closeMenu}>
-            About
-          </NavLink>
-          <div className="m-actions">
-            <button className="m-btn" onClick={toggleTheme}>
-              {theme === "light" ? "Dark mode" : "Light mode"}
-            </button>
-            <button className="m-btn m-btn--ghost" onClick={closeMenu}>Close</button>
-          </div>
-        </div>
-=======
       <div className={`mobile-drawer ${open ? "open" : ""}`}>
         <NavLink to="/" end className="m-link" onClick={closeMenu}>
           Home
@@ -131,7 +107,6 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
         <NavLink to="/patient" className="m-link" onClick={closeMenu}>
           Patient
         </NavLink>
->>>>>>> Sarjana
       </div>
     </header>
   );

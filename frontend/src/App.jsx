@@ -1,9 +1,5 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
-import "./App.css";
-=======
 import './App.css'
 import Login from './pages/Login/Login'
 import Home from './pages/Home/Home'
@@ -14,10 +10,6 @@ import DoctorDashboard from './pages/Dashboard/DoctorDashboard';
 import NonMedicalStaffDashboard from './pages/Dashboard/NonMedicalStaffDashboard';
 import PatientDashboard from './pages/Dashboard/PatientDashboard';
 
->>>>>>> Sarjana
-
-import Login from "./pages/Login/Login";
-import Home from "./pages/Home/Home";
 import Register from "./pages/Register/Register";
 import Doctors from "./pages/Doctor/Doctors";
 import Dashboard from "./pages/Dashboard/Dashboard";
@@ -48,12 +40,8 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* LOGIN (no nav, no footer) */}
-        <Route element={<AuthLayout />}>
+        {/* LOGIN (no nav, no footer) */} 
           <Route path="/login" element={<Login />} />
-<<<<<<< HEAD
-        </Route>
-=======
 
           {/* Dashboard routes */}
           <Route path="/admin" element={<AdminDashboard />} />
@@ -62,8 +50,6 @@ export default function App() {
           <Route path="/staff" element={<NonMedicalStaffDashboard />} />
           <Route path="/patient" element={<PatientDashboard />} />
         </Routes>
-      </Router>
->>>>>>> Sarjana
 
         {/* DASHBOARD (Sidebar + Navibar + Footer) */}
         <Route element={<DashboardLayout theme={theme} setTheme={setTheme} />}>
@@ -79,8 +65,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
-        </Route>
-      </Routes>
+        </Route>  
     </Router>
   );
 }
