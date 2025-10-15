@@ -9,6 +9,9 @@ import Register from "./pages/Register/Register";
 import Doctors from "./pages/Doctor/Doctors";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import BookAppointment from "./pages/BookAppointment/BookAppointment";
+import BranchManagers from "./pages/BranchManagers/BranchManagers";
+import Staff from "./pages/Staff/Staff";
+
 
 // NOTE: keep your folder name exactly as in your project: compornent
 import BaseLayout from "./compornent/Layout/BaseLayout";
@@ -44,6 +47,7 @@ export default function App() {
           <Route path="/dashboard">
             <Route index element={<Dashboard />} />
           </Route>
+          
         </Route>
 
         {/* PUBLIC PAGES (Navibar + Footer) */}
@@ -52,6 +56,8 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
           <Route path="/appointmentsbook" element={<BookAppointment />} />
+          <Route path="/branchmanagers" element={<BranchManagers />} />
+          <Route path="/staff" element={<Staff />} />
         </Route>
       </Routes>
     </Router>

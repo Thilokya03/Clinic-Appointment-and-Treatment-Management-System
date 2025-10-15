@@ -43,6 +43,12 @@ export default function Navibar({ theme = "light", setTheme = () => {} }) {
         <NavLink to="/about" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
           About
         </NavLink>
+        <NavLink to="/branchmanagers" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
+          BranchManagers
+        </NavLink>
+        <NavLink to="/staff" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
+          Staff
+        </NavLink>
       </nav>
 
       {/* Actions */}

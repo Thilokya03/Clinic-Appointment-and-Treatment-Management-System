@@ -1,0 +1,285 @@
+.staff-page-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 20px 0;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 0 20px;
+}
+
+.page-title {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700 !important;
+  margin-bottom: 16px !important;
+  font-size: 2.5rem !important;
+}
+
+.page-subtitle {
+  color: #64748b !important;
+  font-weight: 400 !important;
+  font-size: 1.2rem !important;
+}
+
+.tabs-paper {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 20px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  margin: 0 20px;
+}
+
+.management-tabs {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.management-tabs .MuiTab-root {
+  text-transform: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-height: 64px;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+.management-tabs .MuiTab-root.Mui-selected {
+  color: #8b5cf6;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Vertical Layout */
+.vertical-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Card Headers */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-icon {
+  font-size: 2rem !important;
+  color: #8b5cf6;
+}
+
+/* Action Cards */
+.action-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* List Cards */
+.list-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease;
+}
+
+.list-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.placeholder-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-radius: 20px !important;
+  border: 2px dashed #cbd5e1;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  padding: 40px;
+  text-align: center;
+}
+
+.placeholder-content {
+  padding: 60px 20px;
+  background: rgba(241, 245, 249, 0.5);
+  border-radius: 16px;
+  margin-top: 30px;
+}
+
+.card-title {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  margin-bottom: 0 !important;
+  font-size: 1.5rem !important;
+}
+
+.add-button {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%) !important;
+  padding: 12px 32px !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  font-size: 1rem !important;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.add-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+}
+
+.table-container {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  max-height: 400px;
+  overflow: auto;
+}
+
+/* Table Styling */
+.MuiTableContainer-root {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.MuiTableHead-root {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.MuiTableHead-root .MuiTableCell-root {
+  font-weight: 700;
+  color: #1e293b;
+  border-bottom: 2px solid #e2e8f0;
+  background: transparent;
+  font-size: 1rem;
+  padding: 16px;
+}
+
+.MuiTableBody-root .MuiTableCell-root {
+  padding: 16px;
+  font-size: 0.95rem;
+}
+
+.MuiTableBody-root .MuiTableRow-root {
+  transition: background-color 0.2s ease;
+}
+
+.MuiTableBody-root .MuiTableRow-root:hover {
+  background-color: rgba(139, 92, 246, 0.04);
+}
+
+/* Chip Styling */
+.MuiChip-root {
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.MuiChip-colorPrimary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%) !important;
+  color: white !important;
+}
+
+.MuiChip-colorSecondary {
+  background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%) !important;
+  color: white !important;
+}
+
+/* Dialog Styling */
+.MuiDialog-paper {
+  border-radius: 20px !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+}
+
+.MuiDialogTitle-root {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+}
+
+/* Form Styling */
+.MuiTextField-root, .MuiFormControl-root {
+  margin-bottom: 16px;
+}
+
+.MuiOutlinedInput-root {
+  border-radius: 12px !important;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .staff-page-container {
+    padding: 10px 0;
+  }
+  
+  .page-title {
+    font-size: 2rem !important;
+  }
+  
+  .tabs-paper {
+    margin: 0 10px;
+  }
+  
+  .management-tabs .MuiTab-root {
+    min-height: 56px;
+    font-size: 0.8rem;
+  }
+  
+  .card-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .card-icon {
+    font-size: 1.75rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-title {
+    font-size: 1.75rem !important;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem !important;
+  }
+  
+  .MuiTableHead-root .MuiTableCell-root,
+  .MuiTableBody-root .MuiTableCell-root {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+  }
+  
+  .placeholder-card {
+    padding: 30px 20px;
+  }
+  
+  .add-button {
+    padding: 10px 24px !important;
+    font-size: 0.9rem !important;
+    width: 100%;
+  }
+  
+  .vertical-layout {
+    gap: 16px;
+  }
+}
