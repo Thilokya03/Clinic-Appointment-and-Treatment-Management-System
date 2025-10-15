@@ -32,7 +32,7 @@ router.get('/', staffAuth(['Doctor']), async(req, res) => { //TEST PASS
 
 // **************************ADD staff **********************************************
 
-router.post('/staff',staffAuth(['admin']), async (req, res) => {
+router.post('/staff',staffAuth(['admin']), async (req, res) => { // NO NEEEEEEEEEEEEEEEEDDDDD
     const {staff_id, username, name, category, phone_no, gender, nic, email, password, branch_id} = req.body;
 
     try{
