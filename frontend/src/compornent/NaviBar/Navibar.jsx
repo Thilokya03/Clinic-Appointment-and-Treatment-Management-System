@@ -81,7 +81,6 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
         </button>
       </div>
 
-<<<<<<< HEAD
       {/* Mobile drawer */}
       <div id="mobile-drawer" className={`mobile-drawer ${open ? "open" : ""}`}>
         <div className="mobile-drawer__inner">
@@ -97,6 +96,22 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
           <NavLink to="/about" className="m-link" onClick={closeMenu}>
             About
           </NavLink>
+          <NavLink to="/login" className="m-link" onClick={closeMenu}>
+            Login
+          </NavLink>
+          {/* Role-specific Links */}
+          <NavLink to="/admin" className="m-link" onClick={closeMenu}>
+            Admin
+          </NavLink>
+          <NavLink to="/branch-manager" className="m-link" onClick={closeMenu}>
+            Manager
+          </NavLink>
+          <NavLink to="/staff" className="m-link" onClick={closeMenu}>
+            Staff
+          </NavLink>
+          <NavLink to="/patient" className="m-link" onClick={closeMenu}>
+            Patient
+          </NavLink>
           <div className="m-actions">
             <button className="m-btn" onClick={toggleTheme}>
               {theme === "light" ? "Dark mode" : "Light mode"}
@@ -104,34 +119,6 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
             <button className="m-btn m-btn--ghost" onClick={closeMenu}>Close</button>
           </div>
         </div>
-=======
-      <div className={`mobile-drawer ${open ? "open" : ""}`}>
-        <NavLink to="/" end className="m-link" onClick={closeMenu}>
-          Home
-        </NavLink>
-        <NavLink to="/doctor" className="m-link" onClick={closeMenu}>
-          Doctors
-        </NavLink>
-        <NavLink to="/login" className="m-link" onClick={closeMenu}>
-          Login
-        </NavLink>
-        <NavLink to="/about" className="m-link" onClick={closeMenu}>
-          About
-        </NavLink>
-        {/* New Links */}
-        <NavLink to="/admin" className="m-link" onClick={closeMenu}>
-          Admin
-        </NavLink>
-        <NavLink to="/branch-manager" className="m-link" onClick={closeMenu}>
-          Manager
-        </NavLink>
-        <NavLink to="/staff" className="m-link" onClick={closeMenu}>
-          Staff
-        </NavLink>
-        <NavLink to="/patient" className="m-link" onClick={closeMenu}>
-          Patient
-        </NavLink>
->>>>>>> Sarjana
       </div>
     </header>
   );

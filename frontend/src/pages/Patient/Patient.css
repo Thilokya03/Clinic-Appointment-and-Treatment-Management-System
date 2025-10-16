@@ -1,0 +1,173 @@
+.patient-container {
+  padding: clamp(48px, 6vw, 72px) 0;
+  background: var(--surface-body, linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%));
+  color: var(--text-primary, #0f172a);
+}
+
+.patient-shell {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4vw, 48px);
+}
+
+.patient-title {
+  text-align: center;
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.patient-subtitle {
+  text-align: center;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-muted, rgba(71, 85, 105, 0.75));
+}
+
+.patient-dashboard {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.dashboard-card {
+  background: var(--surface-elevated, #ffffff);
+  border: 1px solid var(--border-soft, rgba(148, 163, 184, 0.32));
+  border-radius: 24px;
+  padding: clamp(20px, 4vw, 28px);
+  box-shadow: 0 28px 64px -38px rgba(15, 23, 42, 0.25);
+}
+
+.dashboard-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.dashboard-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.dashboard-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-soft, rgba(59, 130, 246, 0.1));
+  color: var(--primary-main, #3b82f6);
+}
+
+.appointment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.appointment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface-soft, rgba(241, 245, 249, 0.6));
+  transition: all 0.2s ease-in-out;
+}
+
+.appointment-item:hover {
+  background: var(--surface-soft-hover, rgba(241, 245, 249, 0.9));
+}
+
+.appointment-item__info {
+  flex: 1;
+}
+
+.appointment-item__title {
+  font-weight: 500;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.appointment-item__details {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: 4px 0 0;
+}
+
+.medical-record {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surface-soft, rgba(241, 245, 249, 0.6));
+  margin-bottom: 12px;
+}
+
+.medical-record__icon {
+  color: var(--primary-main, #3b82f6);
+}
+
+.medical-record__info {
+  flex: 1;
+}
+
+.medical-record__title {
+  font-weight: 500;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.medical-record__date {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface-soft, rgba(241, 245, 249, 0.6));
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
+}
+
+.quick-action-btn:hover {
+  background: var(--surface-soft-hover, rgba(241, 245, 249, 0.9));
+  transform: translateY(-2px);
+}
+
+.quick-action-btn__icon {
+  color: var(--primary-main, #3b82f6);
+}
+
+.quick-action-btn__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .patient-dashboard {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+}
