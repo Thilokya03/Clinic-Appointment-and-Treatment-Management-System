@@ -1,0 +1,37 @@
+/* src/pages/Staff/staff.css */
+.staff-container {
+  padding: clamp(36px, 5vw, 56px) 0;
+  background: var(--surface-body, linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%));
+  color: var(--text-primary, #0f172a);
+}
+
+.staff-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.staff-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+}
+
+.staff-subtitle {
+  margin: 0;
+  color: var(--text-muted, rgba(71,85,105,0.75));
+}
+
+.tab-panel {
+  background: var(--surface-elevated, #fff);
+  padding: clamp(16px, 2.5vw, 24px);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(15,23,42,0.06);
+  margin-top: 12px;
+}
+
+@media (max-width: 640px) {
+  .tab-panel {
+    padding: 12px;
+  }
+}

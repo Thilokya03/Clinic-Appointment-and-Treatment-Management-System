@@ -14,6 +14,8 @@ import Login from "./pages/Login/Login";
 import Home from "./pages/Home/Home";
 import Register from "./pages/Register/Register";
 import Doctors from "./pages/Doctor/Doctors";
+import Patient from "./pages/Patient/Patient";
+import Staff from "./pages/Staff/Staff";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import BookAppointment from "./pages/BookAppointment/BookAppointment";
 import SetAppointment from "./pages/SetAppointment/SetAppointment";
@@ -68,6 +70,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
+          <Route path="/patient" element={<Patient />} />
+          <Route path="/staff" element={<Staff />} />
         </Route>
       </Routes>
     </Router>
