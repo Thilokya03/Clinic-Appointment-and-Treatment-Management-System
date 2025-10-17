@@ -55,7 +55,7 @@ export default function App() {
             <Route path="adddoctor" element={<AddDoctor />} />
             <Route path="addstaff" element={<AddStaff />} />
             <Route path="doctordashboard" element={<DoctorDashboard />} />
-            <Route path="doctorchange" element={<DoctorChangeShedule />} 
+            <Route path="doctorchange" element={<DoctorChangeShedule />} />
           </Route>
         </Route>
 
