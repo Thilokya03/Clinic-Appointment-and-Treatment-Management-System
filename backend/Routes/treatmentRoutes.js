@@ -1,0 +1,53 @@
+const express = require("express");
+const router = express.Router();
+const db = require("../db");
+const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
+
+//***************************ADD treatment for an appointment****************** */
+router.post('/',staffAuth(['Doctor','Admin']), async(req, res) =>{ //TEST PASSSSS
+    const {treatment_id, catalog_id, appointment_id, description} = req.body;
+    try{
+        await db.execute(`INSERT INTO treatment (treatment_id, catalog_id, appointment_id, description) VALUES (?,?,?,?)`,
+            [treatment_id, catalog_id, appointment_id, description]);
+        res.status(201).json({message:"treatment added Successfully"});
+    }catch(err){
+        res.status(500).json({error:err});
+    }
+})
+
+//**************************GET treatment for an appointment************************* */
+
+router.get('/:id',authenticate, async(req, res) =>{ //TEST PASSSSS
+    if(req.user.id !== req.params.id && req.user.role !== 'staff'){
+        return res.status(403).json({error:"access denied"});
+    }
+    const appointment_id = req.params.id;
+    try{
+        const [row] = await db.execute(`SELECT * FROM treatment WHERE appointment_id = ?`, [appointment_id]);
+        res.json(row);
+    }catch(err){
+        res.status(500).json({error:err});
+    }
+});
+
+//**************************GET treatment catalog***************************************** */
+
+router.get('/catelog/:id',patientAuth,  async(req, res) =>{ 
+    const catalog_id = req.params.id;
+    try{
+        const row = await db.execute(`SELECT * FROM treatment_catalog WHERE catalog_id = ?`, [catalog_id]);
+        res.json(row);
+    }catch(err){
+        res.status(500).json({error:err});
+    }
+});
+
+//****************************UPDATE balance************************** */
+
+
+
+
+
+
+
+module.exports = router;

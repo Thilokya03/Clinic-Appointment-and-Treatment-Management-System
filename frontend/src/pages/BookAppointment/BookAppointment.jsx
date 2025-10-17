@@ -64,8 +64,8 @@ export default function BookAppointment() {
 
   // Time slots
   const timeSlots = [
-    "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", 
-    "11:00", "11:30", "14:00", "14:30", "15:00", "15:30", 
+    "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+    "11:00", "11:30", "14:00", "14:30", "15:00", "15:30",
     "16:00", "16:30", "17:00"
   ];
 
@@ -75,7 +75,7 @@ export default function BookAppointment() {
   useEffect(() => {
     if (formData.appointmentDate && formData.startTime && formData.endTime) {
       // Mock availability check - in real app, this would be an API call
-      const available = ALL_DOCTORS.filter(doctor => 
+      const available = ALL_DOCTORS.filter(doctor =>
         // Simulate some doctors being unavailable
         Math.random() > 0.3
       );
@@ -126,7 +126,7 @@ export default function BookAppointment() {
       message: "Appointment booked successfully!",
       severity: "success"
     });
-    
+
     // Reset form after successful submission
     setTimeout(() => {
       setFormData({
@@ -284,7 +284,7 @@ export default function BookAppointment() {
                   <Person sx={{ mr: 1, verticalAlign: 'middle' }} />
                   Select Doctor
                 </Typography>
-                
+
                 {availableDoctors.length === 0 ? (
                   <Alert severity="info" sx={{ mb: 3 }}>
                     Please select date and time first to see available doctors.
@@ -321,8 +321,8 @@ export default function BookAppointment() {
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Button onClick={handleBack}>Back</Button>
-                  <Button 
-                    variant="contained" 
+                  <Button
+                    variant="contained"
                     onClick={handleNext}
                     disabled={!formData.selectedDoctor}
                   >
@@ -345,7 +345,7 @@ export default function BookAppointment() {
                     <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
                       Appointment Summary
                     </Typography>
-                    
+
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
                         <Typography variant="body2" color="text.secondary">Patient ID:</Typography>
