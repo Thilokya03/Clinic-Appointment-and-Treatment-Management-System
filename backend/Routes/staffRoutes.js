@@ -9,7 +9,7 @@ const { authenticate, staffAuth } = require('../middlewares/auth');
 
 
 //********************************* GET staff by category ***********************************
-router.get('/by-category/:category', staffAuth(['Admin', 'Branch Manager', 'Nurse', 'Receptionist']), async (req, res) => {
+router.get('/by-category/:category', authenticate, async (req, res) => {
   const category = req.params.category;
 
   try {

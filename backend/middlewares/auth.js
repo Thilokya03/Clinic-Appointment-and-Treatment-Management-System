@@ -1,9 +1,7 @@
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = process.env.JWT_SECRET;
 
-
 // Base authentication to validate token
-
 exports.authenticate = (req, res, next) => {
     const authtoken = req.header('Authorization');
     console.log("🟢 Authenticate middleware reached");
@@ -20,20 +18,30 @@ exports.authenticate = (req, res, next) => {
     }
 };
 
-
 // patient middleware
 exports.patientAuth = (req, res, next) => {
     exports.authenticate(req, res, () => {
         if (req.user.role === 'patient') {
             next();
         }else{
-            res.status(403).json({error:'Access denied: Patient access oooooooooooonly'})
+            res.status(403).json({error:'Access denied: Patient access only'})
+        }
+    });
+};
+
+// appointment booking middleware - allows both patients and staff
+exports.appointmentAccess = (req, res, next) => {
+    exports.authenticate(req, res, () => {
+        // Both patients and staff can access
+        if (req.user.role === 'patient' || req.user.category) {
+            next();
+        } else {
+            res.status(403).json({error:'Access denied: Invalid user type'})
         }
     });
 };
 
 // staff middleware
-
 exports.staffAuth = (roles = []) => {
     return (req, res, next) => {
         exports.authenticate(req, res, () =>{

@@ -173,7 +173,7 @@ export default function Register() {
       };
 
       console.log("Sending registration request...", { ...payload, password: "***" });
-      const response = await axios.post("/api/patient/signup", payload);
+      const response = await axios.post("http://localhost:3000/api/patient/signup", payload);
       console.log("Registration successful:", response.data);
       setToast({
         open: true,

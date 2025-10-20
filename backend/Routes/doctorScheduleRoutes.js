@@ -26,6 +26,40 @@ const mapFrontendToDb = (data) => {
 }
 
 //*************************** GET all doctor schedules ******************
+router.get('/by-doctor/:doctorId', async (req, res) => {
+    try {
+        const { doctorId } = req.params;
+        console.log(doctorId);
+        const [rows] = await db.execute(
+            `SELECT 
+                ds.schedule_id,
+                ds.doctor_id as staff_id,
+                s.name as doctor_name,
+                ds.speciality,
+                s.branch_id,
+                b.name as branch_name,
+                ds.date as schedule_date,
+                ds.start_time,
+                ds.end_time,
+                ds.status,
+                ds.max_patients,
+                ds.fee,
+                (SELECT COUNT(*) FROM appointment WHERE schedule_id = ds.schedule_id) as booked_patients
+             FROM doctor_schedule ds
+             INNER JOIN staff s ON ds.doctor_id = s.staff_id
+             LEFT JOIN branch b ON s.branch_id = b.branch_id
+             WHERE ds.doctor_id = ?
+             AND ds.date >= CURDATE()
+             ORDER BY ds.date ASC, ds.start_time ASC`,
+             [doctorId]
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching doctor schedules:', err);
+        res.status(500).json({ error: 'Error fetching doctor schedules', details: err.message });
+    }
+});
+
 router.get('/', async (req, res) => {
     try {
         const [rows] = await db.execute(
@@ -59,6 +93,8 @@ router.get('/', async (req, res) => {
 //*************************** GET schedules by doctor ******************
 router.get('/doctor/:staff_id', async (req, res) => {
     const { staff_id } = req.params;
+    console.log(staff_id);
+    
     try {
         const [rows] = await db.execute(
             `SELECT 

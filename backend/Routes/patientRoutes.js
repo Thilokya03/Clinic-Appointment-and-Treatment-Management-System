@@ -25,11 +25,12 @@ router.post('/signup', async (req, res) => { // TEST PASSSS
     
     const {patient_id, username, name, phone_no, gender, age, nic, email, password, emergency_contact_name, emergency_contact_no} = req.body;
 
-    if(!username||!password||!email){
+    if(!username || !password || !email || !name || !gender){
       console.log('❌ Validation failed: missing required fields');
-      return res.status(400).json({error: "Please provide username, email and password"});
+      return res.status(400).json({error: "Please provide all required fields"});
     }
     try{
+      console.log('🔍 Checking for existing user...');
       const [existingUser] = await db.execute(
         `SELECT * FROM patient WHERE username = ? OR email = ?`, [username, email]
       );
@@ -48,16 +49,45 @@ router.post('/signup', async (req, res) => { // TEST PASSSS
         console.log('🆔 Generated patient ID:', newPatientId);
       }
 
+      console.log('📝 Inserting new patient with data:', {
+        patient_id: newPatientId,
+        username,
+        name,
+        phone_no,
+        gender,
+        age,
+        email,
+        emergency_contact_name
+      });
+
       await db.execute(
-        "INSERT INTO patient (patient_id, username, name, phone_no, gender, age, nic, email, password, emergency_contact_name, emergency_contact_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO patient (patient_id, username, name, phone_no, gender, age, nic, email, password, emergencyContactName, emergencyContactNo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [newPatientId, username, name, phone_no, gender, age, nic, email, hashedPassword, emergency_contact_name, emergency_contact_no]
       );
       
       console.log('✅ Patient registered successfully:', newPatientId, username);
-      res.status(201).json({message: "patient added successfully", patient_id: newPatientId});
+      res.status(201).json({
+        message: "Patient registered successfully",
+        patient_id: newPatientId,
+        username: username
+      });
     } catch (err){
       console.error('❌ Signup error:', err);
-      res.status(500).json({error: err.message || "Registration failed"});
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(400).json({
+          error: "A patient with this username or email already exists"
+        });
+      }
+      if (err.code === 'ER_BAD_NULL_ERROR') {
+        return res.status(400).json({
+          error: "Missing required fields. Please fill in all required information."
+        });
+      }
+      console.error('SQL Error:', err.sqlMessage);
+      res.status(500).json({
+        error: "Registration failed. Please try again.",
+        details: err.sqlMessage
+      });
     }
 });
 
