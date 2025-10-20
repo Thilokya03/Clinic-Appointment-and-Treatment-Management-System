@@ -55,25 +55,38 @@ router.get('/stats', staffAuth(['Admin']), async(req, res) =>{
 
 // ******************************** ADD Branch ****************************
 router.post('/', staffAuth(['Admin']), async(req, res) =>{ 
-    const {branch_id, name, address, manager_id} = req.body;
+    const {name, address, phone_no, email} = req.body;
     
-    if (!branch_id || !name || !address) {
-        return res.status(400).json({error: 'Please provide branch_id, name, and address'});
+    if (!name || !address) {
+        return res.status(400).json({error: 'Please provide name and address'});
     }
     
     try{
+        // Auto-generate Branch ID
+        const [branches] = await db.execute(`SELECT branch_id FROM branch ORDER BY branch_id DESC LIMIT 1`);
+        
+        let newBranchId;
+        if (branches.length === 0) {
+            newBranchId = 'B0001';
+        } else {
+            const lastId = branches[0].branch_id;
+            const numericPart = parseInt(lastId.substring(1));
+            newBranchId = `B${String(numericPart + 1).padStart(4, '0')}`;
+        }
+        
+        // Insert new branch with auto-generated ID
         await db.execute(
-            `INSERT INTO branch (branch_id, name, address, manager_id) VALUES (?, ?, ?, ?)`, 
-            [branch_id, name, address, manager_id || null]
+            `INSERT INTO branch (branch_id, name, address, phone_no, email) VALUES (?, ?, ?, ?, ?)`, 
+            [newBranchId, name, address, phone_no || null, email || null]
         );
         
-        console.log('✅ Branch created:', { branch_id, name });
-        res.status(201).json({message: "Branch added successfully"});
+        console.log('✅ Branch created:', { branch_id: newBranchId, name, phone_no, email });
+        res.status(201).json({
+            message: "Branch added successfully",
+            branch_id: newBranchId
+        });
     }catch(err){
         console.error('Error creating branch:', err);
-        if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({error: 'Branch ID already exists'});
-        }
         res.status(500).json({error: 'Error creating branch'});
     }
 });
@@ -112,12 +125,12 @@ router.get('/:id', staffAuth(['Admin', 'Branch Manager']), async(req, res) =>{
 // ******************************** UPDATE Branch ****************************
 router.put('/:id', staffAuth(['Admin']), async(req, res) => {
     const branch_id = req.params.id;
-    const {name, address, manager_id} = req.body;
+    const {name, address, phone_no, email} = req.body;
     
     try{
         const [result] = await db.execute(
-            `UPDATE branch SET name = ?, address = ?, manager_id = ? WHERE branch_id = ?`,
-            [name, address, manager_id || null, branch_id]
+            `UPDATE branch SET name = ?, address = ?, phone_no = ?, email = ? WHERE branch_id = ?`,
+            [name, address, phone_no, email, branch_id]
         );
         
         if(result.affectedRows === 0){

@@ -13,6 +13,7 @@ import BranchManagers from "./pages/BranchManagers/BranchManagers";
 import Staff from "./pages/Staff/Staff";
 import AddDoctor from "./pages/AddDoctor/AddDoctor";
 import AddStaff from "./pages/AddStaff/AddStaff";
+import AddBranch from "./pages/AddBranch/AddBranch";
 import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
 import About from "./pages/About/About";
@@ -66,6 +67,12 @@ export default function App() {
               <Route path="branchmanagers" element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <BranchManagers />
+                </ProtectedRoute>
+              } />
+
+              <Route path="addbranch" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AddBranch />
                 </ProtectedRoute>
               } />
 
