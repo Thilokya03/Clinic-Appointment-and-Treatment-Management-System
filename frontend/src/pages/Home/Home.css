@@ -404,3 +404,75 @@
   }
 }
 
+/* Dark Mode Styles */
+[data-theme="dark"] .hero-section {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url('https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=1600&h=900&fit=crop') center/cover;
+}
+
+[data-theme="dark"] .stats-section {
+  background: #0f172a;
+}
+
+[data-theme="dark"] .stat-number {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .stat-label {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .services-section {
+  background: #1e293b;
+}
+
+[data-theme="dark"] .section-title {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .section-subtitle {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .service-card {
+  background: #0f172a;
+  border: 1px solid #334155;
+}
+
+[data-theme="dark"] .service-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  border-color: #475569;
+}
+
+[data-theme="dark"] .service-card h3 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .service-card p {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .features-section {
+  background: #0f172a;
+}
+
+[data-theme="dark"] .feature-card h3 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .feature-card p {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .cta-section {
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f1f35 100%);
+}
+
+[data-theme="dark"] .cta-title {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .cta-text {
+  color: #cbd5e1;
+}
+

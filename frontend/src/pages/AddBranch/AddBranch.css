@@ -290,3 +290,104 @@ select {
     display: none;
   }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .add-branch-container {
+  background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+}
+
+[data-theme="dark"] .add-branch-card {
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .add-branch-header {
+  border-bottom-color: rgba(51, 65, 85, 0.5);
+}
+
+[data-theme="dark"] .add-branch-header h2 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .add-branch-header p {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .alert-error {
+  background: rgba(185, 28, 28, 0.2);
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .alert-success {
+  background: rgba(5, 150, 105, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+}
+
+[data-theme="dark"] .form-section {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(51, 65, 85, 0.5);
+}
+
+[data-theme="dark"] .form-section h3 {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .form-group label {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select {
+  background-color: rgba(15, 23, 42, 0.8);
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .form-group input::placeholder {
+  color: #64748b;
+}
+
+[data-theme="dark"] .form-group input:focus,
+[data-theme="dark"] .form-group select:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+[data-theme="dark"] .input-readonly {
+  background-color: rgba(30, 41, 59, 0.5);
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .form-hint {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .form-actions {
+  border-top-color: rgba(51, 65, 85, 0.5);
+}
+
+[data-theme="dark"] .btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="dark"] .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+[data-theme="dark"] .btn-cancel {
+  background: rgba(30, 41, 59, 0.8);
+  color: #cbd5e1;
+  border-color: #475569;
+}
+
+[data-theme="dark"] .btn-cancel:hover:not(:disabled) {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: #64748b;
+}
+
+[data-theme="dark"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e2e8f0' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}

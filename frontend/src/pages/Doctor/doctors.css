@@ -97,3 +97,63 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .doctors-container {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .doctors-title {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .doctors-subtitle {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .search-section {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(51, 65, 85, 0.5);
+  box-shadow: 0 28px 64px -38px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .results-count {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .no-results {
+  border-color: rgba(51, 65, 85, 0.5);
+  background: rgba(51, 65, 85, 0.2);
+}
+
+[data-theme="dark"] .no-results p {
+  color: #94a3b8;
+}
+
+/* Dark mode for MUI TextField in doctors page */
+[data-theme="dark"] .search-input .MuiInputBase-root,
+[data-theme="dark"] .search-type-select .MuiInputBase-root {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .search-input .MuiOutlinedInput-notchedOutline,
+[data-theme="dark"] .search-type-select .MuiOutlinedInput-notchedOutline {
+  border-color: #475569;
+}
+
+[data-theme="dark"] .search-input .MuiInputLabel-root,
+[data-theme="dark"] .search-type-select .MuiInputLabel-root {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .search-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
+[data-theme="dark"] .search-type-select .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #64748b;
+}
+
+[data-theme="dark"] .search-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+[data-theme="dark"] .search-type-select .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #60a5fa;
+}

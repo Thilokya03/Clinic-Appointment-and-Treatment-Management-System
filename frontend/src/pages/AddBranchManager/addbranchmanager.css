@@ -179,3 +179,74 @@
     padding: 1.5rem;
   }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .add-branch-manager-container {
+  background-color: #0f172a;
+}
+
+[data-theme="dark"] .add-branch-manager-header h1 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .back-button {
+  background-color: #475569;
+}
+
+[data-theme="dark"] .back-button:hover {
+  background-color: #64748b;
+}
+
+[data-theme="dark"] .form-container {
+  background: #1e293b;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .form-group label {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .form-group input::placeholder {
+  color: #64748b;
+}
+
+[data-theme="dark"] .form-group input:focus,
+[data-theme="dark"] .form-group select:focus {
+  border-color: #8b5cf6;
+  background-color: #1e293b;
+}
+
+[data-theme="dark"] .radio-label {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .radio-label:hover {
+  color: #a78bfa;
+}
+
+[data-theme="dark"] .optional {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .error-message {
+  background-color: #450a0a;
+  color: #fca5a5;
+  border-left-color: #dc2626;
+}
+
+[data-theme="dark"] .success-message {
+  background-color: #064e3b;
+  color: #6ee7b7;
+  border-left-color: #10b981;
+}
+
+[data-theme="dark"] .submit-button {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}

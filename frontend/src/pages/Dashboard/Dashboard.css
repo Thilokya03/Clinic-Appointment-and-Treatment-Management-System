@@ -408,3 +408,91 @@
     padding: 1.5rem;
   }
 }
+
+/* Additional Dark Mode Styles */
+[data-theme="dark"] .dashboard-container {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+[data-theme="dark"] .dashboard-title,
+[data-theme="dark"] .dashboard-subtitle {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .user-badge,
+[data-theme="dark"] .admin-badge,
+[data-theme="dark"] .branch-manager-badge,
+[data-theme="dark"] .doctor-badge,
+[data-theme="dark"] .staff-badge,
+[data-theme="dark"] .patient-badge {
+  color: white;
+}
+
+[data-theme="dark"] .stat-card {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(51, 65, 85, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .stat-card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .stat-label {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .dashboard-card {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(51, 65, 85, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .dashboard-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .card-description {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .dashboard-section {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(51, 65, 85, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .section-title {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .activity-item {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(51, 65, 85, 0.5);
+}
+
+[data-theme="dark"] .activity-item:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1));
+  border-color: rgba(168, 85, 247, 0.5);
+}
+
+[data-theme="dark"] .activity-text,
+[data-theme="dark"] .activity-time {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .schedule-table th {
+  color: #f1f5f9;
+  border-bottom-color: rgba(51, 65, 85, 0.5);
+}
+
+[data-theme="dark"] .schedule-table td {
+  color: #e2e8f0;
+  border-bottom-color: rgba(51, 65, 85, 0.3);
+}
+
+[data-theme="dark"] .schedule-table tr:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1));
+}
