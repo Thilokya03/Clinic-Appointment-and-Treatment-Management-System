@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `catms` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `catms`;
--- MySQL dump 10.13  Distrib 8.0.43, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
 -- Host: localhost    Database: catms
 -- ------------------------------------------------------
--- Server version	8.0.43
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -17,6 +17,40 @@ USE `catms`;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+--
+-- Table structure for table `appointment`
+--
+
+DROP TABLE IF EXISTS `appointment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `appointment` (
+  `appointment_id` varchar(5) NOT NULL,
+  `patient_id` varchar(5) NOT NULL,
+  `status` enum('Scheduled','Completed','Cancelled') NOT NULL DEFAULT 'Scheduled',
+  `appointment_date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `notes` text,
+  `appointment_fee` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `schedule_id` varchar(10) NOT NULL,
+  PRIMARY KEY (`appointment_id`),
+  KEY `fk_appt_patient` (`patient_id`),
+  KEY `fk_appt_doctor_schedule` (`schedule_id`),
+  CONSTRAINT `fk_appt_doctor_schedule` FOREIGN KEY (`schedule_id`) REFERENCES `doctor_schedule` (`schedule_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_appt_patient` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `chk_appt_time` CHECK ((`end_time` > `start_time`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `appointment`
+--
+
+LOCK TABLES `appointment` WRITE;
+/*!40000 ALTER TABLE `appointment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `appointment` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `branch`
@@ -29,6 +63,8 @@ CREATE TABLE `branch` (
   `branch_id` varchar(5) NOT NULL,
   `name` varchar(100) NOT NULL,
   `address` varchar(200) NOT NULL,
+  `phone_no` varchar(15) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`branch_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -39,47 +75,9 @@ CREATE TABLE `branch` (
 
 LOCK TABLES `branch` WRITE;
 /*!40000 ALTER TABLE `branch` DISABLE KEYS */;
+INSERT INTO `branch` VALUES ('B0001','Main Branch','Gall Road, Colombo 7','0703371796','thilokyaangeesa@gmail.com');
 /*!40000 ALTER TABLE `branch` ENABLE KEYS */;
 UNLOCK TABLES;
-
-
---
--- Table structure for table `staff`
---
-
-DROP TABLE IF EXISTS `staff`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `staff` (
-  `staff_id` varchar(5) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `category` enum('Admin','Nurse','Doctor','Other') NOT NULL,
-  `phone_no` varchar(10) NOT NULL,
-  `gender` enum('Male','Female') NOT NULL,
-  `nic` varchar(20) DEFAULT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `branch_id` varchar(5) NOT NULL,
-  `reference_no` int DEFAULT NULL,
-  PRIMARY KEY (`staff_id`),
-  UNIQUE KEY `username` (`username`),
-  UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `nic` (`nic`),
-  KEY `fk_staff_branch` (`branch_id`),
-  CONSTRAINT `fk_staff_branch` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`branch_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `staff`
---
-
-LOCK TABLES `staff` WRITE;
-/*!40000 ALTER TABLE `staff` DISABLE KEYS */;
-/*!40000 ALTER TABLE `staff` ENABLE KEYS */;
-UNLOCK TABLES;
-
 
 --
 -- Table structure for table `doctor`
@@ -105,6 +103,132 @@ LOCK TABLES `doctor` WRITE;
 /*!40000 ALTER TABLE `doctor` ENABLE KEYS */;
 UNLOCK TABLES;
 
+--
+-- Table structure for table `doctor_schedule`
+--
+
+DROP TABLE IF EXISTS `doctor_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `doctor_schedule` (
+  `schedule_id` varchar(5) NOT NULL,
+  `doctor_id` varchar(5) NOT NULL,
+  `speciality` varchar(100) NOT NULL,
+  `date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `fee` decimal(10,2) NOT NULL,
+  `status` enum('ACTIVE','INACTIVE') DEFAULT 'ACTIVE',
+  PRIMARY KEY (`schedule_id`),
+  UNIQUE KEY `unique_schedule_doctor_time` (`doctor_id`,`date`,`start_time`,`end_time`),
+  CONSTRAINT `doctor_schedule_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `doctor_schedule`
+--
+
+LOCK TABLES `doctor_schedule` WRITE;
+/*!40000 ALTER TABLE `doctor_schedule` DISABLE KEYS */;
+/*!40000 ALTER TABLE `doctor_schedule` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `insurance`
+--
+
+DROP TABLE IF EXISTS `insurance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `insurance` (
+  `insurance_id` varchar(5) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `coverage_type` varchar(100) NOT NULL,
+  `phone_no` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`insurance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `insurance`
+--
+
+LOCK TABLES `insurance` WRITE;
+/*!40000 ALTER TABLE `insurance` DISABLE KEYS */;
+/*!40000 ALTER TABLE `insurance` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `insurance_claim`
+--
+
+DROP TABLE IF EXISTS `insurance_claim`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `insurance_claim` (
+  `claim_id` varchar(5) NOT NULL,
+  `insurance_id` varchar(5) NOT NULL,
+  `percentage` decimal(5,2) DEFAULT NULL,
+  `payment_id` varchar(5) NOT NULL,
+  PRIMARY KEY (`claim_id`),
+  KEY `fk_claim_insurance` (`insurance_id`),
+  KEY `fk_claim_payment` (`payment_id`),
+  CONSTRAINT `fk_claim_insurance` FOREIGN KEY (`insurance_id`) REFERENCES `insurance` (`insurance_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_claim_payment` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`) ON DELETE CASCADE,
+  CONSTRAINT `insurance_claim_chk_1` CHECK (((`percentage` >= 0.00) and (`percentage` <= 100.00)))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `insurance_claim`
+--
+
+LOCK TABLES `insurance_claim` WRITE;
+/*!40000 ALTER TABLE `insurance_claim` DISABLE KEYS */;
+/*!40000 ALTER TABLE `insurance_claim` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `invoice`
+--
+
+DROP TABLE IF EXISTS `invoice`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `invoice` (
+  `invoice_id` varchar(5) NOT NULL,
+  `payment_id` varchar(5) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `method` enum('Cash','Card','Online','BankTransfer') NOT NULL,
+  PRIMARY KEY (`invoice_id`),
+  UNIQUE KEY `uq_invoice_payment` (`payment_id`),
+  CONSTRAINT `fk_invoice_payment` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `invoice`
+--
+
+LOCK TABLES `invoice` WRITE;
+/*!40000 ALTER TABLE `invoice` DISABLE KEYS */;
+/*!40000 ALTER TABLE `invoice` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Temporary view structure for view `login`
+--
+
+DROP TABLE IF EXISTS `login`;
+/*!50001 DROP VIEW IF EXISTS `login`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `login` AS SELECT 
+ 1 AS `username`,
+ 1 AS `password`,
+ 1 AS `role`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `patient`
@@ -143,125 +267,6 @@ LOCK TABLES `patient` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `insurance`
---
-
-DROP TABLE IF EXISTS `insurance`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `insurance` (
-  `insurance_id` varchar(5) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `coverage_type` varchar(100) NOT NULL,
-  `phone_no` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`insurance_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `insurance`
---
-
-LOCK TABLES `insurance` WRITE;
-/*!40000 ALTER TABLE `insurance` DISABLE KEYS */;
-/*!40000 ALTER TABLE `insurance` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `doctor_schedule`
---
-
-DROP TABLE IF EXISTS `doctor_schedule`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `doctor_schedule` (
-  `schedule_id` varchar(5) NOT NULL,
-  `doctor_id` varchar(5) NOT NULL,
-  `speciality` varchar(100) NOT NULL,
-  `date` date NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `fee` decimal(10,2) NOT NULL,
-  `status` enum('ACTIVE','INACTIVE') DEFAULT 'ACTIVE',
-  PRIMARY KEY (`schedule_id`),
-  UNIQUE KEY `unique_schedule_doctor_time` (`doctor_id`,`date`,`start_time`,`end_time`),
-  CONSTRAINT `doctor_schedule_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `doctor_schedule`
---
-
-LOCK TABLES `doctor_schedule` WRITE;
-/*!40000 ALTER TABLE `doctor_schedule` DISABLE KEYS */;
-/*!40000 ALTER TABLE `doctor_schedule` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
---
--- Table structure for table `appointment`
---
-
-DROP TABLE IF EXISTS `appointment`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `appointment` (
-  `appointment_id` varchar(5) NOT NULL,
-  `patient_id` varchar(5) NOT NULL,
-  `status` enum('Scheduled','Completed','Cancelled') NOT NULL DEFAULT 'Scheduled',
-  `appointment_date` date NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `notes` text,
-  `appointment_fee` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `schedule_id` varchar(10) NOT NULL,
-  PRIMARY KEY (`appointment_id`),
-  KEY `fk_appt_patient` (`patient_id`),
-  KEY `fk_appt_doctor_schedule` (`schedule_id`),
-  CONSTRAINT `fk_appt_doctor_schedule` FOREIGN KEY (`schedule_id`) REFERENCES `doctor_schedule` (`schedule_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_appt_patient` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `chk_appt_time` CHECK ((`end_time` > `start_time`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `appointment`
---
-
-LOCK TABLES `appointment` WRITE;
-/*!40000 ALTER TABLE `appointment` DISABLE KEYS */;
-/*!40000 ALTER TABLE `appointment` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `set_appointment_fee` BEFORE INSERT ON `appointment` FOR EACH ROW BEGIN
-    DECLARE doctor_fee DECIMAL(10,2);
-
-    -- Fetch the fee from doctor_schedule based on the schedule_id
-    SELECT fee INTO doctor_fee
-    FROM doctor_schedule
-    WHERE schedule_id = NEW.schedule_id
-    LIMIT 1;
-
-    -- Assign it to the appointment_fee of the new row
-    SET NEW.appointment_fee = IFNULL(doctor_fee, 0);
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
-
---
 -- Table structure for table `payment`
 --
 
@@ -293,75 +298,57 @@ LOCK TABLES `payment` WRITE;
 /*!40000 ALTER TABLE `payment` DISABLE KEYS */;
 /*!40000 ALTER TABLE `payment` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `set_payment_total` BEFORE INSERT ON `payment` FOR EACH ROW BEGIN
-    DECLARE doctor_fee DECIMAL(10,2);
-    DECLARE treatment_fee DECIMAL(10,2);
-    DECLARE total DECIMAL(10,2);
-    DECLARE Due_payment DECIMAL(10,2);
- 
-SELECT fee INTO doctor_fee
-FROM doctor_schedule ds
-JOIN appointment a ON ds.schedule_id = a.schedule_id
-WHERE a.appointment_id = NEW.appointment_id;
-
- 
-    SELECT IFNULL(SUM(tc.treatment_fee),0) INTO treatment_fee
-    FROM treatment t
-    JOIN treatment_catalog tc ON t.catalog_id = tc.catalog_id
-    WHERE t.appointment_id = NEW.appointment_id;
-
-    SET total = doctor_fee + treatment_fee;
-
-    SET NEW.total_amount = total ;
-    -- Set Due_payment
-    IF IFNULL(NEW.insurance_paid_amount,0) = 0 AND IFNULL(NEW.patient_paid_amount,0) = 0 THEN
-        SET NEW.Due_payment = total;
-    ELSE
-        SET NEW.Due_payment = total - IFNULL(NEW.insurance_paid_amount,0) - IFNULL(NEW.patient_paid_amount,0);
-    END IF;
-
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
 
 --
--- Table structure for table `treatment_catalog`
+-- Table structure for table `staff`
 --
 
-DROP TABLE IF EXISTS `treatment_catalog`;
+DROP TABLE IF EXISTS `staff`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `treatment_catalog` (
-  `catalog_id` varchar(5) NOT NULL,
-  `treatment_name` varchar(150) NOT NULL,
-  `treatment_fee` decimal(10,2) NOT NULL DEFAULT '0.00',
-  PRIMARY KEY (`catalog_id`),
-  UNIQUE KEY `treatment_name` (`treatment_name`)
+CREATE TABLE `staff` (
+  `staff_id` varchar(5) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `category` enum('Admin','Nurse','Doctor','Other') NOT NULL,
+  `phone_no` varchar(10) NOT NULL,
+  `gender` enum('Male','Female') NOT NULL,
+  `nic` varchar(20) DEFAULT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `branch_id` varchar(5) NOT NULL,
+  `reference_no` int DEFAULT NULL,
+  PRIMARY KEY (`staff_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `nic` (`nic`),
+  KEY `fk_staff_branch` (`branch_id`),
+  CONSTRAINT `fk_staff_branch` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`branch_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `treatment_catalog`
+-- Dumping data for table `staff`
 --
 
-LOCK TABLES `treatment_catalog` WRITE;
-/*!40000 ALTER TABLE `treatment_catalog` DISABLE KEYS */;
-/*!40000 ALTER TABLE `treatment_catalog` ENABLE KEYS */;
+LOCK TABLES `staff` WRITE;
+/*!40000 ALTER TABLE `staff` DISABLE KEYS */;
+/*!40000 ALTER TABLE `staff` ENABLE KEYS */;
 UNLOCK TABLES;
 
+--
+-- Temporary view structure for view `staff_appointment_notes`
+--
+
+DROP TABLE IF EXISTS `staff_appointment_notes`;
+/*!50001 DROP VIEW IF EXISTS `staff_appointment_notes`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `staff_appointment_notes` AS SELECT 
+ 1 AS `appointment_id`,
+ 1 AS `patient_name`,
+ 1 AS `notes`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `treatment`
@@ -391,153 +378,31 @@ LOCK TABLES `treatment` WRITE;
 /*!40000 ALTER TABLE `treatment` DISABLE KEYS */;
 /*!40000 ALTER TABLE `treatment` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `update_appointment_fee_after_treatment` AFTER INSERT ON `treatment` FOR EACH ROW BEGIN
-    DECLARE doctor_fee DECIMAL(10,2);
-    DECLARE treatment_total DECIMAL(10,2);
-
-    -- Get doctor fee from the schedule of this appointment
-    SELECT ds.fee INTO doctor_fee
-    FROM doctor_schedule ds
-    JOIN appointment a ON ds.schedule_id = a.schedule_id
-    WHERE a.appointment_id = NEW.appointment_id
-    LIMIT 1;
-
-    -- Get total treatment fees for this appointment
-    SELECT IFNULL(SUM(tc.treatment_fee),0) INTO treatment_total
-    FROM treatment t
-    JOIN treatment_catalog tc ON t.catalog_id = tc.catalog_id
-    WHERE t.appointment_id = NEW.appointment_id;
-
-    -- Update the appointment_fee
-    UPDATE appointment
-    SET appointment_fee = IFNULL(doctor_fee,0) + treatment_total
-    WHERE appointment_id = NEW.appointment_id;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
 
 --
--- Table structure for table `invoice`
+-- Table structure for table `treatment_catalog`
 --
 
-DROP TABLE IF EXISTS `invoice`;
+DROP TABLE IF EXISTS `treatment_catalog`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `invoice` (
-  `invoice_id` varchar(5) NOT NULL,
-  `payment_id` varchar(5) NOT NULL,
-  `amount` decimal(10,2) NOT NULL,
-  `method` enum('Cash','Card','Online','BankTransfer') NOT NULL,
-  PRIMARY KEY (`invoice_id`),
-  UNIQUE KEY `uq_invoice_payment` (`payment_id`),
-  CONSTRAINT `fk_invoice_payment` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+CREATE TABLE `treatment_catalog` (
+  `catalog_id` varchar(5) NOT NULL,
+  `treatment_name` varchar(150) NOT NULL,
+  `treatment_fee` decimal(10,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`catalog_id`),
+  UNIQUE KEY `treatment_name` (`treatment_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `invoice`
+-- Dumping data for table `treatment_catalog`
 --
 
-LOCK TABLES `invoice` WRITE;
-/*!40000 ALTER TABLE `invoice` DISABLE KEYS */;
-/*!40000 ALTER TABLE `invoice` ENABLE KEYS */;
+LOCK TABLES `treatment_catalog` WRITE;
+/*!40000 ALTER TABLE `treatment_catalog` DISABLE KEYS */;
+/*!40000 ALTER TABLE `treatment_catalog` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `update_payment_after_invoice` AFTER INSERT ON `invoice` FOR EACH ROW BEGIN
-    UPDATE payment
-    SET 
-        patient_paid_amount = patient_paid_amount + NEW.amount,
-        Due_payment = total_amount - (patient_paid_amount + insurance_paid_amount),
-        status = CASE
-                    WHEN patient_paid_amount + NEW.amount + insurance_paid_amount >= total_amount THEN 'Paid'
-                    WHEN patient_paid_amount + NEW.amount + insurance_paid_amount > 0 THEN 'Partial'
-                    ELSE 'Pending'
-                 END
-    WHERE payment_id = NEW.payment_id;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
-
---
--- Table structure for table `insurance_claim`
---
-
-DROP TABLE IF EXISTS `insurance_claim`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `insurance_claim` (
-  `claim_id` varchar(5) NOT NULL,
-  `insurance_id` varchar(5) NOT NULL,
-  `percentage` decimal(5,2) DEFAULT NULL,
-  `payment_id` varchar(5) NOT NULL,
-  PRIMARY KEY (`claim_id`),
-  KEY `fk_claim_insurance` (`insurance_id`),
-  KEY `fk_claim_payment` (`payment_id`),
-  CONSTRAINT `fk_claim_insurance` FOREIGN KEY (`insurance_id`) REFERENCES `insurance` (`insurance_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_claim_payment` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`) ON DELETE CASCADE,
-  CONSTRAINT `insurance_claim_chk_1` CHECK (((`percentage` >= 0.00) and (`percentage` <= 100.00)))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `insurance_claim`
---
-
-LOCK TABLES `insurance_claim` WRITE;
-/*!40000 ALTER TABLE `insurance_claim` DISABLE KEYS */;
-/*!40000 ALTER TABLE `insurance_claim` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `update_insurance_paid` AFTER INSERT ON `insurance_claim` FOR EACH ROW BEGIN
-    UPDATE payment
-    SET insurance_paid_amount = insurance_paid_amount + (NEW.percentage / 100) * total_amount,
-        Due_payment = total_amount - (patient_paid_amount + (NEW.percentage / 100) * total_amount),
-        status = CASE
-                    WHEN patient_paid_amount +  (NEW.percentage / 100) * total_amount >= total_amount THEN 'Paid'
-                    WHEN patient_paid_amount + (NEW.percentage / 100) * total_amount > 0 THEN 'Partial'
-                    ELSE 'Pending'
-                 END
-    WHERE payment_id = NEW.payment_id;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
 
 --
 -- Temporary view structure for view `vw_branch_appointment_summary`
@@ -615,8 +480,22 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = @saved_cs_client;
 
 --
--- Dumping routines for database 'catms'
+-- Final view structure for view `login`
 --
+
+/*!50001 DROP VIEW IF EXISTS `login`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `login` AS select `staff`.`username` AS `username`,`staff`.`password` AS `password`,`staff`.`category` AS `role` from `staff` union select `patient`.`username` AS `username`,`patient`.`password` AS `password`,'patient' AS `role` from `patient` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
 -- Final view structure for view `staff_appointment_notes`
@@ -735,4 +614,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-10-15 22:53:33
+-- Dump completed on 2025-10-20 16:51:22
