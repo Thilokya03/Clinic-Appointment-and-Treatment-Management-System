@@ -1,22 +1,19 @@
 // src/App.jsx
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./App.css";
-
-import AdminDashboard from './pages/Dashboard/AdminDashboard';
-import BranchManagerDashboard from './pages/Dashboard/BranchManagerDashboard';
-import DoctorDashboard from './pages/Dashboard/DoctorDashboard';
-import NonMedicalStaffDashboard from './pages/Dashboard/NonMedicalStaffDashboard';
-import PatientDashboard from './pages/Dashboard/PatientDashboard';
-
 
 import Login from "./pages/Login/Login";
 import Home from "./pages/Home/Home";
 import Register from "./pages/Register/Register";
 import Doctors from "./pages/Doctor/Doctors";
 import Dashboard from "./pages/Dashboard/Dashboard";
-import BookAppointment from "./pages/BookAppointment/BookAppointment";
-import SetAppointment from "./pages/SetAppointment/SetAppointment";
+import BranchManagers from "./pages/BranchManagers/BranchManagers";
+import Staff from "./pages/Staff/Staff";
+import AddDoctor from "./pages/AddDoctor/AddDoctor";
+import AddStaff from "./pages/AddStaff/AddStaff";
+import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
+import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
 
 // NOTE: keep your folder name exactly as in your project: compornent
 import BaseLayout from "./compornent/Layout/BaseLayout";
@@ -51,15 +48,14 @@ export default function App() {
         {/* DASHBOARD (Sidebar + Navibar + Footer) */}
         <Route element={<DashboardLayout theme={theme} setTheme={setTheme} />}>
           <Route path="/dashboard">
+            {/* Dashboard routes */}
             <Route index element={<Dashboard />} />
-          {/* Dashboard routes */}
-            <Route path="admin" element={<AdminDashboard />} />
-            <Route path="branch-manager" element={<BranchManagerDashboard />} />
-            <Route path="doctor" element={<DoctorDashboard />} />
-            <Route path="staff" element={<NonMedicalStaffDashboard />} />
-            <Route path="patient" element={<PatientDashboard />} />
-            <Route path="appointments" element={<SetAppointment />} />
-            <Route path="appointmentsbook" element={<BookAppointment />} />
+            <Route path="branchmanagers" element={<BranchManagers />} />
+            <Route path="staff" element={<Staff />} />
+            <Route path="adddoctor" element={<AddDoctor />} />
+            <Route path="addstaff" element={<AddStaff />} />
+            <Route path="doctordashboard" element={<DoctorDashboard />} />
+            <Route path="doctorchange" element={<DoctorChangeShedule />} />
           </Route>
         </Route>
 
@@ -68,6 +64,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
+
+
         </Route>
       </Routes>
     </Router>

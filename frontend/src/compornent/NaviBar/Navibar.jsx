@@ -45,19 +45,6 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
         <NavLink to="/about" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
           About
         </NavLink>
-        {/* New Links */}
-        <NavLink to="/admin" className={({ isActive }) => (isActive ? "link active" : "link")}>
-          Admin
-        </NavLink>
-        <NavLink to="/branch-manager" className={({ isActive }) => (isActive ? "link active" : "link")}>
-          Manager
-        </NavLink>
-        <NavLink to="/staff" className={({ isActive }) => (isActive ? "link active" : "link")}>
-          Staff
-        </NavLink>
-        <NavLink to="/patient" className={({ isActive }) => (isActive ? "link active" : "link")}>
-          Patient
-        </NavLink>
       </nav>
 
       {/* Actions */}

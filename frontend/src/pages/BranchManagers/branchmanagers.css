@@ -1,0 +1,141 @@
+.branch-managers-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 20px 0;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 0 20px;
+}
+
+.page-title {
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700 !important;
+  margin-bottom: 16px !important;
+  font-size: 2.5rem !important;
+}
+
+.page-subtitle {
+  color: #64748b !important;
+  font-weight: 400 !important;
+  font-size: 1.2rem !important;
+}
+
+.tabs-paper {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 20px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  margin: 0 20px;
+}
+
+.management-tabs {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.management-tabs .MuiTab-root {
+  text-transform: none;
+  font-weight: 600;
+  font-size: 1rem;
+  min-height: 64px;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+.management-tabs .MuiTab-root.Mui-selected {
+  color: #3b82f6;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Card Headers */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-icon {
+  font-size: 2rem !important;
+  color: #3b82f6;
+}
+
+/* Placeholder Cards */
+.placeholder-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-radius: 20px !important;
+  border: 2px dashed #cbd5e1;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  padding: 60px 40px;
+  text-align: center;
+}
+
+.placeholder-content {
+  padding: 60px 20px;
+  background: rgba(241, 245, 249, 0.5);
+  border-radius: 16px;
+  margin-top: 30px;
+}
+
+.card-title {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  margin-bottom: 0 !important;
+  font-size: 1.5rem !important;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .branch-managers-container {
+    padding: 10px 0;
+  }
+  
+  .page-title {
+    font-size: 2rem !important;
+  }
+  
+  .tabs-paper {
+    margin: 0 10px;
+  }
+  
+  .management-tabs .MuiTab-root {
+    min-height: 56px;
+    font-size: 0.9rem;
+  }
+  
+  .card-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .card-icon {
+    font-size: 1.75rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-title {
+    font-size: 1.75rem !important;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem !important;
+  }
+  
+  .placeholder-card {
+    padding: 40px 20px;
+  }
+}
