@@ -168,6 +168,8 @@ export default function Register() {
         nic,
         email,
         password,
+        emergency_contact_name: emergencyContactName,
+        emergency_contact_no: emergencyContactNo,
       };
 
       console.log("Sending registration request...", { ...payload, password: "***" });
@@ -175,9 +177,14 @@ export default function Register() {
       console.log("Registration successful:", response.data);
       setToast({
         open: true,
-        message: response.data.message || `Patient registered successfully (${name}). Please login.`,
+        message: response.data.message || `Patient registered successfully (${name}). Redirecting to login...`,
         severity: "success",
       });
+
+      // Redirect to login page after 2 seconds
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
 
     } catch (err) {
       console.error("Registration error:", err);

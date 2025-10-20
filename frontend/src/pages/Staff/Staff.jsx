@@ -1,5 +1,6 @@
 // src/pages/Staff/Staff.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Box,
   Tabs,
@@ -30,6 +31,9 @@ import {
   Select,
   MenuItem,
   Divider,
+  CircularProgress,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   PersonAdd,
@@ -59,67 +63,154 @@ function TabPanel({ children, value, index, ...other }) {
 }
 
 const StaffPage = () => {
+  const theme = useTheme();
+  const isDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const [tabValue, setTabValue] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  const [loading, setLoading] = useState(false);
 
   // Form States
   const [patientForm, setPatientForm] = useState({
-    fullName: '',
-    nic: '',
+    username: '',
+    name: '',
+    phone_no: '',
+    gender: '',
     age: '',
-    dob: ''
+    nic: '',
+    email: '',
+    password: ''
   });
 
   const [treatmentForm, setTreatmentForm] = useState({
-    name: '',
+    treatment_id: '',
+    catalog_id: '',
+    appointment_id: '',
     description: ''
   });
 
   const [insuranceForm, setInsuranceForm] = useState({
-    companyName: '',
-    percentage: '',
-    description: ''
+    name: '',
+    coverage_type: '',
+    phone_no: ''
   });
 
   const [treatmentCatalogForm, setTreatmentCatalogForm] = useState({
-    treatmentName: '',
-    description: ''
+    treatment_name: '',
+    treatment_fee: ''
   });
 
   const [paymentForm, setPaymentForm] = useState({
-    patientId: '',
-    amount: '',
-    paymentMethod: '',
-    description: ''
+    payment_id: '',
+    insurance_paid_amount: '',
+    patient_paid_amount: '',
+    discount_amount: '',
+    status: 'Pending',
+    appointment_id: '',
+    patient_id: ''
+  });
+
+  const [scheduleForm, setScheduleForm] = useState({
+    staff_id: '',
+    branch_id: '',
+    schedule_date: '',
+    start_time: '',
+    end_time: '',
+    max_patients: '10',
+    fee: '0.00',
+    notes: ''
   });
 
   // Data States
-  const [patients, setPatients] = useState([
-    { id: 1, fullName: 'John Doe', nic: '901234567V', age: '32', dob: '1992-05-15' },
-    { id: 2, fullName: 'Jane Smith', nic: '881234568V', age: '35', dob: '1989-08-22' }
-  ]);
+  const [patients, setPatients] = useState([]);
+  const [treatments, setTreatments] = useState([]);
+  const [insuranceCompanies, setInsuranceCompanies] = useState([]);
+  const [treatmentCatalog, setTreatmentCatalog] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [schedules, setSchedules] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [branches, setBranches] = useState([]);
 
-  const [treatments, setTreatments] = useState([
-    { id: 1, name: 'Blood Test', description: 'Complete blood count test' },
-    { id: 2, name: 'X-Ray', description: 'Chest X-ray examination' }
-  ]);
+  // API Base URL
+  const API_URL = 'http://localhost:3000/api';
 
-  const [insuranceCompanies, setInsuranceCompanies] = useState([
-    { id: 1, companyName: 'Ceylinco Life', percentage: '80%', description: 'Comprehensive health insurance' },
-    { id: 2, companyName: 'AIA Insurance', percentage: '75%', description: 'Standard health coverage' }
-  ]);
+  // Get token from localStorage
+  const getToken = () => localStorage.getItem('catms_token');
 
-  const [treatmentCatalog, setTreatmentCatalog] = useState([
-    { id: 1, treatmentName: 'Cardiac Surgery', description: 'Heart surgery procedures' },
-    { id: 2, treatmentName: 'Physical Therapy', description: 'Rehabilitation exercises' }
-  ]);
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchInsuranceCompanies();
+    fetchTreatmentCatalog();
+    fetchDoctorSchedules();
+    fetchDoctors();
+    fetchBranches();
+  }, []);
 
-  const [payments, setPayments] = useState([
-    { id: 1, patientId: 'P001', patientName: 'John Doe', amount: 'LKR 5,000', paymentMethod: 'Cash', date: '2024-01-15' },
-    { id: 2, patientId: 'P002', patientName: 'Jane Smith', amount: 'LKR 3,500', paymentMethod: 'Card', date: '2024-01-16' }
-  ]);
+  // Fetch Insurance Companies
+  const fetchInsuranceCompanies = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/insurance`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      setInsuranceCompanies(response.data);
+    } catch (error) {
+      console.error('Error fetching insurance companies:', error);
+      showToast('Error fetching insurance companies', 'error');
+    }
+  };
+
+  // Fetch Treatment Catalog
+  const fetchTreatmentCatalog = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/treatment-catalog`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      setTreatmentCatalog(response.data);
+    } catch (error) {
+      console.error('Error fetching treatment catalog:', error);
+      showToast('Error fetching treatment catalog', 'error');
+    }
+  };
+
+  // Fetch Doctor Schedules
+  const fetchDoctorSchedules = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/doctor-schedule`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      setSchedules(response.data);
+    } catch (error) {
+      console.error('Error fetching doctor schedules:', error);
+      showToast('Error fetching doctor schedules', 'error');
+    }
+  };
+
+  // Fetch Doctors
+  const fetchDoctors = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/staff/doctors`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      setDoctors(response.data);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+      showToast('Error fetching doctors', 'error');
+    }
+  };
+
+  // Fetch Branches
+  const fetchBranches = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/branch`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      setBranches(response.data);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+      showToast('Error fetching branches', 'error');
+    }
+  };
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -128,6 +219,10 @@ const StaffPage = () => {
   const openAddDialog = (type) => {
     setDialogType(type);
     setOpenDialog(true);
+  };
+
+  const showToast = (message, severity = 'success') => {
+    setToast({ open: true, message, severity });
   };
 
   const handlePatientInputChange = (field) => (event) => {
@@ -150,90 +245,208 @@ const StaffPage = () => {
     setPaymentForm(prev => ({ ...prev, [field]: event.target.value }));
   };
 
-  const addPatient = () => {
-    if (!patientForm.fullName || !patientForm.nic || !patientForm.age) {
-      setToast({ open: true, message: 'Please fill all required fields', severity: 'error' });
-      return;
+  const handleScheduleInputChange = (field) => (event) => {
+    const value = event.target.value;
+    
+    // Auto-populate branch_id when doctor (staff_id) is selected
+    if (field === 'staff_id') {
+      const selectedDoctor = doctors.find(doc => doc.staff_id === value);
+      setScheduleForm(prev => ({ 
+        ...prev, 
+        staff_id: value,
+        branch_id: selectedDoctor?.branch_id || '' 
+      }));
+    } else {
+      setScheduleForm(prev => ({ ...prev, [field]: value }));
     }
-
-    const newPatient = {
-      id: patients.length + 1,
-      ...patientForm
-    };
-
-    setPatients(prev => [...prev, newPatient]);
-    setPatientForm({ fullName: '', nic: '', age: '', dob: '' });
-    setOpenDialog(false);
-    setToast({ open: true, message: 'Patient added successfully!', severity: 'success' });
   };
 
-  const addTreatment = () => {
-    if (!treatmentForm.name) {
-      setToast({ open: true, message: 'Please enter treatment name', severity: 'error' });
+  // Add Patient
+  const addPatient = async () => {
+    if (!patientForm.username || !patientForm.name || !patientForm.email || !patientForm.password) {
+      showToast('Please fill all required fields', 'error');
       return;
     }
 
-    const newTreatment = {
-      id: treatments.length + 1,
-      ...treatmentForm
-    };
-
-    setTreatments(prev => [...prev, newTreatment]);
-    setTreatmentForm({ name: '', description: '' });
-    setOpenDialog(false);
-    setToast({ open: true, message: 'Treatment added successfully!', severity: 'success' });
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API_URL}/patient/signup`, patientForm);
+      showToast('Patient added successfully!', 'success');
+      setPatientForm({
+        username: '',
+        name: '',
+        phone_no: '',
+        gender: '',
+        age: '',
+        nic: '',
+        email: '',
+        password: ''
+      });
+      setOpenDialog(false);
+    } catch (error) {
+      console.error('Error adding patient:', error);
+      showToast(error.response?.data?.error || 'Error adding patient', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addInsuranceCompany = () => {
-    if (!insuranceForm.companyName || !insuranceForm.percentage) {
-      setToast({ open: true, message: 'Please fill all required fields', severity: 'error' });
+  // Add Treatment
+  const addTreatment = async () => {
+    if (!treatmentForm.treatment_id || !treatmentForm.catalog_id || !treatmentForm.appointment_id) {
+      showToast('Please fill all required fields', 'error');
       return;
     }
 
-    const newInsurance = {
-      id: insuranceCompanies.length + 1,
-      ...insuranceForm
-    };
-
-    setInsuranceCompanies(prev => [...prev, newInsurance]);
-    setInsuranceForm({ companyName: '', percentage: '', description: '' });
-    setOpenDialog(false);
-    setToast({ open: true, message: 'Insurance company added successfully!', severity: 'success' });
+    setLoading(true);
+    try {
+      await axios.post(`${API_URL}/treatment`, treatmentForm, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      showToast('Treatment added successfully!', 'success');
+      setTreatmentForm({
+        treatment_id: '',
+        catalog_id: '',
+        appointment_id: '',
+        description: ''
+      });
+      setOpenDialog(false);
+    } catch (error) {
+      console.error('Error adding treatment:', error);
+      showToast(error.response?.data?.error || 'Error adding treatment', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addTreatmentCatalog = () => {
-    if (!treatmentCatalogForm.treatmentName) {
-      setToast({ open: true, message: 'Please enter treatment name', severity: 'error' });
+  // Add Insurance Company
+  const addInsuranceCompany = async () => {
+    if (!insuranceForm.name || !insuranceForm.coverage_type) {
+      showToast('Please fill all required fields', 'error');
       return;
     }
 
-    const newCatalog = {
-      id: treatmentCatalog.length + 1,
-      ...treatmentCatalogForm
-    };
-
-    setTreatmentCatalog(prev => [...prev, newCatalog]);
-    setTreatmentCatalogForm({ treatmentName: '', description: '' });
-    setOpenDialog(false);
-    setToast({ open: true, message: 'Treatment added to catalog successfully!', severity: 'success' });
+    setLoading(true);
+    try {
+      await axios.post(`${API_URL}/insurance`, insuranceForm, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      showToast('Insurance company added successfully!', 'success');
+      setInsuranceForm({ name: '', coverage_type: '', phone_no: '' });
+      setOpenDialog(false);
+      fetchInsuranceCompanies(); // Refresh list
+    } catch (error) {
+      console.error('Error adding insurance company:', error);
+      showToast(error.response?.data?.error || 'Error adding insurance company', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addPayment = () => {
-    if (!paymentForm.patientId || !paymentForm.amount || !paymentForm.paymentMethod) {
-      setToast({ open: true, message: 'Please fill all required fields', severity: 'error' });
+  // Add Treatment to Catalog
+  const addTreatmentCatalog = async () => {
+    if (!treatmentCatalogForm.treatment_name) {
+      showToast('Please enter treatment name', 'error');
       return;
     }
 
-    const newPayment = {
-      id: payments.length + 1,
-      ...paymentForm,
-      date: new Date().toISOString().split('T')[0]
-    };
+    setLoading(true);
+    try {
+      await axios.post(`${API_URL}/treatment-catalog`, treatmentCatalogForm, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      showToast('Treatment added to catalog successfully!', 'success');
+      setTreatmentCatalogForm({ treatment_name: '', treatment_fee: '' });
+      setOpenDialog(false);
+      fetchTreatmentCatalog(); // Refresh list
+    } catch (error) {
+      console.error('Error adding treatment to catalog:', error);
+      showToast(error.response?.data?.error || 'Error adding treatment to catalog', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    setPayments(prev => [...prev, newPayment]);
-    setPaymentForm({ patientId: '', amount: '', paymentMethod: '', description: '' });
-    setOpenDialog(false);
-    setToast({ open: true, message: 'Payment recorded successfully!', severity: 'success' });
+  // Add Payment
+  const addPayment = async () => {
+    if (!paymentForm.payment_id || !paymentForm.appointment_id || !paymentForm.patient_id) {
+      showToast('Please fill all required fields', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.post(`${API_URL}/payment`, paymentForm, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      showToast('Payment recorded successfully!', 'success');
+      setPaymentForm({
+        payment_id: '',
+        insurance_paid_amount: '',
+        patient_paid_amount: '',
+        discount_amount: '',
+        status: 'Pending',
+        appointment_id: '',
+        patient_id: ''
+      });
+      setOpenDialog(false);
+    } catch (error) {
+      console.error('Error recording payment:', error);
+      showToast(error.response?.data?.error || 'Error recording payment', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add Doctor Schedule
+  const addDoctorSchedule = async () => {
+    if (!scheduleForm.staff_id || !scheduleForm.branch_id || !scheduleForm.schedule_date || !scheduleForm.start_time || !scheduleForm.end_time) {
+      showToast('Please fill all required fields', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.post(`${API_URL}/doctor-schedule`, scheduleForm, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      showToast('Doctor schedule added successfully!', 'success');
+      setScheduleForm({
+        staff_id: '',
+        branch_id: '',
+        schedule_date: '',
+        start_time: '',
+        end_time: '',
+        max_patients: '10',
+        fee: '0.00',
+        notes: ''
+      });
+      setOpenDialog(false);
+      fetchDoctorSchedules(); // Refresh list
+    } catch (error) {
+      console.error('Error adding doctor schedule:', error);
+      showToast(error.response?.data?.error || 'Error adding doctor schedule', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update Schedule Status
+  const updateScheduleStatus = async (scheduleId, newStatus) => {
+    setLoading(true);
+    try {
+      await axios.put(`${API_URL}/doctor-schedule/${scheduleId}/status`, 
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      showToast(`Schedule ${newStatus.toLowerCase()} successfully!`, 'success');
+      fetchDoctorSchedules(); // Refresh list
+    } catch (error) {
+      console.error('Error updating schedule status:', error);
+      showToast(error.response?.data?.error || 'Error updating schedule status', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeToast = () => {
@@ -241,7 +454,7 @@ const StaffPage = () => {
   };
 
   return (
-    <div className="staff-page-container">
+    <div className={`staff-page-container ${isDarkMode ? 'dark-mode' : ''}`}>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box className="page-header">
@@ -296,36 +509,12 @@ const StaffPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Registered Patients Card */}
+              {/* Info Message */}
               <Card className="list-card">
                 <CardContent>
-                  <Box className="card-header">
-                    <Typography variant="h5" className="card-title">
-                      Registered Patients ({patients.length})
-                    </Typography>
-                  </Box>
-                  <TableContainer className="table-container">
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell><strong>Full Name</strong></TableCell>
-                          <TableCell><strong>NIC</strong></TableCell>
-                          <TableCell><strong>Age</strong></TableCell>
-                          <TableCell><strong>Date of Birth</strong></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {patients.map((patient) => (
-                          <TableRow key={patient.id} hover>
-                            <TableCell>{patient.fullName}</TableCell>
-                            <TableCell>{patient.nic}</TableCell>
-                            <TableCell>{patient.age}</TableCell>
-                            <TableCell>{patient.dob}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                  <Alert severity="info">
+                    Patients are registered through the signup page. Use the form above to add patients directly from the staff panel.
+                  </Alert>
                 </CardContent>
               </Card>
             </Box>
@@ -355,47 +544,6 @@ const StaffPage = () => {
                   </Box>
                 </CardContent>
               </Card>
-
-              {/* Payment History Card */}
-              <Card className="list-card">
-                <CardContent>
-                  <Box className="card-header">
-                    <Typography variant="h5" className="card-title">
-                      Payment History ({payments.length})
-                    </Typography>
-                  </Box>
-                  <TableContainer className="table-container">
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell><strong>Patient ID</strong></TableCell>
-                          <TableCell><strong>Patient Name</strong></TableCell>
-                          <TableCell><strong>Amount</strong></TableCell>
-                          <TableCell><strong>Payment Method</strong></TableCell>
-                          <TableCell><strong>Date</strong></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {payments.map((payment) => (
-                          <TableRow key={payment.id} hover>
-                            <TableCell>{payment.patientId}</TableCell>
-                            <TableCell>{payment.patientName}</TableCell>
-                            <TableCell>{payment.amount}</TableCell>
-                            <TableCell>
-                              <Chip 
-                                label={payment.paymentMethod} 
-                                size="small" 
-                                color={payment.paymentMethod === 'Cash' ? 'primary' : 'secondary'} 
-                              />
-                            </TableCell>
-                            <TableCell>{payment.date}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </CardContent>
-              </Card>
             </Box>
           </TabPanel>
 
@@ -406,10 +554,10 @@ const StaffPage = () => {
               <Card>
                 <CardContent>
                   <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
-                    Add Treatment
+                    Add Treatment to Appointment
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
-                    Add a new treatment type to the system
+                    Link a treatment from the catalog to an existing appointment
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <Button
@@ -423,59 +571,132 @@ const StaffPage = () => {
                   </Box>
                 </CardContent>
               </Card>
-
-              {/* Available Treatments Card */}
-              <Card className="list-card">
-                <CardContent>
-                  <Box className="card-header">
-                    <Typography variant="h5" className="card-title">
-                      Available Treatments ({treatments.length})
-                    </Typography>
-                  </Box>
-                  <TableContainer className="table-container">
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell><strong>Treatment Name</strong></TableCell>
-                          <TableCell><strong>Description</strong></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {treatments.map((treatment) => (
-                          <TableRow key={treatment.id} hover>
-                            <TableCell>{treatment.name}</TableCell>
-                            <TableCell>{treatment.description}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </CardContent>
-              </Card>
             </Box>
           </TabPanel>
 
           {/* Doctor Schedule Tab */}
           <TabPanel value={tabValue} index={3}>
-            <Card className="placeholder-card">
-              <CardContent>
-                <Box className="card-header" sx={{ justifyContent: 'center', mb: 3 }}>
-                  <Schedule className="card-icon" />
-                  <Typography variant="h4" className="card-title">
-                    Doctor Schedule Management
+            <Box className="vertical-layout">
+              {/* Add Schedule Card */}
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
+                    Add Doctor Schedule
                   </Typography>
-                </Box>
-                <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 4 }}>
-                  This feature is currently under development and will be available soon.
-                </Typography>
-                <Box className="placeholder-content">
-                  <Schedule sx={{ fontSize: 80, color: '#cbd5e1' }} />
-                  <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
-                    Coming Soon
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
+                    Schedule doctor availability for patient appointments
                   </Typography>
-                </Box>
-              </CardContent>
-            </Card>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<Schedule />}
+                      onClick={() => openAddDialog('schedule')}
+                      size="large"
+                    >
+                      Add Schedule
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Doctor Schedules List */}
+              <Card className="list-card">
+                <CardContent>
+                  <Box className="card-header">
+                    <Typography variant="h5" className="card-title">
+                      Doctor Schedules ({schedules.length})
+                    </Typography>
+                  </Box>
+                  {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                      <CircularProgress />
+                    </Box>
+                  ) : (
+                    <TableContainer className="table-container">
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell><strong>Schedule ID</strong></TableCell>
+                            <TableCell><strong>Doctor</strong></TableCell>
+                            <TableCell><strong>Speciality</strong></TableCell>
+                            <TableCell><strong>Branch</strong></TableCell>
+                            <TableCell><strong>Date</strong></TableCell>
+                            <TableCell><strong>Time</strong></TableCell>
+                            <TableCell><strong>Fee (LKR)</strong></TableCell>
+                            <TableCell><strong>Patients</strong></TableCell>
+                            <TableCell><strong>Status</strong></TableCell>
+                            <TableCell><strong>Actions</strong></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {schedules.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={10} align="center">
+                                <Typography color="text.secondary">No schedules found</Typography>
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            schedules.map((schedule) => (
+                              <TableRow key={schedule.schedule_id} hover>
+                                <TableCell>{schedule.schedule_id}</TableCell>
+                                <TableCell>{schedule.doctor_name}</TableCell>
+                                <TableCell>{schedule.speciality}</TableCell>
+                                <TableCell>{schedule.branch_name}</TableCell>
+                                <TableCell>{new Date(schedule.schedule_date).toLocaleDateString()}</TableCell>
+                                <TableCell>
+                                  {schedule.start_time} - {schedule.end_time}
+                                </TableCell>
+                                <TableCell>
+                                  Rs. {parseFloat(schedule.fee || 0).toFixed(2)}
+                                </TableCell>
+                                <TableCell>
+                                  {schedule.booked_patients} / {schedule.max_patients}
+                                </TableCell>
+                                <TableCell>
+                                  <Chip 
+                                    label={schedule.status} 
+                                    size="small" 
+                                    color={
+                                      schedule.status === 'Available' ? 'success' : 
+                                      schedule.status === 'Completed' ? 'primary' : 
+                                      'default'
+                                    }
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <Box sx={{ display: 'flex', gap: 1 }}>
+                                    {schedule.status === 'Available' && (
+                                      <>
+                                        <Button 
+                                          size="small" 
+                                          variant="outlined" 
+                                          color="error"
+                                          onClick={() => updateScheduleStatus(schedule.schedule_id, 'Cancelled')}
+                                        >
+                                          Cancel
+                                        </Button>
+                                        <Button 
+                                          size="small" 
+                                          variant="outlined" 
+                                          color="success"
+                                          onClick={() => updateScheduleStatus(schedule.schedule_id, 'Completed')}
+                                        >
+                                          Complete
+                                        </Button>
+                                      </>
+                                    )}
+                                  </Box>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )}
+                </CardContent>
+              </Card>
+            </Box>
           </TabPanel>
 
           {/* Insurance Company Tab */}
@@ -511,28 +732,44 @@ const StaffPage = () => {
                       Insurance Companies ({insuranceCompanies.length})
                     </Typography>
                   </Box>
-                  <TableContainer className="table-container">
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell><strong>Company Name</strong></TableCell>
-                          <TableCell><strong>Coverage %</strong></TableCell>
-                          <TableCell><strong>Description</strong></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {insuranceCompanies.map((company) => (
-                          <TableRow key={company.id} hover>
-                            <TableCell>{company.companyName}</TableCell>
-                            <TableCell>
-                              <Chip label={company.percentage} size="small" color="primary" />
-                            </TableCell>
-                            <TableCell>{company.description}</TableCell>
+                  {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                      <CircularProgress />
+                    </Box>
+                  ) : (
+                    <TableContainer className="table-container">
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell><strong>Company ID</strong></TableCell>
+                            <TableCell><strong>Company Name</strong></TableCell>
+                            <TableCell><strong>Coverage Type</strong></TableCell>
+                            <TableCell><strong>Phone</strong></TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                          {insuranceCompanies.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={4} align="center">
+                                <Typography color="text.secondary">No insurance companies found</Typography>
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            insuranceCompanies.map((company) => (
+                              <TableRow key={company.insurance_id} hover>
+                                <TableCell>{company.insurance_id}</TableCell>
+                                <TableCell>{company.name}</TableCell>
+                                <TableCell>
+                                  <Chip label={company.coverage_type} size="small" color="primary" />
+                                </TableCell>
+                                <TableCell>{company.phone_no || 'N/A'}</TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )}
                 </CardContent>
               </Card>
             </Box>
@@ -571,24 +808,40 @@ const StaffPage = () => {
                       Treatment Catalog ({treatmentCatalog.length})
                     </Typography>
                   </Box>
-                  <TableContainer className="table-container">
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell><strong>Treatment Name</strong></TableCell>
-                          <TableCell><strong>Description</strong></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {treatmentCatalog.map((item) => (
-                          <TableRow key={item.id} hover>
-                            <TableCell>{item.treatmentName}</TableCell>
-                            <TableCell>{item.description}</TableCell>
+                  {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                      <CircularProgress />
+                    </Box>
+                  ) : (
+                    <TableContainer className="table-container">
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell><strong>Catalog ID</strong></TableCell>
+                            <TableCell><strong>Treatment Name</strong></TableCell>
+                            <TableCell><strong>Treatment Fee (LKR)</strong></TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                          {treatmentCatalog.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={3} align="center">
+                                <Typography color="text.secondary">No treatments in catalog</Typography>
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            treatmentCatalog.map((item) => (
+                              <TableRow key={item.catalog_id} hover>
+                                <TableCell>{item.catalog_id}</TableCell>
+                                <TableCell>{item.treatment_name}</TableCell>
+                                <TableCell>{parseFloat(item.treatment_fee).toFixed(2)}</TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )}
                 </CardContent>
               </Card>
             </Box>
@@ -609,6 +862,7 @@ const StaffPage = () => {
           {dialogType === 'treatment' && 'Add Treatment'}
           {dialogType === 'insurance' && 'Add Insurance Company'}
           {dialogType === 'treatmentCatalog' && 'Add to Treatment Catalog'}
+          {dialogType === 'schedule' && 'Add Doctor Schedule'}
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -617,20 +871,62 @@ const StaffPage = () => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Full Name *"
-                    value={patientForm.fullName}
-                    onChange={handlePatientInputChange('fullName')}
+                    label="Username *"
+                    value={patientForm.username}
+                    onChange={handlePatientInputChange('username')}
                     required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="NIC Number *"
-                    value={patientForm.nic}
-                    onChange={handlePatientInputChange('nic')}
+                    label="Full Name *"
+                    value={patientForm.name}
+                    onChange={handlePatientInputChange('name')}
                     required
                   />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Email *"
+                    type="email"
+                    value={patientForm.email}
+                    onChange={handlePatientInputChange('email')}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Password *"
+                    type="password"
+                    value={patientForm.password}
+                    onChange={handlePatientInputChange('password')}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Phone Number *"
+                    value={patientForm.phone_no}
+                    onChange={handlePatientInputChange('phone_no')}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Gender</InputLabel>
+                    <Select
+                      value={patientForm.gender}
+                      label="Gender"
+                      onChange={handlePatientInputChange('gender')}
+                    >
+                      <MenuItem value="Male">Male</MenuItem>
+                      <MenuItem value="Female">Female</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -645,11 +941,9 @@ const StaffPage = () => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Date of Birth"
-                    type="date"
-                    value={patientForm.dob}
-                    onChange={handlePatientInputChange('dob')}
-                    InputLabelProps={{ shrink: true }}
+                    label="NIC Number"
+                    value={patientForm.nic}
+                    onChange={handlePatientInputChange('nic')}
                   />
                 </Grid>
               </>
@@ -660,44 +954,73 @@ const StaffPage = () => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Patient ID *"
-                    value={paymentForm.patientId}
-                    onChange={handlePaymentInputChange('patientId')}
+                    label="Payment ID *"
+                    value={paymentForm.payment_id}
+                    onChange={handlePaymentInputChange('payment_id')}
+                    required
+                    helperText="Auto-generated (e.g., PM001)"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Appointment ID *"
+                    value={paymentForm.appointment_id}
+                    onChange={handlePaymentInputChange('appointment_id')}
                     required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Amount *"
-                    value={paymentForm.amount}
-                    onChange={handlePaymentInputChange('amount')}
+                    label="Patient ID *"
+                    value={paymentForm.patient_id}
+                    onChange={handlePaymentInputChange('patient_id')}
                     required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth required>
-                    <InputLabel>Payment Method</InputLabel>
+                    <InputLabel>Payment Status</InputLabel>
                     <Select
-                      value={paymentForm.paymentMethod}
-                      label="Payment Method"
-                      onChange={handlePaymentInputChange('paymentMethod')}
+                      value={paymentForm.status}
+                      label="Payment Status"
+                      onChange={handlePaymentInputChange('status')}
                     >
-                      <MenuItem value="Cash">Cash</MenuItem>
-                      <MenuItem value="Card">Card</MenuItem>
-                      <MenuItem value="Insurance">Insurance</MenuItem>
-                      <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
+                      <MenuItem value="Pending">Pending</MenuItem>
+                      <MenuItem value="Completed">Completed</MenuItem>
+                      <MenuItem value="Failed">Failed</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth
-                    label="Description"
-                    multiline
-                    rows={3}
-                    value={paymentForm.description}
-                    onChange={handlePaymentInputChange('description')}
+                    label="Insurance Paid Amount"
+                    type="number"
+                    value={paymentForm.insurance_paid_amount}
+                    onChange={handlePaymentInputChange('insurance_paid_amount')}
+                    InputProps={{ startAdornment: '$' }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    label="Patient Paid Amount"
+                    type="number"
+                    value={paymentForm.patient_paid_amount}
+                    onChange={handlePaymentInputChange('patient_paid_amount')}
+                    InputProps={{ startAdornment: '$' }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    label="Discount Amount"
+                    type="number"
+                    value={paymentForm.discount_amount}
+                    onChange={handlePaymentInputChange('discount_amount')}
+                    InputProps={{ startAdornment: '$' }}
                   />
                 </Grid>
               </>
@@ -705,12 +1028,37 @@ const StaffPage = () => {
 
             {dialogType === 'treatment' && (
               <>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Treatment Name *"
-                    value={treatmentForm.name}
-                    onChange={handleTreatmentInputChange('name')}
+                    label="Treatment ID *"
+                    value={treatmentForm.treatment_id}
+                    onChange={handleTreatmentInputChange('treatment_id')}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Select Treatment from Catalog</InputLabel>
+                    <Select
+                      value={treatmentForm.catalog_id}
+                      label="Select Treatment from Catalog"
+                      onChange={handleTreatmentInputChange('catalog_id')}
+                    >
+                      {treatmentCatalog.map((item) => (
+                        <MenuItem key={item.catalog_id} value={item.catalog_id}>
+                          {item.treatment_name} - LKR {parseFloat(item.treatment_fee).toFixed(2)}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Appointment ID *"
+                    value={treatmentForm.appointment_id}
+                    onChange={handleTreatmentInputChange('appointment_id')}
                     required
                   />
                 </Grid>
@@ -733,29 +1081,27 @@ const StaffPage = () => {
                   <TextField
                     fullWidth
                     label="Company Name *"
-                    value={insuranceForm.companyName}
-                    onChange={handleInsuranceInputChange('companyName')}
+                    value={insuranceForm.name}
+                    onChange={handleInsuranceInputChange('name')}
                     required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Coverage Percentage *"
-                    value={insuranceForm.percentage}
-                    onChange={handleInsuranceInputChange('percentage')}
-                    placeholder="e.g., 80%"
+                    label="Coverage Type *"
+                    value={insuranceForm.coverage_type}
+                    onChange={handleInsuranceInputChange('coverage_type')}
+                    placeholder="e.g., Full Coverage, Partial Coverage"
                     required
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Description"
-                    multiline
-                    rows={3}
-                    value={insuranceForm.description}
-                    onChange={handleInsuranceInputChange('description')}
+                    label="Phone Number"
+                    value={insuranceForm.phone_no}
+                    onChange={handleInsuranceInputChange('phone_no')}
                   />
                 </Grid>
               </>
@@ -767,19 +1113,131 @@ const StaffPage = () => {
                   <TextField
                     fullWidth
                     label="Treatment Name *"
-                    value={treatmentCatalogForm.treatmentName}
-                    onChange={handleTreatmentCatalogInputChange('treatmentName')}
+                    value={treatmentCatalogForm.treatment_name}
+                    onChange={handleTreatmentCatalogInputChange('treatment_name')}
                     required
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Description"
+                    label="Treatment Fee (LKR)"
+                    type="number"
+                    value={treatmentCatalogForm.treatment_fee}
+                    onChange={handleTreatmentCatalogInputChange('treatment_fee')}
+                    placeholder="0.00"
+                  />
+                </Grid>
+              </>
+            )}
+
+            {dialogType === 'schedule' && (
+              <>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Select Doctor</InputLabel>
+                    <Select
+                      value={scheduleForm.staff_id}
+                      label="Select Doctor"
+                      onChange={handleScheduleInputChange('staff_id')}
+                      disabled={doctors.length === 0}
+                    >
+                      {doctors.length === 0 ? (
+                        <MenuItem disabled>No doctors available - Please add doctors first</MenuItem>
+                      ) : (
+                        doctors.map((doctor) => (
+                          <MenuItem key={doctor.staff_id} value={doctor.staff_id}>
+                            {doctor.name} - {doctor.speciality}
+                          </MenuItem>
+                        ))
+                      )}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Branch (Auto-filled from Doctor)"
+                    value={
+                      scheduleForm.branch_id 
+                        ? branches.find(b => b.branch_id === scheduleForm.branch_id)?.name || scheduleForm.branch_id
+                        : 'Select a doctor first'
+                    }
+                    disabled
+                    required
+                    helperText="Branch is automatically set based on the selected doctor"
+                    className="auto-filled-field"
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Schedule Date *"
+                    type="date"
+                    value={scheduleForm.schedule_date}
+                    onChange={handleScheduleInputChange('schedule_date')}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    label="Start Time *"
+                    type="time"
+                    value={scheduleForm.start_time}
+                    onChange={handleScheduleInputChange('start_time')}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    label="End Time *"
+                    type="time"
+                    value={scheduleForm.end_time}
+                    onChange={handleScheduleInputChange('end_time')}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Max Patients *"
+                    type="number"
+                    value={scheduleForm.max_patients}
+                    onChange={handleScheduleInputChange('max_patients')}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Consultation Fee (LKR) *"
+                    type="number"
+                    value={scheduleForm.fee}
+                    onChange={handleScheduleInputChange('fee')}
+                    InputProps={{
+                      startAdornment: <span style={{marginRight: '8px'}}>Rs.</span>,
+                    }}
+                    helperText="Doctor's consultation fee for this schedule"
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Notes"
                     multiline
-                    rows={4}
-                    value={treatmentCatalogForm.description}
-                    onChange={handleTreatmentCatalogInputChange('description')}
+                    rows={3}
+                    value={scheduleForm.notes}
+                    onChange={handleScheduleInputChange('notes')}
+                    placeholder="Any special notes about this schedule..."
                   />
                 </Grid>
               </>
@@ -787,22 +1245,28 @@ const StaffPage = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button onClick={() => setOpenDialog(false)} disabled={loading}>Cancel</Button>
           <Button 
             onClick={
               dialogType === 'patient' ? addPatient :
               dialogType === 'payment' ? addPayment :
               dialogType === 'treatment' ? addTreatment :
               dialogType === 'insurance' ? addInsuranceCompany :
+              dialogType === 'schedule' ? addDoctorSchedule :
               addTreatmentCatalog
             } 
             variant="contained"
+            disabled={loading}
+            startIcon={loading && <CircularProgress size={20} />}
           >
-            {dialogType === 'patient' ? 'Add Patient' :
-             dialogType === 'payment' ? 'Record Payment' :
-             dialogType === 'treatment' ? 'Add Treatment' :
-             dialogType === 'insurance' ? 'Add Company' :
-             'Add to Catalog'}
+            {loading ? 'Processing...' : (
+              dialogType === 'patient' ? 'Add Patient' :
+              dialogType === 'payment' ? 'Record Payment' :
+              dialogType === 'treatment' ? 'Add Treatment' :
+              dialogType === 'insurance' ? 'Add Company' :
+              dialogType === 'schedule' ? 'Add Schedule' :
+              'Add to Catalog'
+            )}
           </Button>
         </DialogActions>
       </Dialog>
