@@ -1,9 +1,50 @@
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "./Dashboard.css";
 
 export default function BranchManagerDashboard() {
   const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalDoctors: 0,
+    totalStaff: 0,
+    todayAppointments: 0,
+    branchRating: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('catms_token');
+      
+      // Fetch doctors count
+      const doctorsRes = await axios.get('/api/staff/by-category/Doctor', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Fetch all staff count
+      const staffRes = await axios.get('/api/staff/all', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setStats({
+        totalDoctors: doctorsRes.data.length,
+        totalStaff: staffRes.data.filter(s => s.category !== 'Doctor' && s.category !== 'Admin').length,
+        todayAppointments: 0, // TODO: Implement appointments endpoint
+        branchRating: 4.8
+      });
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const dashboardCards = [
     {
@@ -57,7 +98,7 @@ export default function BranchManagerDashboard() {
             👨‍⚕️
           </div>
           <div className="stat-content">
-            <h3 className="stat-value">15</h3>
+            <h3 className="stat-value">{loading ? '...' : stats.totalDoctors}</h3>
             <p className="stat-label">Total Doctors</p>
           </div>
         </div>
@@ -67,7 +108,7 @@ export default function BranchManagerDashboard() {
             👥
           </div>
           <div className="stat-content">
-            <h3 className="stat-value">32</h3>
+            <h3 className="stat-value">{loading ? '...' : stats.totalStaff}</h3>
             <p className="stat-label">Staff Members</p>
           </div>
         </div>
@@ -77,7 +118,7 @@ export default function BranchManagerDashboard() {
             📅
           </div>
           <div className="stat-content">
-            <h3 className="stat-value">148</h3>
+            <h3 className="stat-value">{loading ? '...' : stats.todayAppointments}</h3>
             <p className="stat-label">Appointments Today</p>
           </div>
         </div>
@@ -87,7 +128,7 @@ export default function BranchManagerDashboard() {
             ⭐
           </div>
           <div className="stat-content">
-            <h3 className="stat-value">4.8</h3>
+            <h3 className="stat-value">{loading ? '...' : stats.branchRating}</h3>
             <p className="stat-label">Branch Rating</p>
           </div>
         </div>

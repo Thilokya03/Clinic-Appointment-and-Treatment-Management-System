@@ -41,6 +41,12 @@ exports.staffAuth = (roles = []) => {
                 return res.status(403).json({error:'Access denied, Staff only'})
             }
 
+            // 👑 Super Admin has access to everything
+            if (req.user.id === 'SUPER_ADMIN' || req.user.category === 'Super Admin') {
+                console.log('👑 Super Admin access granted');
+                return next();
+            }
+
             if (roles.length > 0 && !roles.includes(req.user.category)){
                 console.log("userCategory", req.user.category)
                 return res.status(403).json({ error: 'Access denied: Insufficient privileges' });

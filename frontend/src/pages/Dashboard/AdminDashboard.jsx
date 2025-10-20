@@ -1,9 +1,40 @@
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "./Dashboard.css";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalBranches: 0,
+    branchManagers: 0,
+    totalDoctors: 0,
+    totalPatients: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('catms_token');
+      const response = await axios.get('/api/branch/stats', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStats(response.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      setError('Failed to load statistics');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const dashboardCards = [
     {
@@ -57,7 +88,7 @@ export default function AdminDashboard() {
             🏥
           </div>
           <div className="stat-content">
-            <h3 className="stat-value">12</h3>
+            <h3 className="stat-value">{loading ? '...' : stats.totalBranches}</h3>
             <p className="stat-label">Total Branches</p>
           </div>
         </div>
@@ -67,18 +98,18 @@ export default function AdminDashboard() {
             👥
           </div>
           <div className="stat-content">
-            <h3 className="stat-value">48</h3>
+            <h3 className="stat-value">{loading ? '...' : stats.branchManagers}</h3>
             <p className="stat-label">Branch Managers</p>
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-icon" style={{ background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)" }}>
-            📈
+            �‍⚕️
           </div>
           <div className="stat-content">
-            <h3 className="stat-value">95%</h3>
-            <p className="stat-label">System Efficiency</p>
+            <h3 className="stat-value">{loading ? '...' : stats.totalDoctors}</h3>
+            <p className="stat-label">Total Doctors</p>
           </div>
         </div>
 
@@ -87,11 +118,17 @@ export default function AdminDashboard() {
             📋
           </div>
           <div className="stat-content">
-            <h3 className="stat-value">1,247</h3>
+            <h3 className="stat-value">{loading ? '...' : stats.totalPatients}</h3>
             <p className="stat-label">Total Patients</p>
           </div>
         </div>
       </div>
+
+      {error && (
+        <div style={{ padding: '1rem', background: '#fee2e2', color: '#991b1b', borderRadius: '8px', marginBottom: '1rem' }}>
+          {error}
+        </div>
+      )}
 
       <div className="dashboard-grid">
         {dashboardCards.map((card, index) => (
