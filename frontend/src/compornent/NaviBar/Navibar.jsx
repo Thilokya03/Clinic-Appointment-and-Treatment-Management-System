@@ -39,6 +39,12 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
         <NavLink to="/doctors" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
           Doctors
         </NavLink>
+        <NavLink to="/patient" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
+          Patient
+        </NavLink>
+        <NavLink to="/staff" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
+          Staff
+        </NavLink>
         <NavLink to="/register" className={({ isActive }) => `link ${isActive ? "is-active" : ""}`}>
           Register
         </NavLink>
@@ -77,11 +83,33 @@ export default function Navibar({ theme = "light", setTheme = () => { } }) {
           <NavLink to="/doctors" className="m-link" onClick={closeMenu}>
             Doctors
           </NavLink>
+          <NavLink to="/patient" className="m-link" onClick={closeMenu}>
+            Patient
+          </NavLink>
+          <NavLink to="/staff" className="m-link" onClick={closeMenu}>
+            Staff
+          </NavLink>
           <NavLink to="/register" className="m-link" onClick={closeMenu}>
             Register
           </NavLink>
           <NavLink to="/about" className="m-link" onClick={closeMenu}>
             About
+          </NavLink>
+          <NavLink to="/login" className="m-link" onClick={closeMenu}>
+            Login
+          </NavLink>
+          {/* Role-specific Links */}
+          <NavLink to="/admin" className="m-link" onClick={closeMenu}>
+            Admin
+          </NavLink>
+          <NavLink to="/branch-manager" className="m-link" onClick={closeMenu}>
+            Manager
+          </NavLink>
+          <NavLink to="/staff" className="m-link" onClick={closeMenu}>
+            Staff
+          </NavLink>
+          <NavLink to="/patient" className="m-link" onClick={closeMenu}>
+            Patient
           </NavLink>
           <div className="m-actions">
             <button className="m-btn" onClick={toggleTheme}>

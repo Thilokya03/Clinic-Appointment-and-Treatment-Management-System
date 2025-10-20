@@ -7,6 +7,7 @@ import Login from "./pages/Login/Login";
 import Home from "./pages/Home/Home";
 import Register from "./pages/Register/Register";
 import Doctors from "./pages/Doctor/Doctors";
+import Patient from "./pages/Patient/Patient";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import BranchManagers from "./pages/BranchManagers/BranchManagers";
 import Staff from "./pages/Staff/Staff";
@@ -14,6 +15,7 @@ import AddDoctor from "./pages/AddDoctor/AddDoctor";
 import AddStaff from "./pages/AddStaff/AddStaff";
 import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
+
 
 // NOTE: keep your folder name exactly as in your project: compornent
 import BaseLayout from "./compornent/Layout/BaseLayout";
@@ -64,8 +66,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
-
-
+          <Route path="/patient" element={<Patient />} />
+          <Route path="/staff" element={<Staff />} />
         </Route>
       </Routes>
     </Router>

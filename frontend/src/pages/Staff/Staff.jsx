@@ -1,3 +1,4 @@
+// src/pages/Staff/Staff.jsx
 import React, { useState } from 'react';
 import {
   Box,
@@ -269,6 +270,7 @@ const StaffPage = () => {
             <Tab icon={<Business />} label="Insurance Company" />
             <Tab icon={<LocalHospital />} label="Treatment Catalog" />
           </Tabs>
+
           {/* Add Patient Tab */}
           <TabPanel value={tabValue} index={0}>
             <Box className="vertical-layout">
@@ -610,7 +612,6 @@ const StaffPage = () => {
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            {/* ... (Dialog form content remains the same as previous version) ... */}
             {dialogType === 'patient' && (
               <>
                 <Grid item xs={12} sm={6}>
