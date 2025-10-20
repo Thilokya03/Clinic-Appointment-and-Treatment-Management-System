@@ -56,8 +56,7 @@ const initialFormState = {
   doctorId: "",
   date: "",
   branchId: "",
-  visitType: "Consultation",
-  duration: 30
+  visitType: ""
 };
 
 export default function SetAppointment() {
@@ -77,6 +76,8 @@ export default function SetAppointment() {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   const branchDropdownRef = useRef(null);
+  const [availableDates, setAvailableDates] = useState([]);
+  const [loadingDates, setLoadingDates] = useState(false);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -146,33 +147,51 @@ export default function SetAppointment() {
     }
   };
 
-  const getAvailableTimeSlot = async (doctorId, date) => {
-    try {
-      const token = localStorage.getItem('catms_token');
-      const response = await axios.get(`http://localhost:3000/api/appointments/available-slots`, {
-        params: { doctorId, date },
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      // Return the first available time slot
-      return response.data.slots[0];
-    } catch (err) {
-      console.error('Error getting available time slots:', err);
-      setBanner({ type: 'error', message: 'Failed to get available time slots' });
-      return null;
-    }
-  };
-
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem('catms_token');
-      const response = await axios.get('http://localhost:3000/api/appointments', {
+      const response = await axios.get('http://localhost:3000/api/appointment', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAppointments(response.data);
     } catch (err) {
       console.error('Error fetching appointments:', err);
       setBanner({ type: 'error', message: 'Failed to fetch appointments' });
+    }
+  };
+
+  const fetchAvailableDates = async (doctorId) => {
+    try {
+      setLoadingDates(true);
+      const token = localStorage.getItem('catms_token');
+      console.log('🔍 Fetching available dates for doctor:', doctorId);
+      
+      const response = await axios.get(`http://localhost:3000/api/doctor-schedule/doctor/${doctorId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      console.log('✅ Doctor schedules fetched:', response.data);
+      
+      // Filter for active schedules with future dates and available slots
+      const currentDate = new Date().toISOString().slice(0, 10);
+      const activeDates = response.data.filter(schedule => 
+        schedule.status === 'ACTIVE' && 
+        schedule.schedule_date >= currentDate &&
+        schedule.booked_patients < schedule.max_patients
+      );
+      
+      console.log('📅 Available dates:', activeDates);
+      setAvailableDates(activeDates);
+      setLoadingDates(false);
+      
+      // Clear date selection when doctor changes
+      setForm((prev) => ({ ...prev, date: "" }));
+      
+    } catch (err) {
+      console.error('❌ Error fetching available dates:', err);
+      setLoadingDates(false);
+      setBanner({ type: 'error', message: 'Failed to fetch available dates for this doctor.' });
+      setAvailableDates([]);
     }
   };
 
@@ -236,6 +255,8 @@ export default function SetAppointment() {
     setDoctorSearchTerm(doctor.name);
     setForm((prev) => ({ ...prev, doctorId: doctor.staff_id }));
     setShowDoctorDropdown(false);
+    // Fetch available dates for the selected doctor
+    fetchAvailableDates(doctor.staff_id);
   };
 
   const handleDoctorSearchChange = (e) => {
@@ -243,7 +264,8 @@ export default function SetAppointment() {
     setShowDoctorDropdown(true);
     if (!e.target.value) {
       setSelectedDoctor(null);
-      setForm((prev) => ({ ...prev, doctorId: "" }));
+      setForm((prev) => ({ ...prev, doctorId: "", date: "" }));
+      setAvailableDates([]);
     }
   };
 
@@ -291,34 +313,47 @@ export default function SetAppointment() {
     try {
       const token = localStorage.getItem('catms_token');
       
-      // Calculate appointment times based on duration
-      const timeSlot = await getAvailableTimeSlot(form.doctorId, form.date);
-      if (!timeSlot) {
-        setBanner({ type: "error", message: "No available time slots for selected date" });
+      // Find the selected schedule to get schedule_id and time information
+      const selectedSchedule = availableDates.find(
+        schedule => schedule.schedule_date === form.date
+      );
+
+      if (!selectedSchedule) {
+        setBanner({ type: "error", message: "Selected date is no longer available" });
+        setLoading(false);
         return;
       }
 
-      const startTime = timeSlot;
-      const startDate = new Date();
-      const [hours, minutes] = startTime.split(':');
-      startDate.setHours(parseInt(hours), parseInt(minutes), 0);
-      const endDate = new Date(startDate.getTime() + form.duration * 60000);
-      const endTime = endDate.toTimeString().slice(0, 5);
+      // Check if schedule still has available slots
+      if (selectedSchedule.booked_patients >= selectedSchedule.max_patients) {
+        setBanner({ type: "error", message: "No available slots for selected date" });
+        setLoading(false);
+        return;
+      }
+
+      const startTime = selectedSchedule.start_time;
+      const endTime = selectedSchedule.end_time;
+
+      // Ensure date is in YYYY-MM-DD format (remove any timestamp)
+      const appointmentDate = typeof form.date === 'string' 
+        ? form.date.split('T')[0] 
+        : form.date;
 
       // Generate appointment ID
       const appointmentId = `A${Date.now().toString().slice(-4)}`;
 
       const appointmentData = {
         appointment_id: appointmentId,
-        doctor_id: form.doctorId,
-        branch_id: form.branchId,
+        schedule_id: selectedSchedule.schedule_id,
         status: 'Scheduled',
-        appointment_date: form.date,
+        appointment_date: appointmentDate,
         start_time: startTime,
         end_time: endTime,
         notes: form.visitType,
-        appointment_fee: 300.00
+        appointment_fee: selectedSchedule.fee || 300.00
       };
+
+      console.log('📝 Submitting appointment:', appointmentData);
 
       await axios.post('http://localhost:3000/api/appointment', appointmentData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -329,16 +364,19 @@ export default function SetAppointment() {
       const newAppointment = {
         id: appointmentId,
         patientName: form.patientName.trim(),
-        patientId: form.patientId.trim(),
         doctorId: form.doctorId,
         doctorName: doctor?.name || "Assigned doctor",
         date: form.date,
-        time: form.time,
-        visitType: "Consultation",
-        status: "Pending",
+        time: startTime,
+        visitType: form.visitType,
+        status: "Scheduled",
       };
 
       setAppointments((prev) => [newAppointment, ...prev]);
+      
+      // Refresh available dates after booking to update slot count
+      fetchAvailableDates(form.doctorId);
+      
       resetForm();
       setBanner({
         type: "success",
@@ -546,66 +584,71 @@ export default function SetAppointment() {
             <div className="form__split">
               <div className="form__row">
                 <label htmlFor="date" className="form__label">
-                  Appointment Date
+                  Appointment Date {!form.doctorId && <span style={{ fontSize: '0.85rem', color: '#f97316', fontWeight: 'normal' }}>(Select doctor first)</span>}
                 </label>
                 <div className="form__field">
                   <span className="form__icon" aria-hidden>
                     <RxCalendar />
                   </span>
-                  <input
+                  <select
                     id="date"
                     name="date"
-                    type="date"
                     value={form.date}
                     onChange={handleChange("date")}
-                    min={today}
                     required
-                  />
+                    disabled={!form.doctorId || loadingDates}
+                  >
+                    <option value="">
+                      {!form.doctorId 
+                        ? "Select a doctor first..." 
+                        : loadingDates 
+                          ? "Loading available dates..." 
+                          : availableDates.length === 0 
+                            ? "No available dates" 
+                            : "Choose appointment date"}
+                    </option>
+                    {availableDates.map((schedule) => {
+                      const dateObj = new Date(schedule.schedule_date);
+                      const formattedDate = dateObj.toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      });
+                      const availableSlots = schedule.max_patients - schedule.booked_patients;
+                      
+                      return (
+                        <option 
+                          key={schedule.schedule_id} 
+                          value={schedule.schedule_date}
+                          data-schedule-id={schedule.schedule_id}
+                        >
+                          {formattedDate} ({schedule.start_time} - {schedule.end_time}) - {availableSlots} slots available
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
               </div>
 
               <div className="form__row">
                 <label htmlFor="visitType" className="form__label">
-                  Visit Type
+                  Visit Type / Purpose
                 </label>
                 <div className="form__field">
                   <span className="form__icon" aria-hidden>
                     <RxClock />
                   </span>
-                  <select
+                  <input
                     id="visitType"
                     name="visitType"
+                    type="text"
+                    placeholder="e.g. Consultation, Follow-up, Emergency, etc."
                     value={form.visitType}
                     onChange={handleChange("visitType")}
                     required
-                  >
-                    <option value="Consultation">Consultation</option>
-                    <option value="Follow-up">Follow-up</option>
-                    <option value="Emergency">Emergency</option>
-                  </select>
+                  />
                 </div>
-              </div>
-            </div>
-            
-            <div className="form__row">
-              <label htmlFor="duration" className="form__label">
-                Duration (minutes)
-              </label>
-              <div className="form__field">
-                <span className="form__icon" aria-hidden>
-                  <RxClock />
-                </span>
-                <select
-                  id="duration"
-                  name="duration"
-                  value={form.duration}
-                  onChange={handleChange("duration")}
-                  required
-                >
-                  <option value="30">30 minutes</option>
-                  <option value="45">45 minutes</option>
-                  <option value="60">1 hour</option>
-                </select>
               </div>
             </div>
 

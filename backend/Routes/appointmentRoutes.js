@@ -5,22 +5,34 @@ const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
 
 //********************************ADD new appointment********************************* */
 router.post('/', authenticate, async(req, res) =>{ 
-    const {appointment_id, patient_id, doctor_id, status, appointment_date, start_time, end_time, notes, appointment_fee} = req.body;
+    const {appointment_id, schedule_id, status, appointment_date, start_time, end_time, notes, appointment_fee} = req.body;
+    
+    // Get patient_id from authenticated user (if patient) or from request body (if staff booking for patient)
+    const patient_id = req.user.role === 'patient' ? req.user.id : req.body.patient_id;
     
     // Validation
-    if (!appointment_id || !patient_id || !doctor_id || !appointment_date || !start_time || !end_time) {
+    if (!appointment_id || !patient_id || !schedule_id || !appointment_date || !start_time || !end_time) {
         return res.status(400).json({error: 'Please provide all required fields'});
     }
     
     try{
-        // Check if doctor exists
-        const [doctor] = await db.execute(
-            `SELECT * FROM doctor WHERE staff_id = ?`,
-            [doctor_id]
+        // Check if schedule exists and is active
+        const [schedule] = await db.execute(
+            `SELECT ds.*, s.branch_id, 
+             (SELECT COUNT(*) FROM appointment WHERE schedule_id = ds.schedule_id) as booked_patients
+             FROM doctor_schedule ds
+             INNER JOIN staff s ON ds.doctor_id = s.staff_id
+             WHERE ds.schedule_id = ? AND ds.status = 'ACTIVE'`,
+            [schedule_id]
         );
         
-        if (doctor.length === 0) {
-            return res.status(404).json({error: 'Doctor not found'});
+        if (schedule.length === 0) {
+            return res.status(404).json({error: 'Schedule not found or inactive'});
+        }
+        
+        // Check if schedule still has available slots
+        if (schedule[0].booked_patients >= schedule[0].max_patients) {
+            return res.status(400).json({error: 'No available slots for this schedule'});
         }
         
         // Check if patient exists
@@ -34,15 +46,15 @@ router.post('/', authenticate, async(req, res) =>{
         }
         
         await db.execute(
-            `INSERT INTO appointment (appointment_id, patient_id, doctor_id, status, appointment_date, start_time, end_time, notes, appointment_fee) 
+            `INSERT INTO appointment (appointment_id, patient_id, schedule_id, status, appointment_date, start_time, end_time, notes, appointment_fee) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
-            [appointment_id, patient_id, doctor_id, status || 'Scheduled', appointment_date, start_time, end_time, notes, appointment_fee || 0.00]
+            [appointment_id, patient_id, schedule_id, status || 'Scheduled', appointment_date, start_time, end_time, notes, appointment_fee || 0.00]
         );
         
         console.log('✅ Appointment created:', {
             appointment_id,
             patient_id,
-            doctor_id,
+            schedule_id,
             appointment_date,
             start_time
         });

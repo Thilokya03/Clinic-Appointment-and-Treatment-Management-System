@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const { staffAuth } = require('../middlewares/auth');
+const { staffAuth, authenticate } = require('../middlewares/auth');
 
 // Generate next schedule_id like DS0001, DS0002, ...
 const generateScheduleId = async () => {
@@ -57,7 +57,8 @@ router.get('/', async (req, res) => {
 });
 
 //*************************** GET schedules by doctor ******************
-router.get('/doctor/:staff_id', async (req, res) => {
+// Allow all authenticated users (including patients) to view doctor schedules for appointment booking
+router.get('/doctor/:staff_id', authenticate, async (req, res) => {
     const { staff_id } = req.params;
     try {
         const [rows] = await db.execute(
