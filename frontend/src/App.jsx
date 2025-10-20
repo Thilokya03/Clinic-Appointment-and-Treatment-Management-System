@@ -29,6 +29,7 @@ import RoleDashboard from "./pages/Dashboard/RoleDashboard";
 import BaseLayout from "./compornent/Layout/BaseLayout";
 import DashboardLayout from "./compornent/Layout/DashboardLayout";
 import AuthLayout from "./compornent/Layout/AuthLayout";
+import Forgotpassword from "./pages/FogotPassword/forgotpassword";
 
 const getInitialTheme = () => {
   if (typeof window !== "undefined") {
@@ -134,6 +135,7 @@ export default function App() {
           <Route element={<BaseLayout theme={theme} setTheme={setTheme} />}>
             <Route path="/" element={<Home />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgotpassword" element={<Forgotpassword/>} />
             <Route path="/doctors" element={<Doctors />} />
             <Route path="/patient" element={<Patient />} />
             <Route path="/about" element={<About />} />

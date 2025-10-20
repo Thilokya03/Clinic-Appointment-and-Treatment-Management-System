@@ -227,7 +227,7 @@ export default function Login() {
                   control={<Checkbox checked={remember} onChange={(e) => setRemember(e.target.checked)} />}
                   label="Remember me"
                 />
-                <Link href="#" underline="hover" onClick={(event) => event.preventDefault()}>
+                <Link href="/forgotpassword" underline="hover">
                   Forgot password?
                 </Link>
               </Box>
