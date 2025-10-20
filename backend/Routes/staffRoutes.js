@@ -9,16 +9,25 @@ const { authenticate, staffAuth } = require('../middlewares/auth');
 
 
 //********************************* GET staff by category ***********************************
-router.get('/by-category/:category', staffAuth(['Admin', 'Branch Manager']), async (req, res) => {
+router.get('/by-category/:category', staffAuth(['Admin', 'Branch Manager', 'Nurse', 'Receptionist']), async (req, res) => {
   const category = req.params.category;
 
   try {
-    const [rows] = await db.execute(
-      `SELECT staff_id, username, name, category, phone_no, gender, nic, email, branch_id 
-       FROM staff WHERE category = ?`,
-      [category]
-    );
-
+    // If requesting doctors, join with doctor table to get speciality
+    let query;
+    if (category === 'Doctor') {
+      query = `SELECT s.staff_id, s.username, s.name, s.category, s.phone_no, s.gender, s.nic, s.email, s.branch_id, d.speciality
+               FROM staff s
+               LEFT JOIN doctor d ON s.staff_id = d.staff_id
+               WHERE s.category = ?`;
+    } else {
+      query = `SELECT staff_id, username, name, category, phone_no, gender, nic, email, branch_id 
+               FROM staff WHERE category = ?`;
+    }
+    
+    const [rows] = await db.execute(query, [category]);
+    
+    console.log(`📋 Fetched ${rows.length} staff members with category: ${category}`);
     res.json(rows);
   } catch (err) {
     console.error('Error fetching staff by category:', err);

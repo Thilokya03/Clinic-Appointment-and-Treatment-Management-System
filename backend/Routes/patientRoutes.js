@@ -23,7 +23,7 @@ const generatePatientId = async () => {
 router.post('/signup', async (req, res) => { // TEST PASSSS
     console.log('📝 Signup request received:', { ...req.body, password: '***' });
     
-    const {patient_id, username, name, phone_no, gender, age, nic, email, password} = req.body;
+    const {patient_id, username, name, phone_no, gender, age, nic, email, password, emergency_contact_name, emergency_contact_no} = req.body;
 
     if(!username||!password||!email){
       console.log('❌ Validation failed: missing required fields');
@@ -49,8 +49,8 @@ router.post('/signup', async (req, res) => { // TEST PASSSS
       }
 
       await db.execute(
-        "INSERT INTO patient (patient_id, username, name, phone_no, gender, age , nic, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [newPatientId, username, name, phone_no, gender, age, nic, email, hashedPassword]
+        "INSERT INTO patient (patient_id, username, name, phone_no, gender, age, nic, email, password, emergency_contact_name, emergency_contact_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [newPatientId, username, name, phone_no, gender, age, nic, email, hashedPassword, emergency_contact_name, emergency_contact_no]
       );
       
       console.log('✅ Patient registered successfully:', newPatientId, username);
