@@ -55,25 +55,11 @@ export default function BranchManagerDashboard() {
       color: "#2563eb"
     },
     {
-      title: "Manage Staff",
-      description: "Oversee and manage branch staff members",
-      icon: "👥",
-      link: "/dashboard/staff",
-      color: "#9333ea"
-    },
-    {
       title: "Generate Reports",
       description: "View and generate branch performance reports",
       icon: "📊",
       link: "/dashboard/reports",
       color: "#f97316"
-    },
-    {
-      title: "Branch Settings",
-      description: "Configure branch-specific settings",
-      icon: "⚙️",
-      link: "/dashboard/branch-settings",
-      color: "#10b981"
     }
   ];
 

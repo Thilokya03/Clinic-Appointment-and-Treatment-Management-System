@@ -32,34 +32,14 @@ const navigationByRole = {
       end: true 
     },
     { 
-      label: "Branches", 
-      href: "/dashboard/addbranch", 
+      label: "Manage Branches", 
+      href: "/dashboard/managebranch", 
       icon: <LuBuilding2 /> 
     },
     { 
-      label: "Branch Managers", 
+      label: "Manage Branch Managers", 
       href: "/dashboard/branchmanagers", 
-      icon: <FaUserTie /> 
-    },
-    { 
-      label: "Add Branch Manager", 
-      href: "/dashboard/addbranchmanager", 
-      icon: <LuUserPlus /> 
-    },
-    { 
-      label: "Staff", 
-      href: "/dashboard/staff", 
-      icon: <LuUsers /> 
-    },
-    { 
-      label: "Add Staff", 
-      href: "/dashboard/addstaff", 
       icon: <LuUserCog /> 
-    },
-    { 
-      label: "Doctors", 
-      href: "/dashboard/adddoctor", 
-      icon: <LuStethoscope /> 
     },
   ],
 
@@ -75,31 +55,6 @@ const navigationByRole = {
       label: "Manage Branch", 
       href: "/dashboard/manage", 
       icon: <LuBuilding2 /> 
-    },
-    { 
-      label: "Staff", 
-      href: "/dashboard/staff", 
-      icon: <LuUsers /> 
-    },
-    { 
-      label: "Add Staff", 
-      href: "/dashboard/addstaff", 
-      icon: <LuUserCog /> 
-    },
-    { 
-      label: "Doctors", 
-      href: "/dashboard/adddoctor", 
-      icon: <LuStethoscope /> 
-    },
-    { 
-      label: "Appointments", 
-      href: "/dashboard/appointments", 
-      icon: <RxCalendar /> 
-    },
-    { 
-      label: "Patients", 
-      href: "/dashboard/patients", 
-      icon: <RxPerson /> 
     },
   ],
 
