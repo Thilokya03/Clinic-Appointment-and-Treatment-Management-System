@@ -23,23 +23,34 @@ router.get('/', staffAuth(['Admin', 'Branch Manager']), async(req, res) =>{
 });
 
 // ******************************** GET Branch Statistics ****************************
-router.get('/stats', staffAuth(['Admin']), async(req, res) =>{
+router.get('/stats', staffAuth(['Admin', 'Super Admin']), async(req, res) =>{
     try{
         // Get total branches
         const [branchCount] = await db.execute(`SELECT COUNT(*) as count FROM branch`);
         
-        // Get total branch managers
+        // Get total branch managers from staff table
         const [managerCount] = await db.execute(`
-            SELECT COUNT(DISTINCT manager_id) as count 
-            FROM branch 
-            WHERE manager_id IS NOT NULL
+            SELECT COUNT(*) as count 
+            FROM staff 
+            WHERE category = 'Branch Manager'
         `);
         
-        // Get total doctors
-        const [doctorCount] = await db.execute(`SELECT COUNT(*) as count FROM doctor`);
+        // Get total doctors from staff table
+        const [doctorCount] = await db.execute(`
+            SELECT COUNT(*) as count 
+            FROM staff 
+            WHERE category = 'Doctor'
+        `);
         
         // Get total patients
         const [patientCount] = await db.execute(`SELECT COUNT(*) as count FROM patient`);
+        
+        console.log('📊 Stats:', {
+            totalBranches: branchCount[0].count,
+            branchManagers: managerCount[0].count,
+            totalDoctors: doctorCount[0].count,
+            totalPatients: patientCount[0].count
+        });
         
         res.json({
             totalBranches: branchCount[0].count,
@@ -48,8 +59,8 @@ router.get('/stats', staffAuth(['Admin']), async(req, res) =>{
             totalPatients: patientCount[0].count
         });
     }catch(err){
-        console.error('Error fetching stats:', err);
-        res.status(500).json({error: 'Error fetching statistics'});
+        console.error('❌ Error fetching stats:', err);
+        res.status(500).json({error: 'Error fetching statistics', details: err.message});
     }
 });
 
