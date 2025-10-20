@@ -10,11 +10,24 @@ const SECRET_KEY = process.env.JWT_SECRET;
 
 //**********************************SIGNUP********************************************* */
 
+// Generate next patient_id like P0001, P0002, ... (fits VARCHAR(5))
+const generatePatientId = async () => {
+    const [rows] = await db.execute(
+        `SELECT MAX(CAST(SUBSTRING(patient_id, 2) AS UNSIGNED)) AS maxId FROM patient`
+    );
+    const max = rows && rows[0] && rows[0].maxId ? Number(rows[0].maxId) : 0;
+    const next = max + 1;
+    return 'P' + String(next).padStart(4, '0');
+}
+
 router.post('/signup', async (req, res) => { // TEST PASSSS
+    console.log('📝 Signup request received:', { ...req.body, password: '***' });
+    
     const {patient_id, username, name, phone_no, gender, age, nic, email, password} = req.body;
 
     if(!username||!password||!email){
-      return res.status(400).json({errro: "Please provide username, email and password"});
+      console.log('❌ Validation failed: missing required fields');
+      return res.status(400).json({error: "Please provide username, email and password"});
     }
     try{
       const [existingUser] = await db.execute(
@@ -22,16 +35,29 @@ router.post('/signup', async (req, res) => { // TEST PASSSS
       );
 
       if(existingUser.length > 0){
+        console.log('❌ User already exists:', username, email);
         return res.status(400).json({error: "Username or email already in use"});
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      await db.execute("INSERT INTO patient (patient_id, username, name, phone_no, gender, age , nic, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
-        ,[patient_id, username, name, phone_no, gender, age, nic, email, hashedPassword]);
-        res.status(201).json({message: "patient added successfully"});
+      // If no patient_id provided, generate one
+      let newPatientId = patient_id;
+      if (!newPatientId || String(newPatientId).trim() === '') {
+        newPatientId = await generatePatientId();
+        console.log('🆔 Generated patient ID:', newPatientId);
+      }
+
+      await db.execute(
+        "INSERT INTO patient (patient_id, username, name, phone_no, gender, age , nic, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [newPatientId, username, name, phone_no, gender, age, nic, email, hashedPassword]
+      );
+      
+      console.log('✅ Patient registered successfully:', newPatientId, username);
+      res.status(201).json({message: "patient added successfully", patient_id: newPatientId});
     } catch (err){
-      res.status(500).json({error:err});
+      console.error('❌ Signup error:', err);
+      res.status(500).json({error: err.message || "Registration failed"});
     }
 });
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./Register.css";
 import { useNavigate, Link as RouterLink, Link } from "react-router-dom";
+import axios from "axios";
 
 // MUI
 import {
@@ -18,7 +19,6 @@ import {
   Divider,
   Snackbar,
   Alert,
-  FormControl, InputLabel, Select, MenuItem 
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -75,15 +75,22 @@ const theme = createTheme({
   },
 });
 
+// Helper: compute age from ISO date (yyyy-mm-dd)
+const getAgeFromDob = (isoDateStr) => {
+  const dob = new Date(isoDateStr);
+  if (Number.isNaN(dob.getTime())) return NaN;
+  const now = new Date();
+  let age = now.getFullYear() - dob.getFullYear();
+  const m = now.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+  return age;
+};
+
 export default function Register() {
-  const [role, setRole] = useState(""); 
   const [username, setUserName] = useState("");
-  const [specialties, setSpecialties] = useState([]);
-  const [branch, setBranch] = useState("");
   const [name, setName] = useState("");
-  const [age , setAge ] = useState("");
-  const [dob , setDob ] = useState(""); 
-  const [nic , setNIC ] = useState(""); 
+  const [dob, setDob] = useState("");
+  const [nic, setNIC] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [contactNo, setContactNo] = useState("");
@@ -109,21 +116,22 @@ export default function Register() {
 
   const navigate = useNavigate();
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
 
-      // Check role
-    if (!role) {
-      return setToast({ open: true, message: "Please select a role.", severity: "error", });
-    }
+    // === Validations ===
     if (name.trim().length < 2) {
       return setToast({ open: true, message: "Enter a valid name.", severity: "error" });
     }
     if (username.trim().length < 2) {
-      return setToast({ open: true, message: "Enter a valid name.", severity: "error" });
+      return setToast({ open: true, message: "Enter a valid username.", severity: "error" });
     }
-    if (!dobDay || !dobMonth || !dobYear) { // ✅ fixed
-      return setToast({ open: true, message: "Select your date of birth.", severity: "error" });
+    if (!dob) {
+      return setToast({ open: true, message: "Please select your date of birth.", severity: "error" });
+    }
+    const computedAge = getAgeFromDob(dob);
+    if (!Number.isInteger(computedAge) || computedAge < 0 || computedAge > 120) {
+      return setToast({ open: true, message: "Date of birth is invalid.", severity: "error" });
     }
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       return setToast({ open: true, message: "Enter a valid email.", severity: "error" });
@@ -147,24 +155,35 @@ export default function Register() {
       return setToast({ open: true, message: "Passwords do not match.", severity: "error" });
     }
     if (!gender) {
-    return setToast({ open: true,  message: "Please select your gender.", severity: "error"});
-    }
-    if (!dob) {
-    return setToast({ open: true,  message: "Please select your Date od birth.", severity: "error"});
+      return setToast({ open: true, message: "Please select your gender.", severity: "error" });
     }
 
-// TODO: Send registration data to backend
+    try {
+      const payload = {
+        username,
+        name,
+        phone_no: contactNo,
+        gender: gender === "male" ? "Male" : "Female",
+        age: computedAge,
+        nic,
+        email,
+        password,
+      };
 
+      console.log("Sending registration request...", { ...payload, password: "***" });
+      const response = await axios.post("/api/patient/signup", payload);
+      console.log("Registration successful:", response.data);
+      setToast({
+        open: true,
+        message: response.data.message || `Patient registered successfully (${name}). Please login.`,
+        severity: "success",
+      });
 
-    setToast({
-      open: true,
-      message: `Patient registered successfully (${name}) | ${email} | ${dob}. Please login.`,
-      severity: "success",
-    });
-
-    setTimeout(() => {
-      navigate("/login");
-    }, 2000);
+    } catch (err) {
+      console.error("Registration error:", err);
+      const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Registration failed";
+      setToast({ open: true, message: msg, severity: "error" });
+    }
   };
 
   return (
@@ -200,27 +219,7 @@ export default function Register() {
             </Box>
 
             {/* Form */}
-            
-            <Box component="form" onSubmit={onSubmit} sx={{ mt: 1 }}> 
-              {/* role Select */}
-              <FormControl fullWidth margin="normal" required sx={{ backgroundColor: "#ffffffff", borderRadius: 1 }}>
-                <InputLabel id="role-label" sx={{ color: "#555555" }}>Select Role</InputLabel>
-                <Select
-                  labelId="role-label"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  slotProps={{
-                    select: { sx: { color: "#000000", backgroundColor: "#f8f7f3ff" } },
-                  }}
-                >
-                  <MenuItem value="patient">Patient</MenuItem>
-                  <MenuItem value="admin">Admin</MenuItem>
-                  <MenuItem value="nurse">Nurse</MenuItem>
-                  <MenuItem value="doctor">Doctor</MenuItem>
-                  <MenuItem value="other">Other</MenuItem>
-                </Select>
-              </FormControl>
-
+            <Box component="form" onSubmit={onSubmit} sx={{ mt: 1 }}>
               <TextField
                 label="Full Name"
                 value={name}
@@ -229,7 +228,7 @@ export default function Register() {
               />
               <TextField
                 label="User Name"
-                value={name}
+                value={username}
                 onChange={(e) => setUserName(e.target.value)}
                 fullWidth margin="normal" required
               />
@@ -242,27 +241,30 @@ export default function Register() {
                 required
               />
 
-              <div style={{ display: "flex", alignItems: "center", gap: "50px", marginTop: "18px", marginBottom: "10px"}}>
-                  <span>Gender :</span>
-                  <label>
-                      <input
-                      type="radio"
-                      name="gender"
-                      value="male"
-                      checked={gender === "male"}
-                      onChange={(e) => setGender(e.target.value)}
-                      /> Male
-                  </label>
-                  <label>
-                      <input
-                      type="radio"
-                      name="gender"
-                      value="female"
-                      checked={gender === "female"}
-                      onChange={(e) => setGender(e.target.value)}
-                      /> Female
-                  </label>
+              <div style={{ display: "flex", alignItems: "center", gap: "50px", marginTop: "18px", marginBottom: "10px" }}>
+                <span>Gender :</span>
+                <label>
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="male"
+                    checked={gender === "male"}
+                    onChange={(e) => setGender(e.target.value)}
+                  />{" "}
+                  Male
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="female"
+                    checked={gender === "female"}
+                    onChange={(e) => setGender(e.target.value)}
+                  />{" "}
+                  Female
+                </label>
               </div>
+
               <TextField
                 label="Contact Number"
                 value={contactNo}
@@ -274,13 +276,9 @@ export default function Register() {
                 value={nic}
                 onChange={(e) => setNIC(e.target.value)}
                 fullWidth margin="normal" required
-              />          
-              <TextField
-                label="Age"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                fullWidth margin="normal" required
               />
+
+              {/* DOB (we compute age from this) */}
               <TextField
                 label="Date of Birth"
                 type="date"
@@ -288,81 +286,36 @@ export default function Register() {
                 onChange={(e) => setDob(e.target.value)}
                 fullWidth
                 margin="normal"
-                required 
-              InputLabelProps={{ shrink: true }}
-              slotProps={{
+                required
+                InputLabelProps={{ shrink: true }}
+                slotProps={{
                   inputLabel: { shrink: true },
                   htmlInput: {
-                    style: { color: "#555555"},
+                    style: { color: "#555555" },
                   },
                 }}
-              sx={{
-                // Target the native calendar picker icon
-                "& input::-webkit-calendar-picker-indicator": {
-                  filter: "invert(50%)",  
-                  opacity: 100,
-                  display: "block",
-                  cursor: "pointer",
-                },
-              }}
+                sx={{
+                  "& input::-webkit-calendar-picker-indicator": {
+                    filter: "invert(50%)",
+                    opacity: 100,
+                    display: "block",
+                    cursor: "pointer",
+                  },
+                }}
               />
-              {role === "patient" && (
-                <TextField
-                  label="Emergency Contact Name"
-                  value={emergencyContactName}
-                  onChange={(e) => setEmergencyContactName(e.target.value)}
-                  fullWidth margin="normal" required
-                />
-              )}
-              {role === "patient" && (
-                <TextField
-                  label="Emergency Contact Number"
-                  value={emergencyContactNo}
-                  onChange={(e) => setEmergencyContactNo(e.target.value)}
-                  fullWidth margin="normal" required
-                />
-              )}
 
-              {role !== "patient"  && (
-                <>
-                  {/* Branch Selection */}
-                  <FormControl fullWidth margin="normal" required>
-                    <InputLabel id="branch-label">Branch</InputLabel>
-                    <Select
-                      labelId="branch-label"
-                      value={branch}
-                      onChange={(e) => setBranch(e.target.value)}
-                    >
-                      <MenuItem value="colombo">Colombo</MenuItem>
-                      <MenuItem value="galle">Galle</MenuItem>
-                      <MenuItem value="kandy">Kandy</MenuItem>
-                      {/* Add more branches dynamically from backend if needed */}
-                    </Select>
-                  </FormControl>
-                </>
-              )}
-              {role === "doctor" && (
-              <>
-                  {/* Specialties Multi-Select */}
-                  <FormControl fullWidth margin="normal" required>
-                    <InputLabel id="specialty-label">Specialties</InputLabel>
-                    <Select
-                      labelId="specialty-label"
-                      multiple
-                      value={specialties}
-                      onChange={(e) => setSpecialties(e.target.value)}
-                      renderValue={(selected) => selected.join(", ")}
-                    >
-                      <MenuItem value="cardiology">Cardiology</MenuItem>
-                      <MenuItem value="orthopedics">Orthopedics</MenuItem>
-                      <MenuItem value="neurology">Neurology</MenuItem>
-                      <MenuItem value="pediatrics">Pediatrics</MenuItem>
-                      {/* Add more specialties as needed */}
-                    </Select>
-                  </FormControl>
-                  </>
-              )}
-
+              <TextField
+                label="Emergency Contact Name"
+                value={emergencyContactName}
+                onChange={(e) => setEmergencyContactName(e.target.value)}
+                fullWidth margin="normal" required
+              />
+              <TextField
+                label="Emergency Contact Number"
+                value={emergencyContactNo}
+                onChange={(e) => setEmergencyContactNo(e.target.value)}
+                fullWidth margin="normal" required
+              />
 
               <TextField
                 label="Email"

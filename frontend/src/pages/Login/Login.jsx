@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./Login.css";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 // MUI
 import {
@@ -81,10 +82,11 @@ const theme = createTheme({
 
 export default function Login() {
   const [role, setRole] = useState("patient");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [showPw, setShowPw] = useState(false);
+  const navigate = useNavigate();
 
   // Toast
   const [toast, setToast] = useState({
@@ -97,28 +99,40 @@ export default function Login() {
     setToast((t) => ({ ...t, open: false }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      return setToast({ open: true, message: "Enter a valid email.", severity: "error" });
+    if (username.trim().length < 2) {
+      return setToast({ open: true, message: "Enter a valid username.", severity: "error" });
     }
     if (password.length < 6) {
       return setToast({ open: true, message: "Min 6 characters for password.", severity: "error" });
     }
+    try {
+      const endpoint = role === "staff" ? "/api/staff/signin" : "/api/patient/signin";
+      const { data } = await axios.post(endpoint, { username, password });
 
-    setToast({
-      open: true,
-      message: `Signed in as ${role.toUpperCase()} (${email})`,
-      severity: "success",
-    });
+      localStorage.setItem("catms_token", data.token);
+      localStorage.setItem("catms_user", JSON.stringify(data.user));
+      localStorage.setItem("catms_role", role);
 
-    if (remember) {
-      localStorage.setItem("catms_login_email", email);
-      localStorage.setItem("catms_login_role", role);
-    } else {
-      localStorage.removeItem("catms_login_email");
-      localStorage.removeItem("catms_login_role");
+      if (remember) {
+        localStorage.setItem("catms_login_username", username);
+        localStorage.setItem("catms_login_role", role);
+      } else {
+        localStorage.removeItem("catms_login_username");
+        localStorage.removeItem("catms_login_role");
+      }
+
+      setToast({
+        open: true,
+        message: `Signed in as ${role.toUpperCase()} (${username})`,
+        severity: "success",
+      });
+
+      setTimeout(() => navigate("/dashboard"), 600);
+    } catch (err) {
+      const msg = err?.response?.data?.error || "Login failed";
+      setToast({ open: true, message: msg, severity: "error" });
     }
   };
 
@@ -171,13 +185,12 @@ export default function Login() {
               </ToggleButtonGroup>
 
               <TextField
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                label="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 fullWidth
                 margin="normal"
-                autoComplete="email"
+                autoComplete="username"
                 required
               />
 
