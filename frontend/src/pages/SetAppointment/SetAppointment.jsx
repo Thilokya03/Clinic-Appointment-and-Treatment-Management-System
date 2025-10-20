@@ -1,4 +1,5 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import axios from "axios";
 import {
   RxBell,
   RxCalendar,
@@ -59,22 +60,71 @@ const INITIAL_APPOINTMENTS = [
 
 const initialFormState = {
   patientName: "",
-  patientId: "",
   doctorId: "",
   date: "",
-  time: "",
-  duration: "30",
+  branchId: "",
   visitType: "Consultation",
-  sendReminder: true,
-  notes: "",
+  duration: 30
 };
 
 export default function SetAppointment() {
   const [form, setForm] = useState(initialFormState);
   const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
   const [banner, setBanner] = useState(null);
+  const [doctors, setDoctors] = useState(DOCTORS);
+  const [loading, setLoading] = useState(false);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  useEffect(() => {
+    fetchDoctors();
+    fetchAppointments();
+  }, []);
+
+  const fetchDoctors = async () => {
+    try {
+      const token = localStorage.getItem('catms_token');
+      const response = await axios.get('http://localhost:3000/api/staff/by-category/Doctor', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDoctors(response.data);
+    } catch (err) {
+      console.error('Error fetching doctors:', err);
+      setBanner({ type: 'error', message: 'Failed to fetch doctors' });
+    }
+  };
+
+  const getAvailableTimeSlot = async (doctorId, date) => {
+    try {
+      const token = localStorage.getItem('catms_token');
+      const response = await axios.get(`http://localhost:3000/api/appointments/available-slots`, {
+        params: { doctorId, date },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Return the first available time slot
+      return response.data.slots[0];
+    } catch (err) {
+      console.error('Error getting available time slots:', err);
+      setBanner({ type: 'error', message: 'Failed to get available time slots' });
+      return null;
+    }
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      const token = localStorage.getItem('catms_token');
+      const response = await axios.get('http://localhost:3000/api/appointments', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAppointments(response.data);
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+      setBanner({ type: 'error', message: 'Failed to fetch appointments' });
+    }
+  };
+
+
 
   const stats = useMemo(() => {
     const appointmentsToday = appointments.filter((apt) => apt.date === today).length;
@@ -112,37 +162,81 @@ export default function SetAppointment() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!form.patientName || !form.patientId || !form.doctorId || !form.date || !form.time) {
-      setBanner({ type: "warning", message: "Please fill in patient, doctor, date and time before saving." });
+    if (!form.patientName || !form.doctorId || !form.date || !form.branchId) {
+      setBanner({ type: "warning", message: "Please fill in all required fields before saving." });
       return;
     }
 
-    const doctor = DOCTORS.find((doc) => doc.id === form.doctorId);
+    setLoading(true);
 
-    const newAppointment = {
-      id: `APT-${Date.now().toString().slice(-5)}`,
-      patientName: form.patientName.trim(),
-      patientId: form.patientId.trim(),
-      doctorId: form.doctorId,
-      doctorName: doctor?.name || "Assigned doctor",
-      date: form.date,
-      time: form.time,
-      duration: Number(form.duration) || 30,
-      visitType: form.visitType,
-      status: "Pending",
-      sendReminder: form.sendReminder,
-      notes: form.notes.trim(),
-    };
+    try {
+      const token = localStorage.getItem('catms_token');
+      
+      // Calculate appointment times based on duration
+      const timeSlot = await getAvailableTimeSlot(form.doctorId, form.date);
+      if (!timeSlot) {
+        setBanner({ type: "error", message: "No available time slots for selected date" });
+        return;
+      }
 
-    setAppointments((prev) => [newAppointment, ...prev]);
-    resetForm();
-    setBanner({
-      type: "success",
-      message: `Appointment for ${newAppointment.patientName} scheduled with ${newAppointment.doctorName}.`,
-    });
+      const startTime = timeSlot;
+      const startDate = new Date();
+      const [hours, minutes] = startTime.split(':');
+      startDate.setHours(parseInt(hours), parseInt(minutes), 0);
+      const endDate = new Date(startDate.getTime() + form.duration * 60000);
+      const endTime = endDate.toTimeString().slice(0, 5);
+
+      // Generate appointment ID
+      const appointmentId = `A${Date.now().toString().slice(-4)}`;
+
+      const appointmentData = {
+        appointment_id: appointmentId,
+        doctor_id: form.doctorId,
+        branch_id: form.branchId,
+        status: 'Scheduled',
+        appointment_date: form.date,
+        start_time: startTime,
+        end_time: endTime,
+        notes: form.visitType,
+        appointment_fee: 300.00
+      };
+
+      await axios.post('http://localhost:3000/api/appointment', appointmentData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const doctor = doctors.find((doc) => doc.staff_id === form.doctorId);
+      
+      const newAppointment = {
+        id: appointmentId,
+        patientName: form.patientName.trim(),
+        patientId: form.patientId.trim(),
+        doctorId: form.doctorId,
+        doctorName: doctor?.name || "Assigned doctor",
+        date: form.date,
+        time: form.time,
+        visitType: "Consultation",
+        status: "Pending",
+      };
+
+      setAppointments((prev) => [newAppointment, ...prev]);
+      resetForm();
+      setBanner({
+        type: "success",
+        message: `Appointment for ${newAppointment.patientName} scheduled successfully!`,
+      });
+    } catch (err) {
+      console.error('Error creating appointment:', err);
+      setBanner({
+        type: "warning",
+        message: err.response?.data?.error || "Failed to create appointment. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeBanner = () => setBanner(null);
@@ -214,21 +308,6 @@ export default function SetAppointment() {
             </div>
 
             <div className="form__row">
-              <label htmlFor="patientId" className="form__label">
-                Patient ID
-              </label>
-              <input
-                id="patientId"
-                name="patientId"
-                type="text"
-                placeholder="e.g. PT-1204"
-                value={form.patientId}
-                onChange={handleChange("patientId")}
-                required
-              />
-            </div>
-
-            <div className="form__row">
               <label htmlFor="doctor" className="form__label">
                 Assign Doctor
               </label>
@@ -246,11 +325,36 @@ export default function SetAppointment() {
                   <option value="" disabled>
                     Select a doctor
                   </option>
-                  {DOCTORS.map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      {doctor.name} · {doctor.specialization}
+                  {doctors.map((doctor) => (
+                    <option key={doctor.staff_id} value={doctor.staff_id}>
+                      {doctor.name} {doctor.speciality ? `· ${doctor.speciality}` : ''}
                     </option>
                   ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="form__row">
+              <label htmlFor="branch" className="form__label">
+                Branch
+              </label>
+              <div className="form__field">
+                <span className="form__icon" aria-hidden>
+                  <RxPerson />
+                </span>
+                <select
+                  id="branch"
+                  name="branch"
+                  value={form.branchId}
+                  onChange={handleChange("branchId")}
+                  required
+                >
+                  <option value="" disabled>
+                    Select a branch
+                  </option>
+                  <option value="B0001">Main Branch - Colombo</option>
+                  <option value="B0002">Kandy Branch</option>
+                  <option value="B0003">Galle Branch</option>
                 </select>
               </div>
             </div>
@@ -277,94 +381,56 @@ export default function SetAppointment() {
               </div>
 
               <div className="form__row">
-                <label htmlFor="time" className="form__label">
-                  Start Time
+                <label htmlFor="visitType" className="form__label">
+                  Visit Type
                 </label>
                 <div className="form__field">
                   <span className="form__icon" aria-hidden>
                     <RxClock />
                   </span>
-                  <input
-                    id="time"
-                    name="time"
-                    type="time"
-                    value={form.time}
-                    onChange={handleChange("time")}
+                  <select
+                    id="visitType"
+                    name="visitType"
+                    value={form.visitType}
+                    onChange={handleChange("visitType")}
                     required
-                  />
+                  >
+                    <option value="Consultation">Consultation</option>
+                    <option value="Follow-up">Follow-up</option>
+                    <option value="Emergency">Emergency</option>
+                  </select>
                 </div>
               </div>
             </div>
-
-            <div className="form__split">
-              <div className="form__row">
-                <label htmlFor="duration" className="form__label">
-                  Duration (minutes)
-                </label>
+            
+            <div className="form__row">
+              <label htmlFor="duration" className="form__label">
+                Duration (minutes)
+              </label>
+              <div className="form__field">
+                <span className="form__icon" aria-hidden>
+                  <RxClock />
+                </span>
                 <select
                   id="duration"
                   name="duration"
                   value={form.duration}
                   onChange={handleChange("duration")}
+                  required
                 >
-                  {[15, 30, 45, 60].map((option) => (
-                    <option key={option} value={option}>
-                      {option} minutes
-                    </option>
-                  ))}
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">1 hour</option>
                 </select>
               </div>
-
-              <div className="form__row">
-                <label htmlFor="visitType" className="form__label">
-                  Visit Type
-                </label>
-                <select
-                  id="visitType"
-                  name="visitType"
-                  value={form.visitType}
-                  onChange={handleChange("visitType")}
-                >
-                  <option value="Consultation">Consultation</option>
-                  <option value="Follow-up">Follow-up</option>
-                  <option value="Screening">Screening</option>
-                  <option value="Emergency">Emergency</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form__row form__row--notes">
-              <label htmlFor="notes" className="form__label">
-                Notes for reception / nurse
-              </label>
-              <textarea
-                id="notes"
-                name="notes"
-                placeholder="Any preparation instructions or additional context..."
-                value={form.notes}
-                onChange={handleChange("notes")}
-                rows={3}
-              />
-            </div>
-
-            <div className="form__row form__row--inline">
-              <label className="form__label form__label--checkbox">
-                <input
-                  type="checkbox"
-                  name="sendReminder"
-                  checked={form.sendReminder}
-                  onChange={handleChange("sendReminder")}
-                />
-                Send reminder SMS 24 hours before
-              </label>
             </div>
 
             <div className="form__actions">
-              <button type="button" className="btn btn--ghost" onClick={resetForm}>
+              <button type="button" className="btn btn--ghost" onClick={resetForm} disabled={loading}>
                 Clear form
               </button>
-              <button type="submit" className="btn btn--primary">
-                Save appointment
+              <button type="submit" className="btn btn--primary" disabled={loading}>
+                {loading ? 'Saving...' : 'Save appointment'}
               </button>
             </div>
           </form>

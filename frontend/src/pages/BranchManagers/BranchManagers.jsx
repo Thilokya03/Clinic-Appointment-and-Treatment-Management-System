@@ -31,7 +31,7 @@ import {
   Search,
   Delete,
 } from '@mui/icons-material';
-import './BranchManagers.css';
+import './branchmanagers.css';
 
 // Tab Panel Component
 function TabPanel({ children, value, index, ...other }) {

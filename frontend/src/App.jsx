@@ -15,6 +15,7 @@ import AddDoctor from "./pages/AddDoctor/AddDoctor";
 import AddStaff from "./pages/AddStaff/AddStaff";
 import AddBranch from "./pages/AddBranch/AddBranch";
 import AddBranchManager from "./pages/AddBranchManager/AddBranchManager";
+import SetAppointment from "./pages/SetAppointment/SetAppointment";
 import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
 import About from "./pages/About/About";
@@ -117,6 +118,13 @@ export default function App() {
               <Route path="doctorchange" element={
                 <ProtectedRoute allowedRoles={['doctor']}>
                   <DoctorChangeShedule />
+                </ProtectedRoute>
+              } />
+
+              {/* Patient Routes */}
+              <Route path="book-appointment" element={
+                <ProtectedRoute>
+                  <SetAppointment />
                 </ProtectedRoute>
               } />
             </Route>
