@@ -1,0 +1,4 @@
+1) make the delete effect on all children tables when deleting parent table by foreign key
+2) removed claim_id from payment table and use payment_id to connect insurence_claim and payment
+3) make the treatment parent of treatment_catelog table
+4) Add balance column in payment table as I said earlier in group

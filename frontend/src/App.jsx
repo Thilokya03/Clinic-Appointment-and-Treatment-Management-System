@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./App.css";
 
@@ -7,9 +7,14 @@ import Login from "./pages/Login/Login";
 import Home from "./pages/Home/Home";
 import Register from "./pages/Register/Register";
 import Doctors from "./pages/Doctor/Doctors";
+import Patient from "./pages/Patient/Patient";
 import Dashboard from "./pages/Dashboard/Dashboard";
-import BookAppointment from "./pages/BookAppointment/BookAppointment";
-import SetAppointment from "./pages/SetAppointment/SetAppointment";
+import BranchManagers from "./pages/BranchManagers/BranchManagers";
+import Staff from "./pages/Staff/Staff";
+import AddDoctor from "./pages/AddDoctor/AddDoctor";
+import AddStaff from "./pages/AddStaff/AddStaff";
+import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
+import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
 import Staff from "./pages/Staff/Staff";
 import Patient from "./pages/Patient/Patient";
 
@@ -41,13 +46,29 @@ export default function App() {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
         </Route>
+=======
+
+          {/* Dashboard routes */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/branch-manager" element={<BranchManagerDashboard />} />
+          <Route path="/doctor" element={<DoctorDashboard />} />
+          <Route path="/staff" element={<NonMedicalStaffDashboard />} />
+          <Route path="/patient" element={<PatientDashboard />} />
+        </Routes>
+      </Router>
+>>>>>>> Sarjana
 
         {/* DASHBOARD (Sidebar + Navibar + Footer) */}
         <Route element={<DashboardLayout theme={theme} setTheme={setTheme} />}>
           <Route path="/dashboard">
+            {/* Dashboard routes */}
             <Route index element={<Dashboard />} />
-            <Route path="appointments" element={<SetAppointment />} />
-            <Route path="appointmentsbook" element={<BookAppointment />} />
+            <Route path="branchmanagers" element={<BranchManagers />} />
+            <Route path="staff" element={<Staff />} />
+            <Route path="adddoctor" element={<AddDoctor />} />
+            <Route path="addstaff" element={<AddStaff />} />
+            <Route path="doctordashboard" element={<DoctorDashboard />} />
+            <Route path="doctorchange" element={<DoctorChangeShedule />} />
           </Route>
         </Route>
 
@@ -56,8 +77,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
-          <Route path="/staff" element={<Staff />} />
           <Route path="/patient" element={<Patient />} />
+          <Route path="/staff" element={<Staff />} />
         </Route>
       </Routes>
     </Router>

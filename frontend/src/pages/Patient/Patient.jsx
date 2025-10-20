@@ -1,195 +1,142 @@
 import { useMemo, useState } from "react";
 import "./patient.css";
+import PatientCard from "../../compornent/PatientCard/PatientCard"; 
 import {
+  TextField,
+  MenuItem,
+  Box,
+  InputAdornment,
   Container,
   Typography,
-  Box,
-  Button,
-  IconButton,
-  Tooltip,
 } from "@mui/material";
-import {
-  CalendarMonth,
-  LocalHospital,
-  Assignment,
-  MedicalInformation,
-  EventAvailable,
-  AccessTime,
-  AccountCircle,
-  LocalPharmacy,
-  Payment,
-  Message,
-} from "@mui/icons-material";
+import { Search, Person, CalendarToday } from "@mui/icons-material";
 
-const UPCOMING_APPOINTMENTS = [
+const PATIENTS = [
   {
-    id: "APT-1001",
+    id: "PAT-1001",
+    image: "https://randomuser.me/api/portraits/women/68.jpg",
+    name: "Samantha Perera",
+    age: 28,
+    gender: "Female",
+    phone: "+94 77 123 4567",
+    email: "samantha@example.com",
+    lastVisit: "2025-10-01",
+    upcomingAppointment: "2025-10-20",
     doctor: "Dr. Aisha Fernando",
-    specialty: "Cardiologist",
-    date: "Today",
-    time: "4:30 PM",
-    status: "Confirmed",
-    type: "Regular Checkup",
+    status: "Active",
+    url: "/patientdetails?patient=PAT-1001",
   },
   {
-    id: "APT-1002",
+    id: "PAT-1002",
+    image: "https://randomuser.me/api/portraits/men/52.jpg",
+    name: "Nuwan Silva",
+    age: 35,
+    gender: "Male",
+    phone: "+94 77 234 5678",
+    email: "nuwan@example.com",
+    lastVisit: "2025-09-25",
+    upcomingAppointment: "2025-10-22",
     doctor: "Dr. Kamal Silva",
-    specialty: "Neurologist",
-    date: "Tomorrow",
-    time: "10:00 AM",
-    status: "Pending",
-    type: "Follow-up",
+    status: "Active",
+    url: "/patientdetails?patient=PAT-1002",
   },
+  // Add more patient objects here
 ];
 
-const MEDICAL_RECORDS = [
-  {
-    id: "REC-1001",
-    type: "Lab Results",
-    date: "Oct 12, 2025",
-    doctor: "Dr. Aisha Fernando",
-    description: "Blood work results",
-  },
-  {
-    id: "REC-1002",
-    type: "Prescription",
-    date: "Oct 5, 2025",
-    doctor: "Dr. Kamal Silva",
-    description: "Monthly medication",
-  },
-  {
-    id: "REC-1003",
-    type: "Treatment Notes",
-    date: "Sep 28, 2025",
-    doctor: "Dr. Nimal Perera",
-    description: "Regular checkup notes",
-  },
-];
+export default function Patients() {
+  const [searchType, setSearchType] = useState("name");
+  const [searchQuery, setSearchQuery] = useState("");
 
-export default function Patient() {
+  const handleSearchTypeChange = (event) => {
+    setSearchType(event.target.value);
+    setSearchQuery("");
+  };
+
+  const filteredPatients = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return PATIENTS.filter((patient) => {
+      if (!query) return true;
+      if (searchType === "name") return patient.name.toLowerCase().includes(query);
+      if (searchType === "doctor") return patient.doctor.toLowerCase().includes(query);
+      return true;
+    });
+  }, [searchQuery, searchType]);
+
   return (
-    <main className="patient-container">
-      <Container maxWidth="xl">
-        <div className="patient-shell">
-          <div>
-            <Typography variant="h1" className="patient-title">
-              Patient Dashboard
-            </Typography>
-            <Typography className="patient-subtitle">
-              Manage your appointments, view medical records, and access quick services
-            </Typography>
-          </div>
+    <div className="patient-container">
+      <Container maxWidth="xl" className="patient-shell">
+        <header>
+          <Typography variant="h3" component="h1" className="patient-title">
+            Our Patients
+          </Typography>
+          <Typography variant="h6" component="p" className="patient-subtitle">
+            Manage patient records and upcoming appointments.
+          </Typography>
+        </header>
 
-          <div className="patient-dashboard">
-            {/* Upcoming Appointments */}
-            <div className="dashboard-card">
-              <div className="dashboard-card__header">
-                <h2 className="dashboard-card__title">Upcoming Appointments</h2>
-                <div className="dashboard-card__icon">
-                  <CalendarMonth />
-                </div>
-              </div>
-              <div className="appointment-list">
-                {UPCOMING_APPOINTMENTS.map((apt) => (
-                  <div key={apt.id} className="appointment-item">
-                    <Box
-                      sx={{
-                        color: apt.status === "Confirmed" ? "success.main" : "warning.main",
-                      }}
-                    >
-                      <EventAvailable />
-                    </Box>
-                    <div className="appointment-item__info">
-                      <h3 className="appointment-item__title">{apt.doctor}</h3>
-                      <p className="appointment-item__details">
-                        {apt.specialty} • {apt.date} at {apt.time}
-                      </p>
-                      <p className="appointment-item__details">{apt.type}</p>
-                    </div>
-                    <IconButton size="small">
-                      <Message fontSize="small" />
-                    </IconButton>
-                  </div>
-                ))}
-                <Button
-                  variant="contained"
-                  fullWidth
-                  startIcon={<EventAvailable />}
-                  sx={{ mt: 2 }}
-                  onClick={() => alert("Book new appointment")}
-                >
-                  Book New Appointment
-                </Button>
-              </div>
-            </div>
+        <Box className="search-section" component="section">
+          <Box className="search-controls">
+            <TextField
+              select
+              label="Search by"
+              value={searchType}
+              onChange={handleSearchTypeChange}
+              size="medium"
+            >
+              <MenuItem value="name">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Person fontSize="small" />
+                  Name
+                </Box>
+              </MenuItem>
+              <MenuItem value="doctor">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CalendarToday fontSize="small" />
+                  Doctor
+                </Box>
+              </MenuItem>
+            </TextField>
 
-            {/* Medical Records */}
-            <div className="dashboard-card">
-              <div className="dashboard-card__header">
-                <h2 className="dashboard-card__title">Recent Medical Records</h2>
-                <div className="dashboard-card__icon">
-                  <Assignment />
-                </div>
-              </div>
-              {MEDICAL_RECORDS.map((record) => (
-                <div key={record.id} className="medical-record">
-                  <div className="medical-record__icon">
-                    <MedicalInformation />
-                  </div>
-                  <div className="medical-record__info">
-                    <h3 className="medical-record__title">{record.type}</h3>
-                    <p className="medical-record__date">
-                      {record.date} • {record.doctor}
-                    </p>
-                  </div>
-                  <Tooltip title="View details">
-                    <IconButton size="small">
-                      <Assignment fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </div>
-              ))}
-              <Button
-                variant="outlined"
-                fullWidth
-                startIcon={<Assignment />}
-                sx={{ mt: 2 }}
-                onClick={() => alert("View all records")}
-              >
-                View All Records
-              </Button>
-            </div>
+            <TextField
+              fullWidth
+              placeholder={searchType === "name" ? "Search by patient's name" : "Search by doctor"}
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className="search-input"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search />
+                  </InputAdornment>
+                ),
+              }}
+              size="medium"
+            />
+          </Box>
+        </Box>
 
-            {/* Quick Actions */}
-            <div className="dashboard-card">
-              <div className="dashboard-card__header">
-                <h2 className="dashboard-card__title">Quick Actions</h2>
-                <div className="dashboard-card__icon">
-                  <AccessTime />
-                </div>
-              </div>
-              <div className="quick-actions">
-                <button className="quick-action-btn">
-                  <LocalPharmacy className="quick-action-btn__icon" />
-                  <span className="quick-action-btn__label">Prescriptions</span>
-                </button>
-                <button className="quick-action-btn">
-                  <Payment className="quick-action-btn__icon" />
-                  <span className="quick-action-btn__label">Pay Bills</span>
-                </button>
-                <button className="quick-action-btn">
-                  <Message className="quick-action-btn__icon" />
-                  <span className="quick-action-btn__label">Messages</span>
-                </button>
-                <button className="quick-action-btn">
-                  <AccountCircle className="quick-action-btn__icon" />
-                  <span className="quick-action-btn__label">Profile</span>
-                </button>
-              </div>
-            </div>
-          </div>
+        <Typography variant="body1" className="results-count">
+          Showing {filteredPatients.length} patient{filteredPatients.length !== 1 ? "s" : ""}
+          {searchQuery && ` for "${searchQuery}"`}
+        </Typography>
+
+        <div className="patients-grid">
+          {filteredPatients.length > 0 ? (
+            filteredPatients.map((patient) => (
+              <PatientCard key={patient.id} patient={patient} />
+            ))
+          ) : (
+            <Box className="no-results">
+              <Typography variant="h6" color="text.primary">
+                No patients found
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Try adjusting your search criteria.
+              </Typography>
+            </Box>
+          )}
         </div>
       </Container>
-    </main>
+    </div>
   );
 }

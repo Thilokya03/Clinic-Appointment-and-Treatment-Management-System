@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./Register.css";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate, Link as RouterLink, Link } from "react-router-dom";
 
 // MUI
 import {
@@ -18,9 +18,7 @@ import {
   Divider,
   Snackbar,
   Alert,
-  ToggleButtonGroup,
-  ToggleButton,
-  Link,
+  FormControl, InputLabel, Select, MenuItem 
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -78,10 +76,14 @@ const theme = createTheme({
 });
 
 export default function Register() {
+  const [role, setRole] = useState(""); 
+  const [username, setUserName] = useState("");
+  const [specialties, setSpecialties] = useState([]);
+  const [branch, setBranch] = useState("");
   const [name, setName] = useState("");
-  const [dobDay, setDobDay] = useState("");
-  const [dobMonth, setDobMonth] = useState("");
-  const [dobYear, setDobYear] = useState("");
+  const [age , setAge ] = useState("");
+  const [dob , setDob ] = useState(""); 
+  const [nic , setNIC ] = useState(""); 
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [contactNo, setContactNo] = useState("");
@@ -105,22 +107,22 @@ export default function Register() {
     setToast((t) => ({ ...t, open: false }));
   };
 
-  const days = Array.from({ length: 31 }, (_, index) => index + 1);
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
-  const years = Array.from({ length: 100 }, (_, index) => new Date().getFullYear() - index);
-
   const navigate = useNavigate();
 
   const onSubmit = (event) => {
     event.preventDefault();
 
+      // Check role
+    if (!role) {
+      return setToast({ open: true, message: "Please select a role.", severity: "error", });
+    }
     if (name.trim().length < 2) {
       return setToast({ open: true, message: "Enter a valid name.", severity: "error" });
     }
-    if (!dobDay || !dobMonth || !dobYear) {
+    if (username.trim().length < 2) {
+      return setToast({ open: true, message: "Enter a valid name.", severity: "error" });
+    }
+    if (!dobDay || !dobMonth || !dobYear) { // ✅ fixed
       return setToast({ open: true, message: "Select your date of birth.", severity: "error" });
     }
     if (!/^\S+@\S+\.\S+$/.test(email)) {
@@ -145,12 +147,14 @@ export default function Register() {
       return setToast({ open: true, message: "Passwords do not match.", severity: "error" });
     }
     if (!gender) {
-      return setToast({ open: true, message: "Please select your gender.", severity: "error" });
+    return setToast({ open: true,  message: "Please select your gender.", severity: "error"});
+    }
+    if (!dob) {
+    return setToast({ open: true,  message: "Please select your Date od birth.", severity: "error"});
     }
 
-    const dob = `${dobYear}-${dobMonth}-${dobDay}`;
+// TODO: Send registration data to backend
 
-    // TODO: Send registration data to backend
 
     setToast({
       open: true,
@@ -195,16 +199,40 @@ export default function Register() {
               </Typography>
             </Box>
 
-            <Box component="form" onSubmit={onSubmit} sx={{ mt: 1 }}>
+            {/* Form */}
+            
+            <Box component="form" onSubmit={onSubmit} sx={{ mt: 1 }}> 
+              {/* role Select */}
+              <FormControl fullWidth margin="normal" required sx={{ backgroundColor: "#ffffffff", borderRadius: 1 }}>
+                <InputLabel id="role-label" sx={{ color: "#555555" }}>Select Role</InputLabel>
+                <Select
+                  labelId="role-label"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  slotProps={{
+                    select: { sx: { color: "#000000", backgroundColor: "#f8f7f3ff" } },
+                  }}
+                >
+                  <MenuItem value="patient">Patient</MenuItem>
+                  <MenuItem value="admin">Admin</MenuItem>
+                  <MenuItem value="nurse">Nurse</MenuItem>
+                  <MenuItem value="doctor">Doctor</MenuItem>
+                  <MenuItem value="other">Other</MenuItem>
+                </Select>
+              </FormControl>
+
               <TextField
                 label="Full Name"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
-                fullWidth
-                margin="normal"
-                required
+                onChange={(e) => setName(e.target.value)}
+                fullWidth margin="normal" required
               />
-
+              <TextField
+                label="User Name"
+                value={name}
+                onChange={(e) => setUserName(e.target.value)}
+                fullWidth margin="normal" required
+              />
               <TextField
                 label="Address"
                 value={address}
@@ -214,110 +242,133 @@ export default function Register() {
                 required
               />
 
-              <Box mt={2}>
-                <Typography variant="caption" color="text.secondary">
-                  Gender
-                </Typography>
-                <ToggleButtonGroup
-                  value={gender}
-                  exclusive
-                  onChange={(_, value) => value && setGender(value)}
-                  fullWidth
-                  sx={{ my: 1, border: "1px solid rgba(148, 163, 184, 0.28)" }}
-                  color="primary"
-                >
-                  <ToggleButton value="male">Male</ToggleButton>
-                  <ToggleButton value="female">Female</ToggleButton>
-                </ToggleButtonGroup>
-              </Box>
+              <div style={{ display: "flex", alignItems: "center", gap: "50px", marginTop: "18px", marginBottom: "10px"}}>
+                  <span>Gender :</span>
+                  <label>
+                      <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={gender === "male"}
+                      onChange={(e) => setGender(e.target.value)}
+                      /> Male
+                  </label>
+                  <label>
+                      <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={gender === "female"}
+                      onChange={(e) => setGender(e.target.value)}
+                      /> Female
+                  </label>
+              </div>
+              <TextField
+                label="Contact Number"
+                value={contactNo}
+                onChange={(e) => setContactNo(e.target.value)}
+                fullWidth margin="normal" required
+              />
+              <TextField
+                label="NIC"
+                value={nic}
+                onChange={(e) => setNIC(e.target.value)}
+                fullWidth margin="normal" required
+              />          
+              <TextField
+                label="Age"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                fullWidth margin="normal" required
+              />
+              <TextField
+                label="Date of Birth"
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                fullWidth
+                margin="normal"
+                required 
+              InputLabelProps={{ shrink: true }}
+              slotProps={{
+                  inputLabel: { shrink: true },
+                  htmlInput: {
+                    style: { color: "#555555"},
+                  },
+                }}
+              sx={{
+                // Target the native calendar picker icon
+                "& input::-webkit-calendar-picker-indicator": {
+                  filter: "invert(50%)",  
+                  opacity: 100,
+                  display: "block",
+                  cursor: "pointer",
+                },
+              }}
+              />
+              {role === "patient" && (
+                <TextField
+                  label="Emergency Contact Name"
+                  value={emergencyContactName}
+                  onChange={(e) => setEmergencyContactName(e.target.value)}
+                  fullWidth margin="normal" required
+                />
+              )}
+              {role === "patient" && (
+                <TextField
+                  label="Emergency Contact Number"
+                  value={emergencyContactNo}
+                  onChange={(e) => setEmergencyContactNo(e.target.value)}
+                  fullWidth margin="normal" required
+                />
+              )}
+
+              {role !== "patient"  && (
+                <>
+                  {/* Branch Selection */}
+                  <FormControl fullWidth margin="normal" required>
+                    <InputLabel id="branch-label">Branch</InputLabel>
+                    <Select
+                      labelId="branch-label"
+                      value={branch}
+                      onChange={(e) => setBranch(e.target.value)}
+                    >
+                      <MenuItem value="colombo">Colombo</MenuItem>
+                      <MenuItem value="galle">Galle</MenuItem>
+                      <MenuItem value="kandy">Kandy</MenuItem>
+                      {/* Add more branches dynamically from backend if needed */}
+                    </Select>
+                  </FormControl>
+                </>
+              )}
+              {role === "doctor" && (
+              <>
+                  {/* Specialties Multi-Select */}
+                  <FormControl fullWidth margin="normal" required>
+                    <InputLabel id="specialty-label">Specialties</InputLabel>
+                    <Select
+                      labelId="specialty-label"
+                      multiple
+                      value={specialties}
+                      onChange={(e) => setSpecialties(e.target.value)}
+                      renderValue={(selected) => selected.join(", ")}
+                    >
+                      <MenuItem value="cardiology">Cardiology</MenuItem>
+                      <MenuItem value="orthopedics">Orthopedics</MenuItem>
+                      <MenuItem value="neurology">Neurology</MenuItem>
+                      <MenuItem value="pediatrics">Pediatrics</MenuItem>
+                      {/* Add more specialties as needed */}
+                    </Select>
+                  </FormControl>
+                  </>
+              )}
+
 
               <TextField
                 label="Email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                fullWidth
-                margin="normal"
-                required
-              />
-
-              <TextField
-                label="Contact Number"
-                value={contactNo}
-                onChange={(event) => setContactNo(event.target.value)}
-                fullWidth
-                margin="normal"
-                required
-              />
-
-              <Box mt={2}>
-                <Typography variant="caption" color="text.secondary">
-                  Date of birth
-                </Typography>
-                <Box display="flex" gap={2} flexWrap="wrap" mt={1}>
-                  <TextField
-                    select
-                    label="Day"
-                    value={dobDay}
-                    onChange={(event) => setDobDay(event.target.value)}
-                    sx={{ flex: 1, minWidth: 100 }}
-                    SelectProps={{ native: true }}
-                  >
-                    <option value=""></option>
-                    {days.map((day) => (
-                      <option key={day} value={day}>
-                        {day}
-                      </option>
-                    ))}
-                  </TextField>
-
-                  <TextField
-                    select
-                    label="Month"
-                    value={dobMonth}
-                    onChange={(event) => setDobMonth(event.target.value)}
-                    sx={{ flex: 1, minWidth: 120 }}
-                    SelectProps={{ native: true }}
-                  >
-                    <option value=""></option>
-                    {months.map((month, index) => (
-                      <option key={month} value={index + 1}>
-                        {month}
-                      </option>
-                    ))}
-                  </TextField>
-
-                  <TextField
-                    select
-                    label="Year"
-                    value={dobYear}
-                    onChange={(event) => setDobYear(event.target.value)}
-                    sx={{ flex: 1, minWidth: 120 }}
-                    SelectProps={{ native: true }}
-                  >
-                    <option value=""></option>
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </TextField>
-                </Box>
-              </Box>
-
-              <TextField
-                label="Emergency Contact Name"
-                value={emergencyContactName}
-                onChange={(event) => setEmergencyContactName(event.target.value)}
-                fullWidth
-                margin="normal"
-                required
-              />
-
-              <TextField
-                label="Emergency Contact Number"
-                value={emergencyContactNo}
-                onChange={(event) => setEmergencyContactNo(event.target.value)}
                 fullWidth
                 margin="normal"
                 required
