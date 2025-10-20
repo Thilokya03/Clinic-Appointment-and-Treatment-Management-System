@@ -52,6 +52,13 @@ export default function AdminDashboard() {
       color: "#9333ea"
     },
     {
+      title: "Add Branch Manager",
+      description: "Register a new branch manager",
+      icon: "➕",
+      link: "/dashboard/addbranchmanager",
+      color: "#8b5cf6"
+    },
+    {
       title: "Generate Reports",
       description: "View and generate system-wide reports",
       icon: "📊",

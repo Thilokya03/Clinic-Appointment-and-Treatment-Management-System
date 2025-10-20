@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+const bcrypt = require('bcrypt');
 const { message } = require("statuses");
 const { route } = require("./patientRoutes");
 const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
@@ -216,6 +217,87 @@ router.get('/managers/list', staffAuth(['Admin']), async(req, res) => {
     }catch(err){
         console.error('Error fetching branch managers:', err);
         res.status(500).json({error: 'Error fetching branch managers'});
+    }
+});
+
+// ******************************** ADD Branch Manager ****************************
+router.post('/managers', staffAuth(['Admin']), async(req, res) => {
+    const { username, password, name, email, phone, branch_id } = req.body;
+    
+    // Validation
+    if (!username || !password || !name || !email || !branch_id) {
+        return res.status(400).json({
+            error: 'Please provide username, password, name, email, and branch_id'
+        });
+    }
+    
+    try{
+        // Check if username or email already exists
+        const [existingUser] = await db.execute(
+            `SELECT * FROM staff WHERE username = ? OR email = ?`,
+            [username, email]
+        );
+        
+        if (existingUser.length > 0) {
+            return res.status(400).json({
+                error: 'Username or email already in use'
+            });
+        }
+        
+        // Check if branch exists
+        const [branch] = await db.execute(
+            `SELECT * FROM branch WHERE branch_id = ?`,
+            [branch_id]
+        );
+        
+        if (branch.length === 0) {
+            return res.status(404).json({
+                error: 'Branch not found'
+            });
+        }
+        
+        // Auto-generate Staff ID
+        const [staff] = await db.execute(
+            `SELECT staff_id FROM staff ORDER BY staff_id DESC LIMIT 1`
+        );
+        
+        let newStaffId;
+        if (staff.length === 0) {
+            newStaffId = 'S0001';
+        } else {
+            const lastId = staff[0].staff_id;
+            const numericPart = parseInt(lastId.substring(1));
+            newStaffId = `S${String(numericPart + 1).padStart(4, '0')}`;
+        }
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Insert new branch manager
+        await db.execute(
+            `INSERT INTO staff (staff_id, username, name, category, phone_no, gender, nic, email, password, branch_id) 
+             VALUES (?, ?, ?, 'Branch Manager', ?, NULL, NULL, ?, ?, ?)`,
+            [newStaffId, username, name, phone || null, email, hashedPassword, branch_id]
+        );
+        
+        console.log('✅ Branch Manager created:', {
+            staff_id: newStaffId,
+            username,
+            name,
+            email,
+            branch_id
+        });
+        
+        res.status(201).json({
+            message: 'Branch manager added successfully',
+            staff_id: newStaffId
+        });
+    }catch(err){
+        console.error('Error creating branch manager:', err);
+        res.status(500).json({
+            error: 'Error creating branch manager',
+            details: err.message
+        });
     }
 });
 
