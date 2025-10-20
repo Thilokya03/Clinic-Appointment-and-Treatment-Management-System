@@ -159,20 +159,145 @@ router.put('/:id', staffAuth(['Admin', 'Super Admin']), async(req, res) => {
 });
 
 // ******************************** DELETE Branch ****************************
+// Automatically deletes all associated data in the correct order
+// Associated deletions include: Invoices, Payments, Treatments, Appointments, Doctors, Staff
 router.delete('/:id', staffAuth(['Admin', 'Super Admin']), async(req, res) => {
     const branch_id = req.params.id;
+    const connection = await db.getConnection();
+    
     try{
-        const [result] = await db.execute(`DELETE FROM branch WHERE branch_id = ?`, [branch_id]);
+        // Start transaction
+        await connection.beginTransaction();
         
-        if(result.affectedRows === 0){
+        // Check if branch exists
+        const [branch] = await connection.execute(`SELECT * FROM branch WHERE branch_id = ?`, [branch_id]);
+        
+        if(branch.length === 0){
+            await connection.rollback();
             return res.status(404).json({error: "Branch not found"});
         }
         
-        console.log('✅ Branch deleted:', branch_id);
-        res.status(200).json({message: "Branch successfully deleted"});
+        // Get all staff in this branch
+        const [staff] = await connection.execute(
+            `SELECT staff_id FROM staff WHERE branch_id = ?`, 
+            [branch_id]
+        );
+        
+        // Get all doctors from this branch
+        const [doctors] = await connection.execute(
+            `SELECT d.staff_id FROM doctor d 
+             INNER JOIN staff s ON d.staff_id = s.staff_id 
+             WHERE s.branch_id = ?`, 
+            [branch_id]
+        );
+        
+        let deletedCounts = {
+            invoices: 0,
+            payments: 0,
+            treatments: 0,
+            appointments: 0,
+            doctors: 0,
+            staff: 0
+        };
+        
+        // If there are doctors, delete their related data
+        if(doctors.length > 0) {
+            const doctorIds = doctors.map(d => d.staff_id);
+            const placeholders = doctorIds.map(() => '?').join(',');
+            
+            // Get all appointments for these doctors
+            const [appointments] = await connection.execute(
+                `SELECT appointment_id FROM appointment WHERE doctor_id IN (${placeholders})`,
+                doctorIds
+            );
+            
+            if(appointments.length > 0) {
+                const appointmentIds = appointments.map(a => a.appointment_id);
+                const apptPlaceholders = appointmentIds.map(() => '?').join(',');
+                
+                // Get all payments for these appointments
+                const [payments] = await connection.execute(
+                    `SELECT payment_id FROM payment WHERE appointment_id IN (${apptPlaceholders})`,
+                    appointmentIds
+                );
+                
+                if(payments.length > 0) {
+                    const paymentIds = payments.map(p => p.payment_id);
+                    const paymentPlaceholders = paymentIds.map(() => '?').join(',');
+                    
+                    // Delete invoices first
+                    const [invoiceResult] = await connection.execute(
+                        `DELETE FROM invoice WHERE payment_id IN (${paymentPlaceholders})`,
+                        paymentIds
+                    );
+                    deletedCounts.invoices = invoiceResult.affectedRows;
+                }
+                
+                // Delete payments
+                const [paymentResult] = await connection.execute(
+                    `DELETE FROM payment WHERE appointment_id IN (${apptPlaceholders})`,
+                    appointmentIds
+                );
+                deletedCounts.payments = paymentResult.affectedRows;
+                
+                // Delete treatments
+                const [treatmentResult] = await connection.execute(
+                    `DELETE FROM treatment WHERE appointment_id IN (${apptPlaceholders})`,
+                    appointmentIds
+                );
+                deletedCounts.treatments = treatmentResult.affectedRows;
+            }
+            
+            // Delete appointments
+            const [appointmentResult] = await connection.execute(
+                `DELETE FROM appointment WHERE doctor_id IN (${placeholders})`,
+                doctorIds
+            );
+            deletedCounts.appointments = appointmentResult.affectedRows;
+            
+            // Delete from doctor table
+            const [doctorResult] = await connection.execute(
+                `DELETE FROM doctor WHERE staff_id IN (${placeholders})`,
+                doctorIds
+            );
+            deletedCounts.doctors = doctorResult.affectedRows;
+        }
+        
+        // Delete all staff from this branch
+        const [staffResult] = await connection.execute(
+            `DELETE FROM staff WHERE branch_id = ?`,
+            [branch_id]
+        );
+        deletedCounts.staff = staffResult.affectedRows;
+        
+        // Finally, delete the branch itself
+        const [branchResult] = await connection.execute(
+            `DELETE FROM branch WHERE branch_id = ?`, 
+            [branch_id]
+        );
+        
+        // Commit transaction
+        await connection.commit();
+        
+        console.log(`✅ Branch deleted: ${branch_id}`);
+        console.log(`📊 Deleted counts:`, deletedCounts);
+        
+        res.status(200).json({
+            message: "Branch and all associated data successfully deleted",
+            branch_id: branch_id,
+            deleted: deletedCounts
+        });
+        
     }catch(err){
+        // Rollback on error
+        await connection.rollback();
         console.error('Error deleting branch:', err);
-        res.status(500).json({error: "Error deleting branch"});
+        res.status(500).json({
+            error: "Error deleting branch", 
+            details: err.message
+        });
+    } finally {
+        connection.release();
     }
 });
 

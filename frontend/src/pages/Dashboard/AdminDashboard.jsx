@@ -41,7 +41,7 @@ export default function AdminDashboard() {
       title: "Manage Branches",
       description: "Add, edit, and manage clinic branches",
       icon: "🏥",
-      link: "/dashboard/branches",
+      link: "/dashboard/managebranch",
       color: "#2563eb"
     },
     {
@@ -52,25 +52,11 @@ export default function AdminDashboard() {
       color: "#9333ea"
     },
     {
-      title: "Add Branch Manager",
-      description: "Register a new branch manager",
-      icon: "➕",
-      link: "/dashboard/addbranchmanager",
-      color: "#8b5cf6"
-    },
-    {
       title: "Generate Reports",
       description: "View and generate system-wide reports",
       icon: "📊",
       link: "/dashboard/reports",
       color: "#f97316"
-    },
-    {
-      title: "System Settings",
-      description: "Configure system settings and preferences",
-      icon: "⚙️",
-      link: "/dashboard/settings",
-      color: "#10b981"
     }
   ];
 
