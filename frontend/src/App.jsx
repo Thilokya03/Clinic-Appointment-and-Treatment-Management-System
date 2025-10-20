@@ -15,8 +15,7 @@ import AddDoctor from "./pages/AddDoctor/AddDoctor";
 import AddStaff from "./pages/AddStaff/AddStaff";
 import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
-import Staff from "./pages/Staff/Staff";
-import Patient from "./pages/Patient/Patient";
+
 
 // NOTE: keep your folder name exactly as in your project: compornent
 import BaseLayout from "./compornent/Layout/BaseLayout";
@@ -46,17 +45,7 @@ export default function App() {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
         </Route>
-=======
 
-          {/* Dashboard routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/branch-manager" element={<BranchManagerDashboard />} />
-          <Route path="/doctor" element={<DoctorDashboard />} />
-          <Route path="/staff" element={<NonMedicalStaffDashboard />} />
-          <Route path="/patient" element={<PatientDashboard />} />
-        </Routes>
-      </Router>
->>>>>>> Sarjana
 
         {/* DASHBOARD (Sidebar + Navibar + Footer) */}
         <Route element={<DashboardLayout theme={theme} setTheme={setTheme} />}>
