@@ -93,33 +93,51 @@ router.post('/doctor',staffAuth(['Admin']), async (req, res) => { // TEST PASS
 //**************************SIGN IN*********************************************** */
 router.post('/signin', async(req, res) => { // TEST PASS
   const {username, password} = req.body;
+  
+  console.log('🔐 Staff Login Attempt:', { username, timestamp: new Date().toISOString() });
 
   if (!username||!password){
+    console.log('❌ Missing credentials');
     return res.status(400).json({error:"please provide username or password"});
   }
   try{
     // Find user by username
     const [rows] = await db.execute(`SELECT * FROM staff WHERE username = ?`, [username]);
+    console.log('📊 User lookup result:', rows.length > 0 ? 'User found' : 'User not found');
 
     if(rows.length === 0){
+      console.log('❌ Invalid username');
       return res.status(401).json({error:"Invalid credentials"});
     }
 
     const staff = rows[0];
+    console.log('👤 Staff found:', { id: staff.staff_id, category: staff.category });
     
     // Verify password
     const isMatch = await bcrypt.compare(password, staff.password);
 
     if(!isMatch){
+      console.log('❌ Invalid password');
       return res.status(401).json({error:"Invalid credentials"});
     }
+    
+    console.log('✅ Password verified');
+    
+    // Map category to role for frontend dashboard
+    let userRole = "staff"; // default for Nurse, Other, etc.
+    if (staff.category === "Admin") {
+      userRole = "admin";
+    } else if (staff.category === "Doctor") {
+      userRole = "doctor";
+    }
+    
     //create payload
     const payload = {
       user:{
         id:staff.staff_id,
         username:staff.username,
         category:staff.category,
-        role:"staff"
+        role: userRole
       }
     };
 
@@ -130,6 +148,7 @@ router.post('/signin', async(req, res) => { // TEST PASS
       {expiresIn: '6h'},
       (err, token) => {
         if(err) throw err;
+        console.log('✅ Login successful:', { username: staff.username, role: userRole });
         res.json({
           message: "Login Successfull",
           token,
@@ -138,7 +157,8 @@ router.post('/signin', async(req, res) => { // TEST PASS
             username: staff.username,
             name: staff.name,
             email:staff.email,
-            category:staff.category
+            category:staff.category,
+            role: userRole
           }
         });
       }

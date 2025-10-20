@@ -16,6 +16,10 @@ import AddStaff from "./pages/AddStaff/AddStaff";
 import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
 
+// Import Auth Context and Protected Route
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import RoleDashboard from "./pages/Dashboard/RoleDashboard";
 
 // NOTE: keep your folder name exactly as in your project: compornent
 import BaseLayout from "./compornent/Layout/BaseLayout";
@@ -40,36 +44,71 @@ export default function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* LOGIN (no nav, no footer) */}
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<Login />} />
-        </Route>
-
-
-        {/* DASHBOARD (Sidebar + Navibar + Footer) */}
-        <Route element={<DashboardLayout theme={theme} setTheme={setTheme} />}>
-          <Route path="/dashboard">
-            {/* Dashboard routes */}
-            <Route index element={<Dashboard />} />
-            <Route path="branchmanagers" element={<BranchManagers />} />
-            <Route path="staff" element={<Staff />} />
-            <Route path="adddoctor" element={<AddDoctor />} />
-            <Route path="addstaff" element={<AddStaff />} />
-            <Route path="doctordashboard" element={<DoctorDashboard />} />
-            <Route path="doctorchange" element={<DoctorChangeShedule />} />
+      <AuthProvider>
+        <Routes>
+          {/* LOGIN (no nav, no footer) */}
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<Login />} />
           </Route>
-        </Route>
 
-        {/* PUBLIC PAGES (Navibar + Footer) */}
-        <Route element={<BaseLayout theme={theme} setTheme={setTheme} />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/doctors" element={<Doctors />} />
-          <Route path="/patient" element={<Patient />} />
-          <Route path="/staff" element={<Staff />} />
-        </Route>
-      </Routes>
+          {/* DASHBOARD (Protected Routes with Role-Based Access) */}
+          <Route element={<DashboardLayout theme={theme} setTheme={setTheme} />}>
+            <Route path="/dashboard">
+              {/* Main Role-Based Dashboard - All authenticated users */}
+              <Route index element={
+                <ProtectedRoute>
+                  <RoleDashboard />
+                </ProtectedRoute>
+              } />
+
+              {/* Admin & Branch Manager Routes */}
+              <Route path="branchmanagers" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <BranchManagers />
+                </ProtectedRoute>
+              } />
+
+              <Route path="staff" element={
+                <ProtectedRoute allowedRoles={['admin', 'branch_manager']}>
+                  <Staff />
+                </ProtectedRoute>
+              } />
+
+              <Route path="adddoctor" element={
+                <ProtectedRoute allowedRoles={['admin', 'branch_manager']}>
+                  <AddDoctor />
+                </ProtectedRoute>
+              } />
+
+              <Route path="addstaff" element={
+                <ProtectedRoute allowedRoles={['admin', 'branch_manager']}>
+                  <AddStaff />
+                </ProtectedRoute>
+              } />
+
+              {/* Doctor Routes */}
+              <Route path="doctordashboard" element={
+                <ProtectedRoute allowedRoles={['doctor']}>
+                  <DoctorDashboard />
+                </ProtectedRoute>
+              } />
+
+              <Route path="doctorchange" element={
+                <ProtectedRoute allowedRoles={['doctor']}>
+                  <DoctorChangeShedule />
+                </ProtectedRoute>
+              } />
+            </Route>
+          </Route>
+
+          {/* PUBLIC PAGES (Navibar + Footer) */}
+          <Route element={<BaseLayout theme={theme} setTheme={setTheme} />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/doctors" element={<Doctors />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

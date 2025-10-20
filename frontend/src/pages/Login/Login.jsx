@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./Login.css";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 
 // MUI
 import {
@@ -81,6 +82,7 @@ const theme = createTheme({
 });
 
 export default function Login() {
+  const { login } = useAuth();
   const [role, setRole] = useState("patient");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -111,9 +113,11 @@ export default function Login() {
       const endpoint = role === "staff" ? "/api/staff/signin" : "/api/patient/signin";
       const { data } = await axios.post(endpoint, { username, password });
 
-      localStorage.setItem("catms_token", data.token);
-      localStorage.setItem("catms_user", JSON.stringify(data.user));
-      localStorage.setItem("catms_role", role);
+      // Use the role from backend response (admin, doctor, staff) or fallback to selected role
+      const userRole = data.user?.role || role;
+      
+      // Use AuthContext login method
+      login(data.user, data.token, userRole);
 
       if (remember) {
         localStorage.setItem("catms_login_username", username);
