@@ -1,4 +1,4 @@
-﻿.set-appointment-page {
+.set-appointment-page {
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -388,4 +388,111 @@ textarea {
   .set-appointment-page .btn {
     width: 100%;
   }
+}
+
+/* Searchable Dropdown Styles */
+.search-dropdown-field {
+  position: relative;
+}
+
+.search-dropdown-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.2);
+  z-index: 1000;
+  margin-top: 4px;
+}
+
+.search-dropdown-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.search-dropdown-item:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.search-dropdown-item.no-results {
+  cursor: default;
+  color: var(--text-muted);
+  text-align: center;
+  justify-content: center;
+}
+
+.search-dropdown-item.no-results:hover {
+  background: transparent;
+}
+
+.doctor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doctor-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.doctor-specialty {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.doctor-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Scrollbar styling for dropdown */
+.search-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-dropdown-menu::-webkit-scrollbar-track {
+  background: var(--surface-panel);
+  border-radius: 8px;
+}
+
+.search-dropdown-menu::-webkit-scrollbar-thumb {
+  background: var(--border-soft);
+  border-radius: 8px;
+}
+
+.search-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Disabled input styling */
+.search-dropdown-wrapper input:disabled {
+  background: var(--surface-panel);
+  cursor: not-allowed;
+  opacity: 0.6;
+  color: var(--text-muted);
 }

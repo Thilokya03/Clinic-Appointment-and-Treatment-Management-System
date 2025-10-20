@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import axios from "axios";
 import {
   RxBell,
@@ -6,15 +6,8 @@ import {
   RxClock,
   RxPerson,
 } from "react-icons/rx";
-import { LuCircleCheck, LuClipboardList, LuTriangleAlert } from "react-icons/lu";
+import { LuCircleCheck, LuClipboardList, LuTriangleAlert, LuBuilding2 } from "react-icons/lu";
 import "./setAppointment.css";
-
-const DOCTORS = [
-  { id: "DOC-001", name: "Dr. Amal Fernando", specialization: "Cardiology", nextAvailable: "10:30" },
-  { id: "DOC-002", name: "Dr. Nirmala Jayasinghe", specialization: "Dermatology", nextAvailable: "11:15" },
-  { id: "DOC-003", name: "Dr. Thisara Perera", specialization: "Neurology", nextAvailable: "13:00" },
-  { id: "DOC-004", name: "Dr. Chanuka Wijesuriya", specialization: "Endocrinology", nextAvailable: "14:40" },
-];
 
 const INITIAL_APPOINTMENTS = [
   {
@@ -71,26 +64,85 @@ export default function SetAppointment() {
   const [form, setForm] = useState(initialFormState);
   const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
   const [banner, setBanner] = useState(null);
-  const [doctors, setDoctors] = useState(DOCTORS);
+  const [doctors, setDoctors] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingDoctors, setLoadingDoctors] = useState(true);
+  const [loadingBranches, setLoadingBranches] = useState(true);
+  const [doctorSearchTerm, setDoctorSearchTerm] = useState("");
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [showDoctorDropdown, setShowDoctorDropdown] = useState(false);
+  const doctorDropdownRef = useRef(null);
+  const [branchSearchTerm, setBranchSearchTerm] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState(null);
+  const [showBranchDropdown, setShowBranchDropdown] = useState(false);
+  const branchDropdownRef = useRef(null);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   useEffect(() => {
+    fetchBranches();
     fetchDoctors();
     fetchAppointments();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (doctorDropdownRef.current && !doctorDropdownRef.current.contains(event.target)) {
+        setShowDoctorDropdown(false);
+      }
+      if (branchDropdownRef.current && !branchDropdownRef.current.contains(event.target)) {
+        setShowBranchDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const fetchBranches = async () => {
+    try {
+      setLoadingBranches(true);
+      const token = localStorage.getItem('catms_token');
+      console.log('🔍 Fetching branches...');
+      
+      const response = await axios.get('http://localhost:3000/api/branch', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      console.log('✅ Branches fetched:', response.data);
+      console.log('📊 Number of branches:', response.data.length);
+      
+      setBranches(response.data);
+      setLoadingBranches(false);
+    } catch (err) {
+      console.error('❌ Error fetching branches:', err);
+      setLoadingBranches(false);
+      setBanner({ type: 'error', message: 'Failed to fetch branches.' });
+    }
+  };
+
   const fetchDoctors = async () => {
     try {
+      setLoadingDoctors(true);
       const token = localStorage.getItem('catms_token');
+      console.log('🔍 Fetching doctors with token:', token ? 'Token exists' : 'No token');
+      
       const response = await axios.get('http://localhost:3000/api/staff/by-category/Doctor', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      console.log('✅ Doctors fetched:', response.data);
+      console.log('📊 Number of doctors:', response.data.length);
+      
       setDoctors(response.data);
+      setLoadingDoctors(false);
     } catch (err) {
-      console.error('Error fetching doctors:', err);
-      setBanner({ type: 'error', message: 'Failed to fetch doctors' });
+      console.error('❌ Error fetching doctors:', err);
+      console.error('Response:', err.response?.data);
+      console.error('Status:', err.response?.status);
+      setLoadingDoctors(false);
+      setBanner({ type: 'error', message: 'Failed to fetch doctors. Please try refreshing the page.' });
     }
   };
 
@@ -155,11 +207,75 @@ export default function SetAppointment() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleBranchSelect = (branch) => {
+    setSelectedBranch(branch);
+    setBranchSearchTerm(branch.name);
+    setForm((prev) => ({ ...prev, branchId: branch.branch_id }));
+    setShowBranchDropdown(false);
+    // Clear doctor selection when branch changes
+    setSelectedDoctor(null);
+    setDoctorSearchTerm("");
+    setForm((prev) => ({ ...prev, doctorId: "" }));
+  };
+
+  const handleBranchSearchChange = (e) => {
+    setBranchSearchTerm(e.target.value);
+    setShowBranchDropdown(true);
+    if (!e.target.value) {
+      setSelectedBranch(null);
+      setForm((prev) => ({ ...prev, branchId: "" }));
+      // Also clear doctor
+      setSelectedDoctor(null);
+      setDoctorSearchTerm("");
+      setForm((prev) => ({ ...prev, doctorId: "" }));
+    }
+  };
+
+  const handleDoctorSelect = (doctor) => {
+    setSelectedDoctor(doctor);
+    setDoctorSearchTerm(doctor.name);
+    setForm((prev) => ({ ...prev, doctorId: doctor.staff_id }));
+    setShowDoctorDropdown(false);
+  };
+
+  const handleDoctorSearchChange = (e) => {
+    setDoctorSearchTerm(e.target.value);
+    setShowDoctorDropdown(true);
+    if (!e.target.value) {
+      setSelectedDoctor(null);
+      setForm((prev) => ({ ...prev, doctorId: "" }));
+    }
+  };
+
+  const filteredBranches = branches.filter(branch =>
+    branch.name?.toLowerCase().includes(branchSearchTerm.toLowerCase())
+  );
+
+  // Filter doctors by selected branch
+  const filteredDoctors = doctors.filter(doctor => {
+    // First filter by branch if one is selected
+    if (form.branchId && doctor.branch_id !== form.branchId) {
+      return false;
+    }
+    // Then filter by search term
+    if (doctorSearchTerm) {
+      return doctor.name?.toLowerCase().includes(doctorSearchTerm.toLowerCase()) ||
+             doctor.speciality?.toLowerCase().includes(doctorSearchTerm.toLowerCase());
+    }
+    return true;
+  });
+
   const resetForm = () => {
     setForm((prev) => ({
       ...initialFormState,
       date: prev.date,
     }));
+    setDoctorSearchTerm("");
+    setSelectedDoctor(null);
+    setShowDoctorDropdown(false);
+    setBranchSearchTerm("");
+    setSelectedBranch(null);
+    setShowBranchDropdown(false);
   };
 
   const handleSubmit = async (event) => {
@@ -307,55 +423,123 @@ export default function SetAppointment() {
               </div>
             </div>
 
-            <div className="form__row">
-              <label htmlFor="doctor" className="form__label">
-                Assign Doctor
+            <div className="form__row" ref={branchDropdownRef}>
+              <label htmlFor="branch" className="form__label">
+                Select Branch <span style={{ color: '#ef4444' }}>*</span>
               </label>
-              <div className="form__field">
+              <div className="form__field search-dropdown-field">
                 <span className="form__icon" aria-hidden>
-                  <LuClipboardList />
+                  <LuBuilding2 />
                 </span>
-                <select
-                  id="doctor"
-                  name="doctor"
-                  value={form.doctorId}
-                  onChange={handleChange("doctorId")}
-                  required
-                >
-                  <option value="" disabled>
-                    Select a doctor
-                  </option>
-                  {doctors.map((doctor) => (
-                    <option key={doctor.staff_id} value={doctor.staff_id}>
-                      {doctor.name} {doctor.speciality ? `· ${doctor.speciality}` : ''}
-                    </option>
-                  ))}
-                </select>
+                <div className="search-dropdown-wrapper">
+                  <input
+                    id="branch"
+                    type="text"
+                    value={branchSearchTerm}
+                    onChange={handleBranchSearchChange}
+                    onFocus={() => setShowBranchDropdown(true)}
+                    placeholder="Search branch by name..."
+                    autoComplete="off"
+                    required
+                  />
+                  {showBranchDropdown && loadingBranches && (
+                    <div className="search-dropdown-menu">
+                      <div className="search-dropdown-item no-results">
+                        Loading branches...
+                      </div>
+                    </div>
+                  )}
+                  {showBranchDropdown && !loadingBranches && filteredBranches.length > 0 && (
+                    <div className="search-dropdown-menu">
+                      {filteredBranches.map((branch) => (
+                        <div
+                          key={branch.branch_id}
+                          className="search-dropdown-item"
+                          onClick={() => handleBranchSelect(branch)}
+                        >
+                          <div className="doctor-info">
+                            <span className="doctor-name">{branch.name}</span>
+                            {branch.address && (
+                              <span className="doctor-specialty">{branch.address}</span>
+                            )}
+                          </div>
+                          <span className="doctor-id">ID: {branch.branch_id}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {showBranchDropdown && !loadingBranches && branches.length === 0 && (
+                    <div className="search-dropdown-menu">
+                      <div className="search-dropdown-item no-results">
+                        No branches available.
+                      </div>
+                    </div>
+                  )}
+                  {showBranchDropdown && !loadingBranches && branchSearchTerm && filteredBranches.length === 0 && branches.length > 0 && (
+                    <div className="search-dropdown-menu">
+                      <div className="search-dropdown-item no-results">
+                        No branches found matching "{branchSearchTerm}"
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="form__row">
-              <label htmlFor="branch" className="form__label">
-                Branch
+            <div className="form__row" ref={doctorDropdownRef}>
+              <label htmlFor="doctor" className="form__label">
+                Assign Doctor {!form.branchId && <span style={{ fontSize: '0.85rem', color: '#f97316', fontWeight: 'normal' }}>(Select branch first)</span>}
               </label>
-              <div className="form__field">
+              <div className="form__field search-dropdown-field">
                 <span className="form__icon" aria-hidden>
-                  <RxPerson />
+                  <LuClipboardList />
                 </span>
-                <select
-                  id="branch"
-                  name="branch"
-                  value={form.branchId}
-                  onChange={handleChange("branchId")}
-                  required
-                >
-                  <option value="" disabled>
-                    Select a branch
-                  </option>
-                  <option value="B0001">Main Branch - Colombo</option>
-                  <option value="B0002">Kandy Branch</option>
-                  <option value="B0003">Galle Branch</option>
-                </select>
+                <div className="search-dropdown-wrapper">
+                  <input
+                    id="doctor"
+                    type="text"
+                    value={doctorSearchTerm}
+                    onChange={handleDoctorSearchChange}
+                    onFocus={() => setShowDoctorDropdown(true)}
+                    placeholder={form.branchId ? "Search doctor by name or specialty..." : "Select a branch first..."}
+                    autoComplete="off"
+                    required
+                    disabled={!form.branchId}
+                  />
+                  {showDoctorDropdown && loadingDoctors && (
+                    <div className="search-dropdown-menu">
+                      <div className="search-dropdown-item no-results">
+                        Loading doctors...
+                      </div>
+                    </div>
+                  )}
+                  {showDoctorDropdown && !loadingDoctors && filteredDoctors.length > 0 && (
+                    <div className="search-dropdown-menu">
+                      {filteredDoctors.map((doctor) => (
+                        <div
+                          key={doctor.staff_id}
+                          className="search-dropdown-item"
+                          onClick={() => handleDoctorSelect(doctor)}
+                        >
+                          <div className="doctor-info">
+                            <span className="doctor-name">{doctor.name}</span>
+                            {doctor.speciality && (
+                              <span className="doctor-specialty">{doctor.speciality}</span>
+                            )}
+                          </div>
+                          <span className="doctor-id">ID: {doctor.staff_id}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {showDoctorDropdown && !loadingDoctors && form.branchId && filteredDoctors.length === 0 && (
+                    <div className="search-dropdown-menu">
+                      <div className="search-dropdown-item no-results">
+                        {doctorSearchTerm ? `No doctors found matching "${doctorSearchTerm}"` : `No doctors available in this branch`}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -475,15 +659,23 @@ export default function SetAppointment() {
             </header>
 
             <ul className="availability-list">
-              {DOCTORS.map((doctor) => (
-                <li key={doctor.id} className="availability-item">
+              {doctors.length > 0 ? (
+                doctors.map((doctor) => (
+                  <li key={doctor.staff_id} className="availability-item">
+                    <div>
+                      <h4>{doctor.name}</h4>
+                      <span>{doctor.speciality || 'General Practice'}</span>
+                    </div>
+                    <span className="availability-item__time">ID: {doctor.staff_id}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="availability-item">
                   <div>
-                    <h4>{doctor.name}</h4>
-                    <span>{doctor.specialization}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Loading doctors...</span>
                   </div>
-                  <span className="availability-item__time">Next at {doctor.nextAvailable}</span>
                 </li>
-              ))}
+              )}
             </ul>
           </article>
         </section>
