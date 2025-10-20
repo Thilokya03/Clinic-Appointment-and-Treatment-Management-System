@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
   Box,
   Tabs,
@@ -21,6 +22,7 @@ import {
   TableHead,
   TableRow,
   Checkbox,
+  CircularProgress,
 } from '@mui/material';
 import {
   MedicalServices,
@@ -50,20 +52,64 @@ const BranchManagers = () => {
   const [tabValue, setTabValue] = useState(0);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
   const [removeSearch, setRemoveSearch] = useState('');
-  const [doctors, setDoctors] = useState([
-    { id: 1, name: 'Dr. Aisha Fernando', specialty: 'Cardiology', ref: 'DR001', nic: '801234567V', dob: '1980-05-15' },
-    { id: 2, name: 'Dr. Kamal Silva', specialty: 'Neurology', ref: 'DR002', nic: '781234568V', dob: '1978-12-20' },
-    { id: 3, name: 'Dr. Nimal Perera', specialty: 'Dermatology', ref: 'DR003', nic: '751112223V', dob: '1975-11-12' },
-  ]);
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
-  // Staff state (dummy)
+  
+  // Staff state
   const [staffSearch, setStaffSearch] = useState('');
-  const [staff, setStaff] = useState([
-    { id: 1, name: 'John Smith', role: 'Receptionist', nic: '901234567V', dob: '1990-03-10' },
-    { id: 2, name: 'Maria Garcia', role: 'Nurse', nic: '851234568V', dob: '1985-07-22' },
-    { id: 3, name: 'Sunil Kumar', role: 'Pharmacist', nic: '801112223V', dob: '1980-11-12' },
-  ]);
+  const [staff, setStaff] = useState([]);
   const [selectedStaffIds, setSelectedStaffIds] = useState([]);
+
+  const navigate = useNavigate();
+
+  // Fetch doctors from backend
+  useEffect(() => {
+    if (tabValue === 0) {
+      fetchDoctors();
+    }
+  }, [tabValue]);
+
+  // Fetch staff from backend
+  useEffect(() => {
+    if (tabValue === 1) {
+      fetchStaff();
+    }
+  }, [tabValue]);
+
+  const fetchDoctors = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('catms_token');
+      const response = await axios.get('http://localhost:3000/api/staff/doctors', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDoctors(response.data);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+      setToast({ open: true, message: 'Error loading doctors', severity: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStaff = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('catms_token');
+      const response = await axios.get('http://localhost:3000/api/staff/all', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Filter out doctors from staff list
+      const nonDoctorStaff = response.data.filter(s => s.category !== 'Doctor');
+      setStaff(nonDoctorStaff);
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+      setToast({ open: true, message: 'Error loading staff', severity: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -72,7 +118,7 @@ const BranchManagers = () => {
   const filteredStaff = staff.filter(s => {
     if (!staffSearch.trim()) return true;
     const q = staffSearch.toLowerCase();
-    return s.name.toLowerCase().includes(q) || s.nic.toLowerCase().includes(q);
+    return s.name.toLowerCase().includes(q) || (s.nic && s.nic.toLowerCase().includes(q));
   });
 
   const toggleStaffSelect = (id) => {
@@ -89,8 +135,6 @@ const BranchManagers = () => {
     setToast({ open: true, message: 'Selected staff removed (dummy)', severity: 'success' });
   };
 
-  const navigate = useNavigate();
-
   const closeToast = () => {
     setToast(prev => ({ ...prev, open: false }));
   };
@@ -98,7 +142,7 @@ const BranchManagers = () => {
   const filteredDoctors = doctors.filter(d => {
     if (!removeSearch.trim()) return true;
     const q = removeSearch.toLowerCase();
-    return d.name.toLowerCase().includes(q) || d.nic.toLowerCase().includes(q);
+    return d.name.toLowerCase().includes(q) || (d.nic && d.nic.toLowerCase().includes(q));
   });
 
   const toggleSelect = (id) => {
@@ -110,7 +154,7 @@ const BranchManagers = () => {
       setToast({ open: true, message: 'Select at least one doctor to remove', severity: 'error' });
       return;
     }
-    setDoctors(prev => prev.filter(d => !selectedIds.includes(d.id)));
+    setDoctors(prev => prev.filter(d => !selectedIds.includes(d.staff_id)));
     setSelectedIds([]);
     setToast({ open: true, message: 'Selected doctor(s) removed (dummy)', severity: 'success' });
   };
@@ -158,7 +202,7 @@ const BranchManagers = () => {
             {/* Centered Add Doctor CTA */}
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mb: 4 }}>
               <Typography variant="h5" align="center">Add a new Doctor</Typography>
-              <Button variant="contained" onClick={() => navigate('/adddoctor')}>
+              <Button variant="contained" onClick={() => navigate('/dashboard/adddoctor')}>
                 Add Doctor
               </Button>
             </Box>
@@ -194,44 +238,50 @@ const BranchManagers = () => {
                       </Grid>
                     </Grid>
 
-                    {/* Dummy results table */}
-                    <TableContainer sx={{ mt: 3 }}>
-                      <Table stickyHeader size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell padding="checkbox"></TableCell>
-                            <TableCell><strong>Name</strong></TableCell>
-                            <TableCell><strong>Specialty</strong></TableCell>
-                            <TableCell><strong>Ref</strong></TableCell>
-                            <TableCell><strong>NIC</strong></TableCell>
-                            <TableCell><strong>DOB</strong></TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {filteredDoctors.length > 0 ? (
-                            filteredDoctors.map((d) => (
-                              <TableRow key={d.id} hover>
-                                <TableCell padding="checkbox">
-                                  <Checkbox
-                                    checked={selectedIds.includes(d.id)}
-                                    onChange={() => toggleSelect(d.id)}
-                                  />
-                                </TableCell>
-                                <TableCell>{d.name}</TableCell>
-                                <TableCell>{d.specialty}</TableCell>
-                                <TableCell>{d.ref}</TableCell>
-                                <TableCell>{d.nic}</TableCell>
-                                <TableCell>{d.dob}</TableCell>
-                              </TableRow>
-                            ))
-                          ) : (
+                    {/* Doctor results table */}
+                    {loading ? (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                        <CircularProgress />
+                      </Box>
+                    ) : (
+                      <TableContainer sx={{ mt: 3 }}>
+                        <Table stickyHeader size="small">
+                          <TableHead>
                             <TableRow>
-                              <TableCell colSpan={6} align="center">No matches found</TableCell>
+                              <TableCell padding="checkbox"></TableCell>
+                              <TableCell><strong>Staff ID</strong></TableCell>
+                              <TableCell><strong>Name</strong></TableCell>
+                              <TableCell><strong>Specialty</strong></TableCell>
+                              <TableCell><strong>NIC</strong></TableCell>
+                              <TableCell><strong>Branch</strong></TableCell>
                             </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
+                          </TableHead>
+                          <TableBody>
+                            {filteredDoctors.length > 0 ? (
+                              filteredDoctors.map((d) => (
+                                <TableRow key={d.staff_id} hover>
+                                  <TableCell padding="checkbox">
+                                    <Checkbox
+                                      checked={selectedIds.includes(d.staff_id)}
+                                      onChange={() => toggleSelect(d.staff_id)}
+                                    />
+                                  </TableCell>
+                                  <TableCell>{d.staff_id}</TableCell>
+                                  <TableCell>{d.name}</TableCell>
+                                  <TableCell>{d.speciality}</TableCell>
+                                  <TableCell>{d.nic || 'N/A'}</TableCell>
+                                  <TableCell>{d.branch_name || 'N/A'}</TableCell>
+                                </TableRow>
+                              ))
+                            ) : (
+                              <TableRow>
+                                <TableCell colSpan={6} align="center">No doctors found</TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    )}
                   </CardContent>
                 </Card>
               </Grid>
@@ -243,7 +293,7 @@ const BranchManagers = () => {
             {/* Centered Add Staff CTA */}
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mb: 4 }}>
               <Typography variant="h5" align="center">Add a new Staff</Typography>
-              <Button variant="contained" onClick={() => navigate('/addstaff')}>
+              <Button variant="contained" onClick={() => navigate('/dashboard/addstaff')}>
                 Add Staff
               </Button>
             </Box>
@@ -279,42 +329,52 @@ const BranchManagers = () => {
                       </Grid>
                     </Grid>
 
-                    {/* Dummy staff table */}
-                    <TableContainer sx={{ mt: 3 }}>
-                      <Table stickyHeader size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell padding="checkbox"></TableCell>
-                            <TableCell><strong>Name</strong></TableCell>
-                            <TableCell><strong>Role</strong></TableCell>
-                            <TableCell><strong>NIC</strong></TableCell>
-                            <TableCell><strong>DOB</strong></TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {filteredStaff.length > 0 ? (
-                            filteredStaff.map((s) => (
-                              <TableRow key={s.id} hover>
-                                <TableCell padding="checkbox">
-                                  <Checkbox
-                                    checked={selectedStaffIds.includes(s.id)}
-                                    onChange={() => toggleStaffSelect(s.id)}
-                                  />
-                                </TableCell>
-                                <TableCell>{s.name}</TableCell>
-                                <TableCell>{s.role}</TableCell>
-                                <TableCell>{s.nic}</TableCell>
-                                <TableCell>{s.dob}</TableCell>
-                              </TableRow>
-                            ))
-                          ) : (
+                    {/* Staff table */}
+                    {loading ? (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                        <CircularProgress />
+                      </Box>
+                    ) : (
+                      <TableContainer sx={{ mt: 3 }}>
+                        <Table stickyHeader size="small">
+                          <TableHead>
                             <TableRow>
-                              <TableCell colSpan={5} align="center">No matches found</TableCell>
+                              <TableCell padding="checkbox"></TableCell>
+                              <TableCell><strong>Staff ID</strong></TableCell>
+                              <TableCell><strong>Name</strong></TableCell>
+                              <TableCell><strong>Category</strong></TableCell>
+                              <TableCell><strong>NIC</strong></TableCell>
+                              <TableCell><strong>Phone</strong></TableCell>
+                              <TableCell><strong>Email</strong></TableCell>
                             </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
+                          </TableHead>
+                          <TableBody>
+                            {filteredStaff.length > 0 ? (
+                              filteredStaff.map((s) => (
+                                <TableRow key={s.staff_id} hover>
+                                  <TableCell padding="checkbox">
+                                    <Checkbox
+                                      checked={selectedStaffIds.includes(s.staff_id)}
+                                      onChange={() => toggleStaffSelect(s.staff_id)}
+                                    />
+                                  </TableCell>
+                                  <TableCell>{s.staff_id}</TableCell>
+                                  <TableCell>{s.name}</TableCell>
+                                  <TableCell>{s.category}</TableCell>
+                                  <TableCell>{s.nic || 'N/A'}</TableCell>
+                                  <TableCell>{s.phone_no}</TableCell>
+                                  <TableCell>{s.email}</TableCell>
+                                </TableRow>
+                              ))
+                            ) : (
+                              <TableRow>
+                                <TableCell colSpan={7} align="center">No staff found</TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    )}
                   </CardContent>
                 </Card>
               </Grid>

@@ -65,32 +65,223 @@ router.get('/', staffAuth(['Doctor']), async (req, res) => { //TEST PASS
 
 // **************************ADD staff **********************************************
 
-router.post('/staff', staffAuth(['admin']), async (req, res) => { // NO NEEEEEEEEEEEEEEEEDDDDD
-  const { staff_id, username, name, category, phone_no, gender, nic, email, password, branch_id } = req.body;
+router.post('/staff', staffAuth(['Admin', 'Super Admin', 'Branch Manager']), async (req, res) => {
+  const { username, name, category, phone_no, gender, nic, email, password, branch_id } = req.body;
+
+  // Validation
+  if (!username || !password || !name || !email || !category || !branch_id) {
+    return res.status(400).json({
+      error: 'Please provide username, password, name, email, category, and branch_id'
+    });
+  }
+
+  // Validate phone number (required)
+  if (!phone_no) {
+    return res.status(400).json({
+      error: 'Please provide phone number'
+    });
+  }
+
+  // Validate phone number format (10 digits)
+  const phoneRegex = /^[0-9]{10}$/;
+  if (!phoneRegex.test(phone_no)) {
+    return res.status(400).json({
+      error: 'Phone number must be exactly 10 digits'
+    });
+  }
+
+  // Validate category
+  const validCategories = ['Admin', 'Branch Manager', 'Nurse', 'Doctor', 'Other'];
+  if (!validCategories.includes(category)) {
+    return res.status(400).json({
+      error: 'Invalid category. Must be one of: Admin, Branch Manager, Nurse, Doctor, Other'
+    });
+  }
+
+  // Validate gender if provided
+  if (gender && !['Male', 'Female'].includes(gender)) {
+    return res.status(400).json({
+      error: 'Gender must be either Male or Female'
+    });
+  }
 
   try {
+    // Check if username or email already exists
+    const [existingUser] = await db.execute(
+      `SELECT * FROM staff WHERE username = ? OR email = ?`,
+      [username, email]
+    );
+
+    if (existingUser.length > 0) {
+      return res.status(400).json({
+        error: 'Username or email already in use'
+      });
+    }
+
+    // Check if NIC already exists (if provided)
+    if (nic) {
+      const [existingNIC] = await db.execute(
+        `SELECT * FROM staff WHERE nic = ?`,
+        [nic]
+      );
+
+      if (existingNIC.length > 0) {
+        return res.status(400).json({
+          error: 'NIC already in use'
+        });
+      }
+    }
+
+    // Check if branch exists
+    const [branch] = await db.execute(
+      `SELECT * FROM branch WHERE branch_id = ?`,
+      [branch_id]
+    );
+
+    if (branch.length === 0) {
+      return res.status(404).json({
+        error: 'Branch not found'
+      });
+    }
+
+    // Auto-generate Staff ID
+    const [staff] = await db.execute(
+      `SELECT staff_id FROM staff ORDER BY staff_id DESC LIMIT 1`
+    );
+
+    let newStaffId;
+    if (staff.length === 0) {
+      newStaffId = 'S0001';
+    } else {
+      const lastId = staff[0].staff_id;
+      const numericPart = parseInt(lastId.substring(1));
+      newStaffId = `S${String(numericPart + 1).padStart(4, '0')}`;
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.execute("INSERT INTO staff (staff_id, username, name, category, phone_no, gender, nic, email, password, branch_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
-      , [staff_id, username, name, category, phone_no, gender, nic, email, hashedPassword, branch_id]);
-    res.status(201).json({ message: "Staff added successfully" });
+    // Insert new staff
+    await db.execute(
+      `INSERT INTO staff (staff_id, username, name, category, phone_no, gender, nic, email, password, branch_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [newStaffId, username, name, category, phone_no, gender || null, nic || null, email, hashedPassword, branch_id]
+    );
+
+    // If category is Branch Manager, update the branch table with manager_id
+    if (category === 'Branch Manager') {
+      await db.execute(
+        `UPDATE branch SET manager_id = ? WHERE branch_id = ?`,
+        [newStaffId, branch_id]
+      );
+      console.log('✅ Branch updated with manager_id:', { branch_id, manager_id: newStaffId });
+    }
+
+    console.log('✅ Staff member created:', {
+      staff_id: newStaffId,
+      username,
+      name,
+      category,
+      email,
+      phone_no,
+      gender: gender || 'Not specified',
+      nic: nic || 'Not specified',
+      branch_id
+    });
+
+    res.status(201).json({
+      message: "Staff added successfully",
+      staff_id: newStaffId
+    });
   } catch (err) {
-    res.status(500).json({ error: err });
+    console.error('❌ Error creating staff:', err);
+    res.status(500).json({ 
+      error: 'Error creating staff member',
+      details: err.message 
+    });
   }
 });
 
 // **************************ADD DOCTOR **********************************************
 
-router.post('/doctor', staffAuth(['Admin']), async (req, res) => { // TEST PASS
-  const { staff_id, speciality, reference_no } = req.body;
+router.post('/doctor', staffAuth(['Admin', 'Branch Manager', 'Super Admin']), async (req, res) => { // TEST PASS
+  const { staff_id, speciality } = req.body;
+
+  if (!staff_id || !speciality) {
+    return res.status(400).json({ error: "Please provide staff_id and speciality" });
+  }
 
   try {
-
-    await db.execute("INSERT INTO doctor (staff_id,speciality, reference_no) VALUES (?, ?, ?) "
-      , [staff_id, speciality, reference_no]);
+    await db.execute("INSERT INTO doctor (staff_id, speciality) VALUES (?, ?) "
+      , [staff_id, speciality]);
     res.status(201).json({ message: "doctor added successfully" });
   } catch (err) {
+    console.error('Error adding doctor:', err);
     res.status(500).json({ error: "error adding doctor" });
+  }
+});
+
+//********************************* GET all doctors with staff info ***********************************
+router.get('/doctors', async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT 
+        d.staff_id,
+        s.name,
+        s.username,
+        s.email,
+        s.phone_no,
+        s.gender,
+        s.nic,
+        s.branch_id,
+        b.name as branch_name,
+        d.speciality
+       FROM doctor d
+       INNER JOIN staff s ON d.staff_id = s.staff_id
+       LEFT JOIN branch b ON s.branch_id = b.branch_id
+       ORDER BY s.name`
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching doctors:', err);
+    res.status(500).json({ error: 'Server error fetching doctors' });
+  }
+});
+
+//********************************* GET doctor by staff_id ***********************************
+router.get('/doctors/:staff_id', async (req, res) => {
+  const { staff_id } = req.params;
+
+  try {
+    const [rows] = await db.execute(
+      `SELECT 
+        d.staff_id,
+        s.name,
+        s.username,
+        s.email,
+        s.phone_no,
+        s.gender,
+        s.nic,
+        s.branch_id,
+        b.name as branch_name,
+        b.address as branch_address,
+        d.speciality
+       FROM doctor d
+       INNER JOIN staff s ON d.staff_id = s.staff_id
+       LEFT JOIN branch b ON s.branch_id = b.branch_id
+       WHERE d.staff_id = ?`,
+      [staff_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Error fetching doctor:', err);
+    res.status(500).json({ error: 'Server error fetching doctor' });
   }
 });
 

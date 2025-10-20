@@ -1,30 +1,228 @@
-// CATMS Sidebar
+// CATMS Sidebar - Role-Based Navigation
 // Import alongside leftsidebar.css for the complete experience.
 
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./leftsidebar.css";
-import { RxDashboard, RxCalendar, RxPerson, RxGear, RxBell } from "react-icons/rx";
-import { LuLogOut } from "react-icons/lu";
+import { 
+  RxDashboard, 
+  RxCalendar, 
+  RxPerson, 
+  RxBell 
+} from "react-icons/rx";
+import { 
+  LuLogOut, 
+  LuBuilding2, 
+  LuUserPlus, 
+  LuUsers, 
+  LuStethoscope,
+  LuClipboardList,
+  LuUserCog
+} from "react-icons/lu";
+import { FaHospital, FaUserTie } from "react-icons/fa";
 
-const defaultNavItems = [
-  { label: "Dashboard", href: "/dashboard", icon: <RxDashboard />, end: true },
-  { label: "Set Appointment", href: "/dashboard/appointments", icon: <RxCalendar /> },
-  { label: "Patients", href: "/dashboard/patients", icon: <RxPerson /> },
-  { label: "Settings", href: "/dashboard/settings", icon: <RxGear /> },
-];
+// Role-based navigation items
+const navigationByRole = {
+  // Super Admin / Admin
+  admin: [
+    { 
+      label: "Dashboard", 
+      href: "/dashboard", 
+      icon: <RxDashboard />, 
+      end: true 
+    },
+    { 
+      label: "Branches", 
+      href: "/dashboard/addbranch", 
+      icon: <LuBuilding2 /> 
+    },
+    { 
+      label: "Branch Managers", 
+      href: "/dashboard/branchmanagers", 
+      icon: <FaUserTie /> 
+    },
+    { 
+      label: "Add Branch Manager", 
+      href: "/dashboard/addbranchmanager", 
+      icon: <LuUserPlus /> 
+    },
+    { 
+      label: "Staff", 
+      href: "/dashboard/staff", 
+      icon: <LuUsers /> 
+    },
+    { 
+      label: "Add Staff", 
+      href: "/dashboard/addstaff", 
+      icon: <LuUserCog /> 
+    },
+    { 
+      label: "Doctors", 
+      href: "/dashboard/adddoctor", 
+      icon: <LuStethoscope /> 
+    },
+  ],
+
+  // Branch Manager
+  branch_manager: [
+    { 
+      label: "Dashboard", 
+      href: "/dashboard", 
+      icon: <RxDashboard />, 
+      end: true 
+    },
+    { 
+      label: "Manage Branch", 
+      href: "/dashboard/manage", 
+      icon: <LuBuilding2 /> 
+    },
+    { 
+      label: "Staff", 
+      href: "/dashboard/staff", 
+      icon: <LuUsers /> 
+    },
+    { 
+      label: "Add Staff", 
+      href: "/dashboard/addstaff", 
+      icon: <LuUserCog /> 
+    },
+    { 
+      label: "Doctors", 
+      href: "/dashboard/adddoctor", 
+      icon: <LuStethoscope /> 
+    },
+    { 
+      label: "Appointments", 
+      href: "/dashboard/appointments", 
+      icon: <RxCalendar /> 
+    },
+    { 
+      label: "Patients", 
+      href: "/dashboard/patients", 
+      icon: <RxPerson /> 
+    },
+  ],
+
+  // Doctor
+  doctor: [
+    { 
+      label: "Dashboard", 
+      href: "/dashboard", 
+      icon: <RxDashboard />, 
+      end: true 
+    },
+    { 
+      label: "My Schedule", 
+      href: "/dashboard/doctorchange", 
+      icon: <RxCalendar /> 
+    },
+    { 
+      label: "Appointments", 
+      href: "/dashboard/appointments", 
+      icon: <LuClipboardList /> 
+    },
+    { 
+      label: "Patients", 
+      href: "/dashboard/patients", 
+      icon: <RxPerson /> 
+    },
+  ],
+
+  // Staff (Nurse, Other)
+  staff: [
+    { 
+      label: "Dashboard", 
+      href: "/dashboard", 
+      icon: <RxDashboard />, 
+      end: true 
+    },
+    { 
+      label: "Appointments", 
+      href: "/dashboard/appointments", 
+      icon: <RxCalendar /> 
+    },
+    { 
+      label: "Patients", 
+      href: "/dashboard/patients", 
+      icon: <RxPerson /> 
+    },
+    { 
+      label: "Tasks", 
+      href: "/dashboard/tasks", 
+      icon: <LuClipboardList /> 
+    },
+  ],
+
+  // Patient
+  patient: [
+    { 
+      label: "Dashboard", 
+      href: "/dashboard", 
+      icon: <RxDashboard />, 
+      end: true 
+    },
+    { 
+      label: "Book Appointment", 
+      href: "/dashboard/book", 
+      icon: <RxCalendar /> 
+    },
+    { 
+      label: "My Appointments", 
+      href: "/dashboard/myappointments", 
+      icon: <LuClipboardList /> 
+    },
+    { 
+      label: "Medical Records", 
+      href: "/dashboard/records", 
+      icon: <FaHospital /> 
+    },
+  ],
+};
 
 export default function Leftsidebar({
-  navItems = defaultNavItems,
-  user = { name: "User", email: "user@example.com" },
   notificationsCount = 0,
-  onLogout = () => {},
   theme = "light",
 }) {
   const [open, setOpen] = useState(true);
+  const [user, setUser] = useState({ name: "User", email: "user@example.com", role: "staff" });
+  const [navItems, setNavItems] = useState([]);
+  const navigate = useNavigate();
   const tone = theme === "dark" ? "dark" : "light";
 
+  // Get user data from localStorage and set navigation items
+  useEffect(() => {
+    const userData = localStorage.getItem('catms_user');
+    const userRole = localStorage.getItem('catms_role');
+    
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser({
+          name: parsedUser.name || parsedUser.username || "User",
+          email: parsedUser.email || "user@example.com",
+          role: userRole || parsedUser.role || "staff"
+        });
+        
+        // Set navigation items based on role
+        const role = userRole || parsedUser.role || "staff";
+        setNavItems(navigationByRole[role] || navigationByRole.staff);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        setNavItems(navigationByRole.staff);
+      }
+    } else {
+      setNavItems(navigationByRole.staff);
+    }
+  }, []);
+
   const toggleSidebar = () => setOpen((o) => !o);
+
+  const handleLogout = () => {
+    localStorage.removeItem('catms_token');
+    localStorage.removeItem('catms_user');
+    localStorage.removeItem('catms_role');
+    navigate('/login');
+  };
 
   return (
     <aside
@@ -88,7 +286,10 @@ export default function Leftsidebar({
             <div className="user__meta">
               <div className="user__name">{user?.name}</div>
               <div className="user__email">{user?.email}</div>
-              <button type="button" className="btn btn--ghost" onClick={onLogout}>
+              <div className="user__role" style={{ fontSize: '0.75rem', color: '#888', marginTop: '4px' }}>
+                {user?.role?.replace('_', ' ').toUpperCase()}
+              </div>
+              <button type="button" className="btn btn--ghost" onClick={handleLogout}>
                 Logout
               </button>
             </div>
@@ -100,7 +301,7 @@ export default function Leftsidebar({
             className="btn btn--primary btn--floating"
             title="Logout"
             aria-label="Logout"
-            onClick={onLogout}
+            onClick={handleLogout}
           >
             <LuLogOut size={20} />
           </button>

@@ -1,24 +1,82 @@
--- Database Schema Updates for Branch Manager Support
--- Run these queries to update your existing database
+-- ============================================================================
+-- Database Schema Updates for CATMS (Clinic Appointment and Treatment Management System)
+-- Date: October 20, 2025
+-- ============================================================================
+-- Run these commands to update your database schema if starting from the base Database.sql
 
--- 1. Update staff category to include Branch Manager
-ALTER TABLE staff MODIFY COLUMN category 
-  ENUM('Admin', 'Branch Manager', 'Nurse', 'Doctor', 'Other') NOT NULL;
+USE catms;
 
--- 2. Add manager_id to branch table
-ALTER TABLE branch ADD COLUMN IF NOT EXISTS manager_id VARCHAR(5) NULL;
+-- ============================================================================
+-- 1. UPDATE BRANCH TABLE - Add missing columns
+-- ============================================================================
 
--- 3. Add foreign key constraint for manager
-ALTER TABLE branch ADD CONSTRAINT fk_branch_manager 
-  FOREIGN KEY (manager_id) REFERENCES staff(staff_id) 
-  ON DELETE SET NULL ON UPDATE CASCADE;
+-- Add phone_no column (if not exists)
+ALTER TABLE branch 
+ADD COLUMN phone_no VARCHAR(15) NULL AFTER address;
 
--- 4. Sample data: Create test branches
-INSERT INTO branch (branch_id, name, address) VALUES
-('B0001', 'Main Branch - Colombo', '123 Galle Road, Colombo 03'),
-('B0002', 'Kandy Branch', '45 Peradeniya Road, Kandy'),
-('B0003', 'Galle Branch', '78 Matara Road, Galle')
-ON DUPLICATE KEY UPDATE branch_id=branch_id;
+-- Add email column (if not exists)
+ALTER TABLE branch 
+ADD COLUMN email VARCHAR(100) NULL AFTER phone_no;
 
--- Note: Use the create-branch-manager.js script to create branch manager accounts
--- with properly hashed passwords
+-- Add manager_id column with foreign key (if not exists)
+ALTER TABLE branch 
+ADD COLUMN manager_id VARCHAR(5) NULL AFTER email;
+
+-- Add foreign key constraint for manager_id
+ALTER TABLE branch 
+ADD CONSTRAINT fk_branch_manager 
+FOREIGN KEY (manager_id) REFERENCES staff(staff_id) 
+ON DELETE SET NULL 
+ON UPDATE CASCADE;
+
+-- ============================================================================
+-- 2. UPDATE STAFF TABLE - Add 'Branch Manager' to category ENUM
+-- ============================================================================
+
+-- Modify category ENUM to include 'Branch Manager'
+ALTER TABLE staff 
+MODIFY COLUMN category ENUM('Admin', 'Branch Manager', 'Nurse', 'Doctor', 'Other') NOT NULL;
+
+-- ============================================================================
+-- 3. UPDATE STAFF TABLE - Make gender and nic nullable
+-- ============================================================================
+
+-- Make gender column nullable (was NOT NULL before)
+ALTER TABLE staff 
+MODIFY COLUMN gender ENUM('Male', 'Female') NULL;
+
+-- Make nic column nullable (keep UNIQUE constraint)
+ALTER TABLE staff 
+MODIFY COLUMN nic VARCHAR(20) NULL;
+
+-- ============================================================================
+-- VERIFICATION QUERIES
+-- ============================================================================
+
+-- Verify branch table structure
+SELECT 'Branch Table Structure:' AS Info;
+DESCRIBE branch;
+
+-- Verify staff table structure
+SELECT 'Staff Table Structure:' AS Info;
+DESCRIBE staff;
+
+-- Show category ENUM values
+SELECT 'Staff Category ENUM Values:' AS Info;
+SHOW COLUMNS FROM staff WHERE Field = 'category';
+
+-- ============================================================================
+-- SUMMARY OF CHANGES
+-- ============================================================================
+-- 
+-- Branch Table:
+--   - Added: phone_no VARCHAR(15) NULL
+--   - Added: email VARCHAR(100) NULL
+--   - Added: manager_id VARCHAR(5) NULL (FK to staff.staff_id)
+--
+-- Staff Table:
+--   - Updated: category ENUM to include 'Branch Manager'
+--   - Updated: gender ENUM to allow NULL
+--   - Updated: nic VARCHAR(20) to allow NULL (maintains UNIQUE constraint)
+--
+-- ============================================================================

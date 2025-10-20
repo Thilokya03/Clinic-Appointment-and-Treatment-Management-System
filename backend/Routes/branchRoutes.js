@@ -8,7 +8,7 @@ const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
 
 
 // ******************************** GET All Branches ****************************
-router.get('/', staffAuth(['Admin', 'Branch Manager']), async(req, res) =>{
+router.get('/', staffAuth(['Admin', 'Branch Manager', 'Super Admin']), async(req, res) =>{
     try{
         const [rows] = await db.execute(`
             SELECT b.*, s.name as manager_name, s.staff_id as manager_id
@@ -16,10 +16,11 @@ router.get('/', staffAuth(['Admin', 'Branch Manager']), async(req, res) =>{
             LEFT JOIN staff s ON b.manager_id = s.staff_id
             ORDER BY b.branch_id
         `);
+        console.log('✅ Fetched branches:', rows.length);
         res.json(rows);
     }catch(err){
-        console.error('Error fetching branches:', err);
-        res.status(500).json({error: 'Error fetching branches'});
+        console.error('❌ Error fetching branches:', err);
+        res.status(500).json({error: 'Error fetching branches', details: err.message});
     }
 });
 
@@ -66,7 +67,7 @@ router.get('/stats', staffAuth(['Admin', 'Super Admin']), async(req, res) =>{
 });
 
 // ******************************** ADD Branch ****************************
-router.post('/', staffAuth(['Admin']), async(req, res) =>{ 
+router.post('/', staffAuth(['Admin', 'Super Admin']), async(req, res) =>{ 
     const {name, address, phone_no, email} = req.body;
     
     if (!name || !address) {
@@ -114,7 +115,7 @@ router.post('/', staffAuth(['Admin']), async(req, res) =>{
 
 
 // ******************************** get branch by id ****************************
-router.get('/:id', staffAuth(['Admin', 'Branch Manager']), async(req, res) =>{ 
+router.get('/:id', staffAuth(['Admin', 'Branch Manager', 'Super Admin']), async(req, res) =>{ 
     const branch_id = req.params.id;
     try{
         const [row] = await db.execute(`
@@ -135,7 +136,7 @@ router.get('/:id', staffAuth(['Admin', 'Branch Manager']), async(req, res) =>{
 });
 
 // ******************************** UPDATE Branch ****************************
-router.put('/:id', staffAuth(['Admin']), async(req, res) => {
+router.put('/:id', staffAuth(['Admin', 'Super Admin']), async(req, res) => {
     const branch_id = req.params.id;
     const {name, address, phone_no, email} = req.body;
     
@@ -158,7 +159,7 @@ router.put('/:id', staffAuth(['Admin']), async(req, res) => {
 });
 
 // ******************************** DELETE Branch ****************************
-router.delete('/:id', staffAuth(['Admin']), async(req, res) => {
+router.delete('/:id', staffAuth(['Admin', 'Super Admin']), async(req, res) => {
     const branch_id = req.params.id;
     try{
         const [result] = await db.execute(`DELETE FROM branch WHERE branch_id = ?`, [branch_id]);
@@ -176,7 +177,7 @@ router.delete('/:id', staffAuth(['Admin']), async(req, res) => {
 });
 
 // ******************************** Assign Manager to Branch ****************************
-router.post('/:id/assign-manager', staffAuth(['Admin']), async(req, res) => {
+router.post('/:id/assign-manager', staffAuth(['Admin', 'Super Admin']), async(req, res) => {
     const branch_id = req.params.id;
     const { manager_id } = req.body;
     
@@ -214,7 +215,7 @@ router.post('/:id/assign-manager', staffAuth(['Admin']), async(req, res) => {
 });
 
 // ******************************** GET Branch Managers ****************************
-router.get('/managers/list', staffAuth(['Admin']), async(req, res) => {
+router.get('/managers/list', staffAuth(['Admin', 'Super Admin']), async(req, res) => {
     try{
         const [managers] = await db.execute(`
             SELECT s.staff_id, s.username, s.name, s.email, s.phone_no, s.branch_id, 
@@ -232,13 +233,20 @@ router.get('/managers/list', staffAuth(['Admin']), async(req, res) => {
 });
 
 // ******************************** ADD Branch Manager ****************************
-router.post('/managers', staffAuth(['Admin']), async(req, res) => {
-    const { username, password, name, email, phone, branch_id } = req.body;
+router.post('/managers', staffAuth(['Admin', 'Super Admin']), async(req, res) => {
+    const { username, password, name, email, phone, gender, branch_id } = req.body;
     
     // Validation
     if (!username || !password || !name || !email || !branch_id) {
         return res.status(400).json({
             error: 'Please provide username, password, name, email, and branch_id'
+        });
+    }
+    
+    // Validate gender if provided
+    if (gender && !['Male', 'Female'].includes(gender)) {
+        return res.status(400).json({
+            error: 'Gender must be either Male or Female'
         });
     }
     
@@ -287,8 +295,8 @@ router.post('/managers', staffAuth(['Admin']), async(req, res) => {
         // Insert new branch manager
         await db.execute(
             `INSERT INTO staff (staff_id, username, name, category, phone_no, gender, nic, email, password, branch_id) 
-             VALUES (?, ?, ?, 'Branch Manager', ?, NULL, NULL, ?, ?, ?)`,
-            [newStaffId, username, name, phone || null, email, hashedPassword, branch_id]
+             VALUES (?, ?, ?, 'Branch Manager', ?, ?, NULL, ?, ?, ?)`,
+            [newStaffId, username, name, phone || null, gender || null, email, hashedPassword, branch_id]
         );
         
         console.log('✅ Branch Manager created:', {
@@ -296,6 +304,7 @@ router.post('/managers', staffAuth(['Admin']), async(req, res) => {
             username,
             name,
             email,
+            gender: gender || 'Not specified',
             branch_id
         });
         

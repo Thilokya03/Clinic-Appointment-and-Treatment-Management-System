@@ -11,6 +11,8 @@ export default function AddBranchManager() {
     name: "",
     email: "",
     phone: "",
+    gender: "",
+    nic: "",
     branch_id: ""
   });
   const [branches, setBranches] = useState([]);
@@ -46,9 +48,25 @@ export default function AddBranchManager() {
     setLoading(true);
     setError(null);
 
+    // Validate phone number format (10 digits)
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setError('Phone number must be exactly 10 digits');
+      setLoading(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem('catms_token');
-      await axios.post('http://localhost:3000/api/branch/managers', formData, {
+      
+      // Prepare data for staff endpoint with category as 'Branch Manager'
+      const staffData = {
+        ...formData,
+        phone_no: formData.phone,  // Map 'phone' to 'phone_no' for backend
+        category: 'Branch Manager'
+      };
+      
+      await axios.post('http://localhost:3000/api/staff/staff', staffData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuccess(true);
@@ -127,7 +145,7 @@ export default function AddBranchManager() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="phone">Phone Number</label>
+            <label htmlFor="phone">Phone Number <span className="required">*</span></label>
             <input
               type="tel"
               id="phone"
@@ -135,7 +153,54 @@ export default function AddBranchManager() {
               value={formData.phone}
               onChange={handleChange}
               required
-              placeholder="Enter phone number"
+              placeholder="Enter 10-digit phone number (e.g., 0771234567)"
+              pattern="[0-9]{10}"
+              maxLength="10"
+              title="Phone number must be exactly 10 digits"
+            />
+            <small style={{ color: '#6b7280', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+              Must be exactly 10 digits
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label>Gender <span className="required">*</span></label>
+            <div className="radio-group">
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Male"
+                  checked={formData.gender === "Male"}
+                  onChange={handleChange}
+                  required
+                />
+                <span>Male</span>
+              </label>
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Female"
+                  checked={formData.gender === "Female"}
+                  onChange={handleChange}
+                  required
+                />
+                <span>Female</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="nic">NIC Number <span className="optional">(Optional)</span></label>
+            <input
+              type="text"
+              id="nic"
+              name="nic"
+              value={formData.nic}
+              onChange={handleChange}
+              placeholder="Enter NIC number"
+              maxLength="20"
             />
           </div>
 

@@ -89,6 +89,12 @@ export default function App() {
                 </ProtectedRoute>
               } />
 
+              <Route path="manage" element={
+                <ProtectedRoute allowedRoles={['branch_manager']}>
+                  <BranchManagers />
+                </ProtectedRoute>
+              } />
+
               <Route path="adddoctor" element={
                 <ProtectedRoute allowedRoles={['admin', 'branch_manager']}>
                   <AddDoctor />
@@ -122,7 +128,6 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/doctors" element={<Doctors />} />
             <Route path="/patient" element={<Patient />} />
-            <Route path="/staff" element={<Staff />} />
             <Route path="/about" element={<About />} />
           </Route>
         </Routes>

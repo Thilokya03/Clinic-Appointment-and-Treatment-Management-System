@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import "./doctors.css";
 import DoctorCard from "../../compornent/DoctorCard/DoctorCard";
 import {
@@ -8,140 +8,94 @@ import {
   InputAdornment,
   Container,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import { Search, Person, MedicalServices } from "@mui/icons-material";
-
-const DOCTORS = [
-  {
-    id: "DOC-1001",
-    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=640",
-    name: "Dr. Aisha Fernando",
-    specialty: "Consultant Cardiologist",
-    category: "Cardiology",
-    bio: "Heart health specialist focused on preventive cardiology and minimally invasive care.",
-    rating: 4.9,
-    reviews: 178,
-    experience: 14,
-    languages: ["English", "Sinhala"],
-    location: "National Hospital, Colombo",
-    nextAvailable: "Today - 04:30 PM",
-    consultationFee: "LKR 3,500",
-    patientsServed: 3200,
-    services: ["ECG review", "Heart screening"],
-    acceptingNewPatients: true,
-    url: "/appointmentsbook?doctor=DOC-1001",
-  },
-  {
-    id: "DOC-1002",
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=640",
-    name: "Dr. Kamal Silva",
-    specialty: "Consultant Neurologist",
-    category: "Neurology",
-    bio: "Expert in neurodegenerative disorders, stroke rehabilitation and long-term support.",
-    rating: 4.8,
-    reviews: 142,
-    experience: 12,
-    languages: ["English", "Sinhala", "Tamil"],
-    location: "Asiri Central Hospital, Colombo",
-    nextAvailable: "Tomorrow - 09:15 AM",
-    consultationFee: "LKR 4,200",
-    patientsServed: 2700,
-    services: ["EEG assessment", "Stroke clinic"],
-    acceptingNewPatients: true,
-    url: "/appointmentsbook?doctor=DOC-1002",
-  },
-  {
-    id: "DOC-1003",
-    image: "https://images.unsplash.com/photo-1591604021695-0c69b7c05981?w=640",
-    name: "Dr. Nimal Perera",
-    specialty: "Senior Consultant Pediatrician",
-    category: "Pediatrics",
-    bio: "Trusted child specialist offering compassionate care for newborns to teenagers.",
-    rating: 4.7,
-    reviews: 201,
-    experience: 18,
-    languages: ["English", "Sinhala"],
-    location: "Lady Ridgeway Hospital, Colombo",
-    nextAvailable: "Tomorrow - 11:00 AM",
-    consultationFee: "LKR 2,900",
-    patientsServed: 5100,
-    services: ["Well-baby clinic", "Immunisation"],
-    acceptingNewPatients: false,
-    url: "/appointmentsbook?doctor=DOC-1003",
-  },
-  {
-    id: "DOC-1004",
-    image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=640",
-    name: "Dr. Sunil Rathnayake",
-    specialty: "Consultant Dermatologist",
-    category: "Dermatology",
-    bio: "Advanced dermatology and laser therapist specialising in chronic skin conditions.",
-    rating: 4.9,
-    reviews: 156,
-    experience: 11,
-    languages: ["English", "Sinhala"],
-    location: "Nawaloka Hospital, Colombo",
-    nextAvailable: "Fri - 02:45 PM",
-    consultationFee: "LKR 3,200",
-    patientsServed: 2200,
-    services: ["Skin screening", "Laser therapy"],
-    acceptingNewPatients: true,
-    url: "/appointmentsbook?doctor=DOC-1004",
-  },
-  {
-    id: "DOC-1005",
-    image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=640",
-    name: "Dr. Priya Bandara",
-    specialty: "Consultant Obstetrician & Gynecologist",
-    category: "Gynecology",
-    bio: "Holistic women's health consultant with focus on high-risk pregnancies.",
-    rating: 4.8,
-    reviews: 189,
-    experience: 15,
-    languages: ["English", "Sinhala"],
-    location: "Ninewells Hospital, Colombo",
-    nextAvailable: "Sat - 09:30 AM",
-    consultationFee: "LKR 3,800",
-    patientsServed: 3400,
-    services: ["Prenatal care", "Fertility clinic"],
-    acceptingNewPatients: true,
-    url: "/appointmentsbook?doctor=DOC-1005",
-  },
-  {
-    id: "DOC-1006",
-    image: "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=640",
-    name: "Dr. Rajitha Gunawardena",
-    specialty: "Consultant Orthopedic Surgeon",
-    category: "Orthopedics",
-    bio: "Specialises in sports injuries, joint replacements and minimally invasive surgery.",
-    rating: 4.6,
-    reviews: 134,
-    experience: 13,
-    languages: ["English", "Sinhala"],
-    location: "Lanka Hospitals, Colombo",
-    nextAvailable: "Mon - 08:45 AM",
-    consultationFee: "LKR 4,000",
-    patientsServed: 2950,
-    services: ["Sports clinic", "Joint replacement"],
-    acceptingNewPatients: false,
-    url: "/appointmentsbook?doctor=DOC-1006",
-  },
-];
+import axios from "axios";
 
 export default function Doctors() {
   const [searchType, setSearchType] = useState("name");
   const [searchQuery, setSearchQuery] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("all");
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch doctors from backend
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  const fetchDoctors = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:3000/api/staff/doctors');
+      
+      // Transform backend data to match frontend format
+      const transformedDoctors = response.data.map((doctor, index) => ({
+        id: doctor.staff_id,
+        image: `https://images.unsplash.com/photo-${getRandomDoctorImage(index)}?w=640`,
+        name: doctor.name,
+        specialty: doctor.speciality,
+        category: doctor.speciality,
+        bio: `Expert ${doctor.speciality} specialist providing comprehensive care.`,
+        rating: (4.5 + Math.random() * 0.4).toFixed(1),
+        reviews: Math.floor(100 + Math.random() * 150),
+        experience: Math.floor(5 + Math.random() * 15),
+        languages: ["English", "Sinhala"],
+        location: doctor.branch_name || "Main Branch",
+        nextAvailable: getRandomAvailability(),
+        consultationFee: `LKR ${(2500 + Math.floor(Math.random() * 2000)).toLocaleString()}`,
+        patientsServed: Math.floor(1000 + Math.random() * 4000),
+        services: [doctor.speciality, "Consultation"],
+        acceptingNewPatients: Math.random() > 0.3,
+        url: `/appointmentsbook?doctor=${doctor.staff_id}`,
+        phone: doctor.phone_no,
+        email: doctor.email,
+      }));
+
+      setDoctors(transformedDoctors);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching doctors:', err);
+      setError('Failed to load doctors. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function to get random doctor images
+  const getRandomDoctorImage = (index) => {
+    const imageIds = [
+      '1612349317150-e413f6a5b16d',
+      '1559839734-2b71ea197ec2',
+      '1591604021695-0c69b7c05981',
+      '1582750433449-648ed127bb54',
+      '1537368910025-700350fe46c7',
+      '1551601651-2a8555f1a136',
+    ];
+    return imageIds[index % imageIds.length];
+  };
+
+  // Helper function to generate random availability
+  const getRandomAvailability = () => {
+    const days = ['Today', 'Tomorrow', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const randomDay = days[Math.floor(Math.random() * days.length)];
+    const hours = Math.floor(Math.random() * 12) + 1;
+    const minutes = ['00', '15', '30', '45'][Math.floor(Math.random() * 4)];
+    const period = Math.random() > 0.5 ? 'AM' : 'PM';
+    return `${randomDay} - ${hours}:${minutes} ${period}`;
+  };
 
   const specialtyOptions = useMemo(() => {
-    const unique = new Set(DOCTORS.map((doctor) => doctor.category));
+    const unique = new Set(doctors.map((doctor) => doctor.category));
     return ["all", ...Array.from(unique)];
-  }, []);
+  }, [doctors]);
 
   const filteredDoctors = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return DOCTORS.filter((doctor) => {
+    return doctors.filter((doctor) => {
       const matchesQuery = !query
         || (searchType === "name"
           ? doctor.name.toLowerCase().includes(query)
@@ -152,7 +106,7 @@ export default function Doctors() {
 
       return matchesQuery && matchesSpecialty;
     });
-  }, [searchQuery, searchType, specialtyFilter]);
+  }, [searchQuery, searchType, specialtyFilter, doctors]);
 
   const handleSearchTypeChange = (event) => {
     setSearchType(event.target.value);
@@ -167,7 +121,7 @@ export default function Doctors() {
             Our Specialists
           </Typography>
           <Typography variant="h6" component="p" className="doctors-subtitle">
-            Trusted doctors across cardiology, neurology, pediatrics, dermatology and more.
+            Trusted doctors across various specialties providing expert care.
           </Typography>
         </header>
 
@@ -231,28 +185,45 @@ export default function Doctors() {
           </Box>
         </Box>
 
-        <Typography variant="body1" className="results-count">
-          Showing {filteredDoctors.length} doctor{filteredDoctors.length !== 1 ? "s" : ""}
-          {searchQuery && ` for "${searchQuery}"`}
-          {specialtyFilter !== "all" && ` in ${specialtyFilter}`}
-        </Typography>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+            <CircularProgress size={60} />
+          </Box>
+        ) : error ? (
+          <Box className="no-results">
+            <Typography variant="h6" color="error">
+              {error}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Please check your connection and try again.
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            <Typography variant="body1" className="results-count">
+              Showing {filteredDoctors.length} doctor{filteredDoctors.length !== 1 ? "s" : ""}
+              {searchQuery && ` for "${searchQuery}"`}
+              {specialtyFilter !== "all" && ` in ${specialtyFilter}`}
+            </Typography>
 
-        <div className="doctors-grid">
-          {filteredDoctors.length > 0 ? (
-            filteredDoctors.map((doctor) => (
-              <DoctorCard key={doctor.id} doctor={doctor} />
-            ))
-          ) : (
-            <Box className="no-results">
-              <Typography variant="h6" color="text.primary">
-                No doctors found
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Try adjusting your search criteria or choose another specialty.
-              </Typography>
-            </Box>
-          )}
-        </div>
+            <div className="doctors-grid">
+              {filteredDoctors.length > 0 ? (
+                filteredDoctors.map((doctor) => (
+                  <DoctorCard key={doctor.id} doctor={doctor} />
+                ))
+              ) : (
+                <Box className="no-results">
+                  <Typography variant="h6" color="text.primary">
+                    No doctors found
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Try adjusting your search criteria or choose another specialty.
+                  </Typography>
+                </Box>
+              )}
+            </div>
+          </>
+        )}
       </Container>
     </div>
   );
