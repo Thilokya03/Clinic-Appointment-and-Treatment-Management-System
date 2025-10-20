@@ -2,6 +2,7 @@
   padding: clamp(48px, 6vw, 72px) 0;
   background: var(--surface-body, linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%));
   color: var(--text-primary, #0f172a);
+  min-height: 90vh;
 }
 
 .patient-shell {
@@ -27,16 +28,17 @@
 
 .patient-dashboard {
   display: grid;
-  gap: 24px;
+  gap: clamp(20px, 4vw, 28px);
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
 .dashboard-card {
-  background: var(--surface-elevated, #ffffff);
-  border: 1px solid var(--border-soft, rgba(148, 163, 184, 0.32));
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(2,6,23,.06);
   border-radius: 24px;
   padding: clamp(20px, 4vw, 28px);
-  box-shadow: 0 28px 64px -38px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 12px 30px -12px rgba(2,6,23,.25);
+  backdrop-filter: blur(8px) saturate(1.05);
 }
 
 .dashboard-card__header {
@@ -136,33 +138,33 @@
 }
 
 .quick-action-btn {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 40px 1fr;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 16px;
-  border-radius: 12px;
-  background: var(--surface-soft, rgba(241, 245, 249, 0.6));
-  border: none;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(2,6,23,.06);
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: transform .08s ease, box-shadow .2s ease;
   text-align: center;
 }
 
 .quick-action-btn:hover {
-  background: var(--surface-soft-hover, rgba(241, 245, 249, 0.9));
   transform: translateY(-2px);
+  box-shadow: 0 12px 30px -12px rgba(2,6,23,.25);
 }
 
 .quick-action-btn__icon {
-  color: var(--primary-main, #3b82f6);
+  color: #3b82f6;
+  font-size: 26px;
 }
 
 .quick-action-btn__label {
   font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
