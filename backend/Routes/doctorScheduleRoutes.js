@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const { staffAuth } = require('../middlewares/auth');
+const { staffAuth, authenticate } = require('../middlewares/auth');
 
 // Generate next schedule_id like DS0001, DS0002, ...
 const generateScheduleId = async () => {
@@ -91,7 +91,8 @@ router.get('/', async (req, res) => {
 });
 
 //*************************** GET schedules by doctor ******************
-router.get('/doctor/:staff_id', async (req, res) => {
+// Allow all authenticated users (including patients) to view doctor schedules for appointment booking
+router.get('/doctor/:staff_id', authenticate, async (req, res) => {
     const { staff_id } = req.params;
     console.log(staff_id);
     
@@ -405,7 +406,7 @@ router.put('/:id/reschedule', staffAuth(['Admin', 'Branch Manager', 'Doctor']), 
 });
 
 //*************************** DELETE schedule ******************
-router.delete('/:id', staffAuth(['Admin', 'Branch Manager']), async (req, res) => {
+router.delete('/:id', staffAuth(['Admin', 'Branch Manager', 'Doctor']), async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -417,6 +418,11 @@ router.delete('/:id', staffAuth(['Admin', 'Branch Manager']), async (req, res) =
 
         if (existing.length === 0) {
             return res.status(404).json({ error: 'Schedule not found' });
+        }
+
+        // If user is a doctor, verify they own this schedule
+        if (req.user.role === 'doctor' && existing[0].doctor_id !== req.user.id) {
+            return res.status(403).json({ error: 'You can only delete your own schedules' });
         }
 
         // Check if there are appointments

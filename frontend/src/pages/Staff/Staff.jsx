@@ -131,6 +131,15 @@ const StaffPage = () => {
   const [schedules, setSchedules] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [branches, setBranches] = useState([]);
+  
+  // Treatment workflow states
+  const [patientSearch, setPatientSearch] = useState('');
+  const [searchedPatients, setSearchedPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [patientAppointments, setPatientAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [filteredCatalog, setFilteredCatalog] = useState([]);
 
   // API Base URL
   const API_URL = 'http://localhost:3000/api';
@@ -293,23 +302,39 @@ const StaffPage = () => {
 
   // Add Treatment
   const addTreatment = async () => {
-    if (!treatmentForm.treatment_id || !treatmentForm.catalog_id || !treatmentForm.appointment_id) {
-      showToast('Please fill all required fields', 'error');
+    if (!selectedAppointment || !treatmentForm.catalog_id) {
+      showToast('Please select an appointment and a treatment', 'error');
       return;
     }
 
     setLoading(true);
     try {
-      await axios.post(`${API_URL}/treatment`, treatmentForm, {
+      const treatmentData = {
+        treatment_id: treatmentForm.treatment_id || `T${Date.now()}`,
+        catalog_id: treatmentForm.catalog_id,
+        appointment_id: selectedAppointment.appointment_id,
+        description: treatmentForm.description
+      };
+      
+      await axios.post(`${API_URL}/treatment`, treatmentData, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       showToast('Treatment added successfully!', 'success');
+      
+      // Reset all treatment workflow states
       setTreatmentForm({
         treatment_id: '',
         catalog_id: '',
         appointment_id: '',
         description: ''
       });
+      setPatientSearch('');
+      setSearchedPatients([]);
+      setSelectedPatient(null);
+      setPatientAppointments([]);
+      setSelectedAppointment(null);
+      setCatalogSearch('');
+      setFilteredCatalog([]);
       setOpenDialog(false);
     } catch (error) {
       console.error('Error adding treatment:', error);
@@ -317,6 +342,76 @@ const StaffPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Search patients by name or NIC
+  const searchPatients = async (searchTerm) => {
+    if (!searchTerm || searchTerm.length < 2) {
+      setSearchedPatients([]);
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_URL}/patient/all`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      
+      const filtered = response.data.filter(patient => 
+        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        patient.nic.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+      setSearchedPatients(filtered);
+    } catch (error) {
+      console.error('Error searching patients:', error);
+      showToast('Error searching patients', 'error');
+    }
+  };
+
+  // Fetch appointments for selected patient
+  const fetchPatientAppointments = async (patientId) => {
+    try {
+      const response = await axios.get(`${API_URL}/appointment`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      
+      const filtered = response.data.filter(apt => apt.patient_id === patientId);
+      setPatientAppointments(filtered);
+      
+      if (filtered.length === 0) {
+        showToast('No appointments found for this patient', 'info');
+      }
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      showToast('Error fetching appointments', 'error');
+    }
+  };
+
+  // Handle patient selection
+  const handlePatientSelect = (patient) => {
+    setSelectedPatient(patient);
+    setSearchedPatients([]);
+    setPatientSearch(patient.name);
+    fetchPatientAppointments(patient.patient_id);
+  };
+
+  // Handle appointment selection
+  const handleAppointmentSelect = (appointment) => {
+    setSelectedAppointment(appointment);
+    setFilteredCatalog(treatmentCatalog); // Show all catalog items
+  };
+
+  // Filter treatment catalog
+  const filterTreatmentCatalog = (searchTerm) => {
+    if (!searchTerm) {
+      setFilteredCatalog(treatmentCatalog);
+      return;
+    }
+    
+    const filtered = treatmentCatalog.filter(item =>
+      item.treatment_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredCatalog(filtered);
   };
 
   // Add Insurance Company
@@ -852,7 +947,19 @@ const StaffPage = () => {
       {/* Add Dialog */}
       <Dialog 
         open={openDialog} 
-        onClose={() => setOpenDialog(false)}
+        onClose={() => {
+          setOpenDialog(false);
+          // Reset treatment workflow states
+          if (dialogType === 'treatment') {
+            setPatientSearch('');
+            setSearchedPatients([]);
+            setSelectedPatient(null);
+            setPatientAppointments([]);
+            setSelectedAppointment(null);
+            setCatalogSearch('');
+            setFilteredCatalog([]);
+          }
+        }}
         maxWidth="md"
         fullWidth
       >
@@ -1028,50 +1135,149 @@ const StaffPage = () => {
 
             {dialogType === 'treatment' && (
               <>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Treatment ID *"
-                    value={treatmentForm.treatment_id}
-                    onChange={handleTreatmentInputChange('treatment_id')}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required>
-                    <InputLabel>Select Treatment from Catalog</InputLabel>
-                    <Select
-                      value={treatmentForm.catalog_id}
-                      label="Select Treatment from Catalog"
-                      onChange={handleTreatmentInputChange('catalog_id')}
-                    >
-                      {treatmentCatalog.map((item) => (
-                        <MenuItem key={item.catalog_id} value={item.catalog_id}>
-                          {item.treatment_name} - LKR {parseFloat(item.treatment_fee).toFixed(2)}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Appointment ID *"
-                    value={treatmentForm.appointment_id}
-                    onChange={handleTreatmentInputChange('appointment_id')}
-                    required
-                  />
-                </Grid>
+                {/* Step 1: Search Patient */}
                 <Grid item xs={12}>
+                  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                    Step 1: Search Patient
+                  </Typography>
                   <TextField
                     fullWidth
-                    label="Description"
-                    multiline
-                    rows={4}
-                    value={treatmentForm.description}
-                    onChange={handleTreatmentInputChange('description')}
+                    label="Search by Patient Name or NIC"
+                    value={patientSearch}
+                    onChange={(e) => {
+                      setPatientSearch(e.target.value);
+                      searchPatients(e.target.value);
+                    }}
+                    placeholder="Type patient name or NIC..."
+                    helperText="Enter at least 2 characters to search"
                   />
+                  
+                  {/* Patient Search Results */}
+                  {searchedPatients.length > 0 && !selectedPatient && (
+                    <Box sx={{ mt: 2, maxHeight: 200, overflow: 'auto', border: '1px solid #ddd', borderRadius: 1 }}>
+                      {searchedPatients.map((patient) => (
+                        <Box
+                          key={patient.patient_id}
+                          onClick={() => handlePatientSelect(patient)}
+                          sx={{
+                            p: 2,
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #eee',
+                            '&:hover': { bgcolor: '#f5f5f5' }
+                          }}
+                        >
+                          <Typography variant="body1"><strong>{patient.name}</strong></Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            NIC: {patient.nic} | Phone: {patient.phone_no}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                 </Grid>
+
+                {/* Step 2: Select Appointment */}
+                {selectedPatient && (
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle1" sx={{ mb: 1, mt: 2, fontWeight: 'bold' }}>
+                      Step 2: Select Appointment for {selectedPatient.name}
+                    </Typography>
+                    
+                    {patientAppointments.length === 0 ? (
+                      <Typography color="text.secondary" sx={{ p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+                        No appointments found for this patient
+                      </Typography>
+                    ) : (
+                      <Box sx={{ maxHeight: 250, overflow: 'auto', border: '1px solid #ddd', borderRadius: 1 }}>
+                        {patientAppointments.map((apt) => (
+                          <Box
+                            key={apt.appointment_id}
+                            onClick={() => handleAppointmentSelect(apt)}
+                            sx={{
+                              p: 2,
+                              cursor: 'pointer',
+                              borderBottom: '1px solid #eee',
+                              bgcolor: selectedAppointment?.appointment_id === apt.appointment_id ? '#e3f2fd' : 'transparent',
+                              '&:hover': { bgcolor: selectedAppointment?.appointment_id === apt.appointment_id ? '#e3f2fd' : '#f5f5f5' }
+                            }}
+                          >
+                            <Typography variant="body1">
+                              <strong>Appointment ID:</strong> {apt.appointment_id}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              <strong>Date:</strong> {new Date(apt.appointment_date).toLocaleDateString()} | 
+                              <strong> Time:</strong> {apt.appointment_time} | 
+                              <strong> Status:</strong> {apt.status}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </Grid>
+                )}
+
+                {/* Step 3: Search and Select Treatment */}
+                {selectedAppointment && (
+                  <>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle1" sx={{ mb: 1, mt: 2, fontWeight: 'bold' }}>
+                        Step 3: Select Treatment from Catalog
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        label="Search Treatment Catalog"
+                        value={catalogSearch}
+                        onChange={(e) => {
+                          setCatalogSearch(e.target.value);
+                          filterTreatmentCatalog(e.target.value);
+                        }}
+                        placeholder="Type to search treatments..."
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12}>
+                      <FormControl fullWidth required>
+                        <InputLabel>Select Treatment</InputLabel>
+                        <Select
+                          value={treatmentForm.catalog_id}
+                          label="Select Treatment"
+                          onChange={handleTreatmentInputChange('catalog_id')}
+                        >
+                          {(filteredCatalog.length > 0 ? filteredCatalog : treatmentCatalog).map((item) => (
+                            <MenuItem key={item.catalog_id} value={item.catalog_id}>
+                              {item.treatment_name} - Rs. {parseFloat(item.treatment_fee).toFixed(2)}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Treatment Description / Notes"
+                        multiline
+                        rows={4}
+                        value={treatmentForm.description}
+                        onChange={handleTreatmentInputChange('description')}
+                        placeholder="Add any additional notes about the treatment..."
+                      />
+                    </Grid>
+
+                    {/* Summary */}
+                    <Grid item xs={12}>
+                      <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+                        <Typography variant="subtitle2" gutterBottom><strong>Summary:</strong></Typography>
+                        <Typography variant="body2">Patient: {selectedPatient.name}</Typography>
+                        <Typography variant="body2">NIC: {selectedPatient.nic}</Typography>
+                        <Typography variant="body2">Appointment: {selectedAppointment.appointment_id}</Typography>
+                        <Typography variant="body2">
+                          Date: {new Date(selectedAppointment.appointment_date).toLocaleDateString()}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </>
+                )}
               </>
             )}
 
@@ -1245,7 +1451,24 @@ const StaffPage = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} disabled={loading}>Cancel</Button>
+          <Button 
+            onClick={() => {
+              setOpenDialog(false);
+              // Reset treatment workflow states
+              if (dialogType === 'treatment') {
+                setPatientSearch('');
+                setSearchedPatients([]);
+                setSelectedPatient(null);
+                setPatientAppointments([]);
+                setSelectedAppointment(null);
+                setCatalogSearch('');
+                setFilteredCatalog([]);
+              }
+            }} 
+            disabled={loading}
+          >
+            Cancel
+          </Button>
           <Button 
             onClick={
               dialogType === 'patient' ? addPatient :
@@ -1256,7 +1479,10 @@ const StaffPage = () => {
               addTreatmentCatalog
             } 
             variant="contained"
-            disabled={loading}
+            disabled={
+              loading || 
+              (dialogType === 'treatment' && (!selectedAppointment || !treatmentForm.catalog_id))
+            }
             startIcon={loading && <CircularProgress size={20} />}
           >
             {loading ? 'Processing...' : (

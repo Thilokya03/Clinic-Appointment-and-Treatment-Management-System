@@ -8,21 +8,62 @@ import {
   RxPerson,
 } from "react-icons/rx";
 import { LuCircleCheck, LuClipboardList, LuTriangleAlert, LuBuilding2 } from "react-icons/lu";
-import SearchableBranchDropdown from './SearchableBranchDropdown';
 import "./setAppointment.css";
 
+const INITIAL_APPOINTMENTS = [
+  {
+    id: "APT-2305",
+    patientName: "Naduni Senanayake",
+    patientId: "PT-1034",
+    doctorId: "DOC-001",
+    doctorName: "Dr. Amal Fernando",
+    date: new Date().toISOString().slice(0, 10),
+    time: "09:00",
+    duration: 30,
+    visitType: "Follow-up",
+    status: "Confirmed",
+    sendReminder: true,
+  },
+  {
+    id: "APT-2306",
+    patientName: "Kasun Abeysekara",
+    patientId: "PT-1042",
+    doctorId: "DOC-003",
+    doctorName: "Dr. Thisara Perera",
+    date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+    time: "11:30",
+    duration: 45,
+    visitType: "Consultation",
+    status: "Pending",
+    sendReminder: false,
+  },
+  {
+    id: "APT-2307",
+    patientName: "Ruvini Jayawardena",
+    patientId: "PT-0981",
+    doctorId: "DOC-002",
+    doctorName: "Dr. Nirmala Jayasinghe",
+    date: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10),
+    time: "15:00",
+    duration: 30,
+    visitType: "Skin Screening",
+    status: "Waiting",
+    sendReminder: true,
+  },
+];
 
 const initialFormState = {
+  patientName: "",
   doctorId: "",
   date: "",
   branchId: "",
-  notes: ""
+  visitType: ""
 };
 
 export default function SetAppointment() {
   const { user } = useAuth();
   const [form, setForm] = useState(initialFormState);
-  const [appointments, setAppointments] = useState([]);
+  const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
   const [banner, setBanner] = useState(null);
   const [doctors, setDoctors] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -37,9 +78,8 @@ export default function SetAppointment() {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   const branchDropdownRef = useRef(null);
-  const [selectedSpeciality, setSelectedSpeciality] = useState("All");
-  const [specialities, setSpecialities] = useState(["All"]);
   const [availableDates, setAvailableDates] = useState([]);
+  const [loadingDates, setLoadingDates] = useState(false);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -99,11 +139,6 @@ export default function SetAppointment() {
       console.log('📊 Number of doctors:', response.data.length);
       
       setDoctors(response.data);
-      
-      // Extract unique specialities
-      const uniqueSpecialities = ["All", ...new Set(response.data.map(doc => doc.speciality).filter(Boolean))];
-      setSpecialities(uniqueSpecialities);
-      
       setLoadingDoctors(false);
     } catch (err) {
       console.error('❌ Error fetching doctors:', err);
@@ -114,39 +149,6 @@ export default function SetAppointment() {
     }
   };
 
-  const getAvailableTimeSlot = async (doctorId, date) => {
-    try {
-      const token = localStorage.getItem('catms_token');
-      
-      // Convert date to YYYY-MM-DD format if it's not already
-      const dateStr = typeof date === 'string' && date.includes('T') 
-        ? date.split('T')[0] 
-        : date;
-      
-      console.log('📅 Fetching slots for doctorId:', doctorId, 'date:', dateStr);
-      
-      const response = await axios.get(`http://localhost:3000/api/appointment/available-slots`, {
-        params: { doctorId, date: dateStr },
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      console.log('Available slots response:', response.data);
-      
-      // Return the first available time slot and schedule_id
-      if (response.data.slots && response.data.slots.length > 0) {
-        return {
-          time: response.data.slots[0],
-          schedule_id: response.data.schedule_id
-        };
-      }
-      return null;
-    } catch (err) {
-      console.error('Error getting available time slots:', err);
-      setBanner({ type: 'error', message: 'Failed to get available time slots' });
-      return null;
-    }
-  };
-
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem('catms_token');
@@ -154,11 +156,44 @@ export default function SetAppointment() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAppointments(response.data);
-      
-      console.log('✅ Appointments fetched:', response.data);
     } catch (err) {
       console.error('Error fetching appointments:', err);
       setBanner({ type: 'error', message: 'Failed to fetch appointments' });
+    }
+  };
+
+  const fetchAvailableDates = async (doctorId) => {
+    try {
+      setLoadingDates(true);
+      const token = localStorage.getItem('catms_token');
+      console.log('🔍 Fetching available dates for doctor:', doctorId);
+      
+      const response = await axios.get(`http://localhost:3000/api/doctor-schedule/doctor/${doctorId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      console.log('✅ Doctor schedules fetched:', response.data);
+      
+      // Filter for active schedules with future dates and available slots
+      const currentDate = new Date().toISOString().slice(0, 10);
+      const activeDates = response.data.filter(schedule => 
+        schedule.status === 'ACTIVE' && 
+        schedule.schedule_date >= currentDate &&
+        schedule.booked_patients < schedule.max_patients
+      );
+      
+      console.log('📅 Available dates:', activeDates);
+      setAvailableDates(activeDates);
+      setLoadingDates(false);
+      
+      // Clear date selection when doctor changes
+      setForm((prev) => ({ ...prev, date: "" }));
+      
+    } catch (err) {
+      console.error('❌ Error fetching available dates:', err);
+      setLoadingDates(false);
+      setBanner({ type: 'error', message: 'Failed to fetch available dates for this doctor.' });
+      setAvailableDates([]);
     }
   };
 
@@ -198,17 +233,10 @@ export default function SetAppointment() {
     setBranchSearchTerm(branch.name);
     setForm((prev) => ({ ...prev, branchId: branch.branch_id }));
     setShowBranchDropdown(false);
-    
     // Clear doctor selection when branch changes
     setSelectedDoctor(null);
     setDoctorSearchTerm("");
     setForm((prev) => ({ ...prev, doctorId: "" }));
-    
-    // Update specialities based on selected branch
-    const doctorsInBranch = doctors.filter(doc => doc.branch_id === branch.branch_id);
-    const branchSpecialities = ["All", ...new Set(doctorsInBranch.map(doc => doc.speciality).filter(Boolean))];
-    setSpecialities(branchSpecialities);
-    setSelectedSpeciality("All"); // Reset speciality selection
   };
 
   const handleBranchSearchChange = (e) => {
@@ -217,88 +245,20 @@ export default function SetAppointment() {
     if (!e.target.value) {
       setSelectedBranch(null);
       setForm((prev) => ({ ...prev, branchId: "" }));
-      // Also clear doctor and reset specialities
+      // Also clear doctor
       setSelectedDoctor(null);
       setDoctorSearchTerm("");
       setForm((prev) => ({ ...prev, doctorId: "" }));
-      // Reset specialities to include all available ones
-      const allSpecialities = ["All", ...new Set(doctors.map(doc => doc.speciality).filter(Boolean))];
-      setSpecialities(allSpecialities);
-      setSelectedSpeciality("All");
-    }
-  };
-
-  const fetchDoctorSchedule = async (doctorId) => {
-    try {
-      const token = localStorage.getItem('catms_token');
-      console.log('🔍 Fetching schedule for doctor:', doctorId);
-      
-      const response = await axios.get(`http://localhost:3000/api/doctor-schedule/by-doctor/${doctorId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      console.log('✅ Doctor schedule response:', response.data);
-      console.log('✅ Number of schedules:', response.data.length);
-      
-      // Log each schedule in detail
-      response.data.forEach((schedule, index) => {
-        console.log(`Schedule ${index + 1}:`, {
-          schedule_id: schedule.schedule_id,
-          schedule_date: schedule.schedule_date,
-          doctor_id: schedule.staff_id || schedule.doctor_id,
-          start_time: schedule.start_time,
-          end_time: schedule.end_time
-        });
-      });
-      
-      // Extract unique dates from the schedule
-      const dates = [...new Set(response.data.map(schedule => {
-        // Parse the date string
-        let dateStr = schedule.schedule_date || schedule.date;
-        console.log('Processing date:', dateStr);
-        
-        // Handle different date formats
-        if (dateStr.includes('/')) {
-          // Convert MM/DD/YYYY to YYYY-MM-DD
-          const [month, day, year] = dateStr.split('/');
-          return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-        }
-        return dateStr;
-      }))];
-      
-      console.log('📅 Extracted dates:', dates);
-      
-      // Sort dates
-      dates.sort();
-      
-      // Filter out past dates
-      const today = new Date().toISOString().slice(0, 10);
-      const futureDates = dates.filter(date => {
-        const isValid = date >= today;
-        console.log(`Date ${date} is ${isValid ? 'valid' : 'invalid'} (today is ${today})`);
-        return isValid;
-      });
-      
-      console.log('📅 Available future dates:', futureDates);
-      
-      setAvailableDates(futureDates);
-    } catch (err) {
-      console.error('❌ Error fetching doctor schedule:', err);
-      console.error('Error response:', err.response?.data);
-      console.error('Error status:', err.response?.status);
-      setBanner({ type: 'error', message: 'Failed to fetch doctor\'s schedule' });
-      setAvailableDates([]);
     }
   };
 
   const handleDoctorSelect = (doctor) => {
-    console.log('🔍 Doctor selected:', doctor);
     setSelectedDoctor(doctor);
     setDoctorSearchTerm(doctor.name);
-    setForm((prev) => ({ ...prev, doctorId: doctor.staff_id, date: '' })); // Reset date when doctor changes
+    setForm((prev) => ({ ...prev, doctorId: doctor.staff_id }));
     setShowDoctorDropdown(false);
-    console.log('🔍 Fetching schedule for doctor ID:', doctor.staff_id);
-    fetchDoctorSchedule(doctor.staff_id); // Fetch doctor's schedule
+    // Fetch available dates for the selected doctor
+    fetchAvailableDates(doctor.staff_id);
   };
 
   const handleDoctorSearchChange = (e) => {
@@ -307,7 +267,7 @@ export default function SetAppointment() {
     if (!e.target.value) {
       setSelectedDoctor(null);
       setForm((prev) => ({ ...prev, doctorId: "", date: "" }));
-      setAvailableDates([]); // Reset available dates when doctor is unselected
+      setAvailableDates([]);
     }
   };
 
@@ -315,14 +275,10 @@ export default function SetAppointment() {
     branch.name?.toLowerCase().includes(branchSearchTerm.toLowerCase())
   );
 
-  // Filter doctors by selected branch and speciality
+  // Filter doctors by selected branch
   const filteredDoctors = doctors.filter(doctor => {
     // First filter by branch if one is selected
     if (form.branchId && doctor.branch_id !== form.branchId) {
-      return false;
-    }
-    // Then filter by speciality if not "All"
-    if (selectedSpeciality !== "All" && doctor.speciality !== selectedSpeciality) {
       return false;
     }
     // Then filter by search term
@@ -344,7 +300,6 @@ export default function SetAppointment() {
     setBranchSearchTerm("");
     setSelectedBranch(null);
     setShowBranchDropdown(false);
-    setAvailableDates([]); // Reset available dates
   };
 
   const handleSubmit = async (event) => {
@@ -374,17 +329,27 @@ export default function SetAppointment() {
       const token = localStorage.getItem('catms_token');
       console.log('🔍 Token exists:', !!token);
       
-      // Calculate appointment times based on duration
-      console.log('🔍 Getting available time slot for doctor:', form.doctorId, 'date:', form.date);
-      const slotInfo = await getAvailableTimeSlot(form.doctorId, form.date);
-      
-      if (!slotInfo) {
-        setBanner({ type: "error", message: "No available time slots for selected date" });
+      // Find the selected schedule to get schedule_id
+      const selectedSchedule = availableDates.find(
+        schedule => schedule.schedule_date === form.date || schedule.date === form.date
+      );
+
+      console.log('🔍 Selected schedule:', selectedSchedule);
+      console.log('🔍 All available dates:', availableDates);
+      console.log('🔍 Looking for date:', form.date);
+
+      if (!selectedSchedule) {
+        setBanner({ type: "error", message: "Selected date is no longer available. Please refresh and try again." });
         setLoading(false);
         return;
       }
 
-      console.log('✅ Got slot info:', slotInfo);
+      // Check if schedule still has available slots
+      if (selectedSchedule.booked_patients >= selectedSchedule.max_patients) {
+        setBanner({ type: "error", message: "No available slots for selected date" });
+        setLoading(false);
+        return;
+      }
 
       // Generate appointment ID
       const appointmentId = `A${Date.now().toString().slice(-4)}`;
@@ -397,11 +362,11 @@ export default function SetAppointment() {
       const appointmentData = {
         appointment_id: appointmentId,
         patient_id: user.id,
-        schedule_id: slotInfo.schedule_id,
+        schedule_id: selectedSchedule.schedule_id,
         status: 'Scheduled',
         appointment_date: appointmentDate,
         notes: form.notes || null,
-        appointment_fee: 300.00
+        appointment_fee: selectedSchedule.fee || 300.00
       };
 
       console.log('📝 Creating appointment with data:', appointmentData);
@@ -467,7 +432,7 @@ export default function SetAppointment() {
           )}
           <span>{banner.message}</span>
           <button type="button" onClick={closeBanner} className="banner__close" aria-label="Dismiss message">
-            ×
+            
           </button>
         </div>
       )}
@@ -483,62 +448,86 @@ export default function SetAppointment() {
           </header>
 
           <form className="appointment-form" onSubmit={handleSubmit}>
-            {user && (
-              <div className="form__row" style={{ backgroundColor: '#f0f9ff', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <RxPerson style={{ fontSize: '1.5rem', color: '#0284c7' }} />
-                  <div>
-                    <p style={{ margin: 0, fontWeight: '500', color: '#0c4a6e' }}>Booking for:</p>
-                    <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', color: '#0369a1' }}>{user.username}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             <div className="form__row">
+              <label htmlFor="patientName" className="form__label">
+                Patient Name
+              </label>
+              <div className="form__field">
+                <span className="form__icon" aria-hidden>
+                  <RxPerson />
+                </span>
+                <input
+                  id="patientName"
+                  name="patientName"
+                  type="text"
+                  placeholder="e.g. Sanduni Perera"
+                  value={form.patientName}
+                  onChange={handleChange("patientName")}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form__row" ref={branchDropdownRef}>
               <label htmlFor="branch" className="form__label">
                 Select Branch <span style={{ color: '#ef4444' }}>*</span>
               </label>
-              <SearchableBranchDropdown
-                value={branchSearchTerm}
-                onChange={setBranchSearchTerm}
-                onSelect={(branch) => {
-                  setSelectedBranch(branch);
-                  setBranchSearchTerm(branch.name);
-                  setForm(prev => ({ ...prev, branchId: branch.branch_id }));
-                  setDoctorSearchTerm("");
-                  setSelectedDoctor(null);
-                }}
-                loading={loadingBranches}
-                branches={branches}
-                showDropdown={showBranchDropdown}
-                setShowDropdown={setShowBranchDropdown}
-              />
-            </div>
-
-            <div className="form__row">
-              <label htmlFor="speciality" className="form__label">
-                Doctor Speciality
-              </label>
-              <div className="form__field">
-                <select
-                  id="speciality"
-                  value={selectedSpeciality}
-                  onChange={(e) => {
-                    setSelectedSpeciality(e.target.value);
-                    // Clear doctor selection when speciality changes
-                    setDoctorSearchTerm("");
-                    setSelectedDoctor(null);
-                    setForm(prev => ({ ...prev, doctorId: "" }));
-                  }}
-                  className="form__select"
-                >
-                  {specialities.map(speciality => (
-                    <option key={speciality} value={speciality}>
-                      {speciality}
-                    </option>
-                  ))}
-                </select>
+              <div className="form__field search-dropdown-field">
+                <span className="form__icon" aria-hidden>
+                  <LuBuilding2 />
+                </span>
+                <div className="search-dropdown-wrapper">
+                  <input
+                    id="branch"
+                    type="text"
+                    value={branchSearchTerm}
+                    onChange={handleBranchSearchChange}
+                    onFocus={() => setShowBranchDropdown(true)}
+                    placeholder="Search branch by name..."
+                    autoComplete="off"
+                    required
+                  />
+                  {showBranchDropdown && loadingBranches && (
+                    <div className="search-dropdown-menu">
+                      <div className="search-dropdown-item no-results">
+                        Loading branches...
+                      </div>
+                    </div>
+                  )}
+                  {showBranchDropdown && !loadingBranches && filteredBranches.length > 0 && (
+                    <div className="search-dropdown-menu">
+                      {filteredBranches.map((branch) => (
+                        <div
+                          key={branch.branch_id}
+                          className="search-dropdown-item"
+                          onClick={() => handleBranchSelect(branch)}
+                        >
+                          <div className="doctor-info">
+                            <span className="doctor-name">{branch.name}</span>
+                            {branch.address && (
+                              <span className="doctor-specialty">{branch.address}</span>
+                            )}
+                          </div>
+                          <span className="doctor-id">ID: {branch.branch_id}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {showBranchDropdown && !loadingBranches && branches.length === 0 && (
+                    <div className="search-dropdown-menu">
+                      <div className="search-dropdown-item no-results">
+                        No branches available.
+                      </div>
+                    </div>
+                  )}
+                  {showBranchDropdown && !loadingBranches && branchSearchTerm && filteredBranches.length === 0 && branches.length > 0 && (
+                    <div className="search-dropdown-menu">
+                      <div className="search-dropdown-item no-results">
+                        No branches found matching "{branchSearchTerm}"
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -602,7 +591,7 @@ export default function SetAppointment() {
             <div className="form__split">
               <div className="form__row">
                 <label htmlFor="date" className="form__label">
-                  Appointment Date
+                  Appointment Date {!form.doctorId && <span style={{ fontSize: '0.85rem', color: '#f97316', fontWeight: 'normal' }}>(Select doctor first)</span>}
                 </label>
                 <div className="form__field">
                   <span className="form__icon" aria-hidden>
@@ -614,52 +603,59 @@ export default function SetAppointment() {
                     value={form.date}
                     onChange={handleChange("date")}
                     required
-                    disabled={!selectedDoctor}
-                    className="form__select"
+                    disabled={!form.doctorId || loadingDates}
                   >
-                    <option value="">Select a date</option>
-                    {availableDates.map(date => {
-                      const dateObj = date.includes('/') 
-                        ? new Date(date.split('/')[2], parseInt(date.split('/')[0]) - 1, date.split('/')[1])
-                        : new Date(date);
+                    <option value="">
+                      {!form.doctorId 
+                        ? "Select a doctor first..." 
+                        : loadingDates 
+                          ? "Loading available dates..." 
+                          : availableDates.length === 0 
+                            ? "No available dates" 
+                            : "Choose appointment date"}
+                    </option>
+                    {availableDates.map((schedule) => {
+                      const dateObj = new Date(schedule.schedule_date);
+                      const formattedDate = dateObj.toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      });
+                      const availableSlots = schedule.max_patients - schedule.booked_patients;
+                      
                       return (
-                        <option key={date} value={date}>
-                          {dateObj.toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
+                        <option 
+                          key={schedule.schedule_id} 
+                          value={schedule.schedule_date}
+                          data-schedule-id={schedule.schedule_id}
+                        >
+                          {formattedDate} ({schedule.start_time} - {schedule.end_time}) - {availableSlots} slots available
                         </option>
                       );
                     })}
                   </select>
                 </div>
               </div>
-            </div>
-            
-            <div className="form__row">
-              <label htmlFor="notes" className="form__label">
-                Notes (Optional)
-              </label>
-              <div className="form__field">
-                <textarea
-                  id="notes"
-                  name="notes"
-                  value={form.notes || ""}
-                  onChange={handleChange("notes")}
-                  placeholder="Add any additional notes or special requirements..."
-                  rows="4"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '0.95rem',
-                    fontFamily: 'inherit',
-                    resize: 'vertical'
-                  }}
-                />
+
+              <div className="form__row">
+                <label htmlFor="visitType" className="form__label">
+                  Visit Type / Purpose
+                </label>
+                <div className="form__field">
+                  <span className="form__icon" aria-hidden>
+                    <RxClock />
+                  </span>
+                  <input
+                    id="visitType"
+                    name="visitType"
+                    type="text"
+                    placeholder="e.g. Consultation, Follow-up, Emergency, etc."
+                    value={form.visitType}
+                    onChange={handleChange("visitType")}
+                    required
+                  />
+                </div>
               </div>
             </div>
 
@@ -672,8 +668,10 @@ export default function SetAppointment() {
               </button>
             </div>
           </form>
+        </section>
 
-          <div className="card upcoming-card">
+        <section className="side-panel">
+          <article className="card upcoming-card">
             <header className="card__header">
               <div className="card__title">
                 <RxCalendar aria-hidden />
@@ -699,10 +697,8 @@ export default function SetAppointment() {
                 </li>
               ))}
             </ul>
-          </div>
-        </section>
+          </article>
 
-        <section className="side-panel">
           <article className="card availability-card">
             <header className="card__header">
               <div className="card__title">

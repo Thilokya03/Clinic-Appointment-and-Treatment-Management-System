@@ -9,6 +9,7 @@ const { authenticate, staffAuth } = require('../middlewares/auth');
 
 
 //********************************* GET staff by category ***********************************
+// Allow all authenticated users (including patients) to view staff by category
 router.get('/by-category/:category', authenticate, async (req, res) => {
   const category = req.params.category;
 

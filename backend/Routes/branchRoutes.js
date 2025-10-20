@@ -8,7 +8,7 @@ const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
 
 
 // ******************************** GET All Branches ****************************
-// Allow all users to view branches (needed for appointment booking and staff forms)
+// Allow all authenticated users (staff and patients) to view branches
 router.get('/', authenticate, async(req, res) =>{
     try{
         const [rows] = await db.execute(`
@@ -277,7 +277,8 @@ router.delete('/:id', staffAuth(['Admin', 'Super Admin']), async(req, res) => {
             [branch_id]
         );
         
-        // Commit transaction
+        // Comm
+        // it transaction
         await connection.commit();
         
         console.log(`✅ Branch deleted: ${branch_id}`);

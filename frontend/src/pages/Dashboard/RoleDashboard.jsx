@@ -1,7 +1,7 @@
 import { useAuth } from "../../context/AuthContext";
 import AdminDashboard from "./AdminDashboard";
 import BranchManagerDashboard from "./BranchManagerDashboard";
-import DoctorDashboard from "./DoctorDashboard";
+import DoctorDashboard from "../DoctorDashboard/DoctorDashboard"; // Changed to new 3-tab dashboard
 import StaffDashboard from "./StaffDashboard";
 import PatientDashboard from "./PatientDashboard";
 import { Navigate } from "react-router-dom";
