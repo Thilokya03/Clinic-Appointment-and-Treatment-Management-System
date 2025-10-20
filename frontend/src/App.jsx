@@ -15,6 +15,7 @@ import AddDoctor from "./pages/AddDoctor/AddDoctor";
 import AddStaff from "./pages/AddStaff/AddStaff";
 import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
+import About from "./pages/About/About";  
 
 
 // NOTE: keep your folder name exactly as in your project: compornent
@@ -68,7 +69,8 @@ export default function App() {
           <Route path="/doctors" element={<Doctors />} />
           <Route path="/patient" element={<Patient />} />
           <Route path="/staff" element={<Staff />} />
-        </Route>
+          <Route path="/about" element={<About />} />
+          </Route>
       </Routes>
     </Router>
   );

@@ -41,6 +41,197 @@
   overflow: hidden;
 }
 
+/* Hospital Footer Styles */
+.hospital-footer {
+  margin-top: auto;
+  background: linear-gradient(135deg, #1a3a52 0%, #0f2537 100%);
+  color: #e0e0e0;
+  width: 100%;
+}
+
+.footer-main {
+  padding: 60px 0 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Footer Titles */
+.footer-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 15px 0;
+}
+
+.footer-heading {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 20px 0;
+}
+
+.footer-description {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #b0b0b0;
+  margin: 0 0 25px 0;
+}
+
+/* Emergency Box */
+.footer-emergency {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(0, 168, 107, 0.15);
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #00a86b;
+}
+
+.emergency-icon {
+  font-size: 28px;
+}
+
+.emergency-label {
+  font-size: 12px;
+  color: #b0b0b0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.emergency-number {
+  font-size: 18px;
+  font-weight: 700;
+  color: #00a86b;
+  margin-top: 2px;
+}
+
+/* Footer Links */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: #b0b0b0;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.footer-links a:hover {
+  color: #00a86b;
+  padding-left: 5px;
+}
+
+/* Contact Info */
+.footer-contact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-contact li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #b0b0b0;
+  line-height: 1.6;
+}
+
+.contact-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 25px 0;
+}
+
+.footer-bottom-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-copyright {
+  font-size: 14px;
+  color: #b0b0b0;
+  margin: 0;
+}
+
+.footer-bottom-links {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.footer-bottom-links a {
+  color: #b0b0b0;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.3s ease;
+}
+
+.footer-bottom-links a:hover {
+  color: #00a86b;
+}
+
+.footer-bottom-links .divider {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* Social Links */
+.footer-social {
+  display: flex;
+  gap: 15px;
+}
+
+.social-link {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  text-decoration: none;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  background: #00a86b;
+  transform: translateY(-3px);
+}
+
 .site-footer {
   margin-top: auto;
   padding: 16px clamp(20px, 4vw, 48px);
@@ -77,6 +268,105 @@
     --dashboard-margin-inline-start: 16px;
     --dashboard-margin-inline-end: 16px;
     border-radius: 18px;
+  }
+}
+
+/* Footer Responsive Styles */
+@media (max-width: 768px) {
+  .footer-main {
+    padding: 40px 0 30px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .footer-section {
+    text-align: center;
+  }
+
+  .footer-title {
+    font-size: 20px;
+  }
+
+  .footer-heading {
+    font-size: 16px;
+  }
+
+  .footer-emergency {
+    justify-content: center;
+  }
+
+  .footer-links {
+    text-align: center;
+  }
+
+  .footer-links a:hover {
+    padding-left: 0;
+  }
+
+  .footer-contact li {
+    justify-content: center;
+    text-align: left;
+  }
+
+  .footer-bottom-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-bottom-links {
+    justify-content: center;
+  }
+
+  .footer-social {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-main {
+    padding: 30px 0 25px;
+  }
+
+  .footer-container {
+    gap: 30px;
+  }
+
+  .footer-title {
+    font-size: 18px;
+  }
+
+  .footer-description {
+    font-size: 13px;
+  }
+
+  .footer-emergency {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .emergency-number {
+    font-size: 16px;
+  }
+
+  .footer-bottom {
+    padding: 20px 0;
+  }
+
+  .footer-copyright {
+    font-size: 12px;
+  }
+
+  .footer-bottom-links a {
+    font-size: 12px;
+  }
+
+  .social-link {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
   }
 }
 
