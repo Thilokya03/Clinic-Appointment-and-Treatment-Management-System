@@ -10,11 +10,13 @@ import Doctors from "./pages/Doctor/Doctors";
 import Patient from "./pages/Patient/Patient";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import BranchManagers from "./pages/BranchManagers/BranchManagers";
+import ManageBranchManagers from "./pages/ManageBranchManagers/ManageBranchManagers";
 import Staff from "./pages/Staff/Staff";
 import AddDoctor from "./pages/AddDoctor/AddDoctor";
 import AddStaff from "./pages/AddStaff/AddStaff";
 import AddBranch from "./pages/AddBranch/AddBranch";
 import AddBranchManager from "./pages/AddBranchManager/AddBranchManager";
+import ManageBranch from "./pages/ManageBranch/ManageBranch";
 import SetAppointment from "./pages/SetAppointment/SetAppointment";
 import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
@@ -69,7 +71,7 @@ export default function App() {
               {/* Admin & Branch Manager Routes */}
               <Route path="branchmanagers" element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <BranchManagers />
+                  <ManageBranchManagers />
                 </ProtectedRoute>
               } />
 
@@ -82,6 +84,12 @@ export default function App() {
               <Route path="addbranch" element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <AddBranch />
+                </ProtectedRoute>
+              } />
+
+              <Route path="managebranch" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ManageBranch />
                 </ProtectedRoute>
               } />
 

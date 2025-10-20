@@ -305,7 +305,6 @@ router.post('/signup', async (req, res) => { // TEST PASS
 
     await db.execute(`INSERT INTO staff (staff_id, username, name, category, phone_no, gender, nic, email, password, branch_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [staff_id, username, name, category, phone_no, gender, nic, email, hashedPassword, branch_id]);
-    await db.execute(`INSERT `)
     res.status(201).json({ message: "staff added successfully" });
   } catch (err) {
     res.status(500).json({ error: err });
@@ -438,17 +437,117 @@ router.post('/signin', async (req, res) => { // TEST PASS
 
 });
 
-//**************************DELETE a staff******************************************
-
-router.delete('/', staffAuth(['admin']), async (req, res) => {
-  const staff_id = req.user.id;
+//**************************DELETE staff by ID (Admin only)******************************************
+router.delete('/:id', staffAuth(['Admin', 'Super Admin']), async (req, res) => {
+  const staff_id = req.params.id;
+  const connection = await db.getConnection();
 
   try {
-    await db.execute(`DELETE FROM staff WHERE staff_id=?`, [staff_id]);
-    res.status(200).json({ message: "Staff successfully deleted" });
+    await connection.beginTransaction();
+
+    // Check if staff exists
+    const [staff] = await connection.execute(`SELECT * FROM staff WHERE staff_id = ?`, [staff_id]);
+    
+    if(staff.length === 0){
+      await connection.rollback();
+      return res.status(404).json({error: "Staff member not found"});
+    }
+
+    const staffCategory = staff[0].category;
+    let deletedCounts = {
+      invoices: 0,
+      payments: 0,
+      treatments: 0,
+      appointments: 0,
+      doctors: 0
+    };
+
+    // If staff is a doctor, delete all related data first
+    if(staffCategory === 'Doctor') {
+      // Check if this staff is in the doctor table
+      const [doctor] = await connection.execute(`SELECT * FROM doctor WHERE staff_id = ?`, [staff_id]);
+      
+      if(doctor.length > 0) {
+        // Get all appointments for this doctor
+        const [appointments] = await connection.execute(
+          `SELECT appointment_id FROM appointment WHERE doctor_id = ?`,
+          [staff_id]
+        );
+
+        if(appointments.length > 0) {
+          const appointmentIds = appointments.map(a => a.appointment_id);
+          const placeholders = appointmentIds.map(() => '?').join(',');
+
+          // Get all payments for these appointments
+          const [payments] = await connection.execute(
+            `SELECT payment_id FROM payment WHERE appointment_id IN (${placeholders})`,
+            appointmentIds
+          );
+
+          if(payments.length > 0) {
+            const paymentIds = payments.map(p => p.payment_id);
+            const paymentPlaceholders = paymentIds.map(() => '?').join(',');
+
+            // Delete invoices
+            const [invoiceResult] = await connection.execute(
+              `DELETE FROM invoice WHERE payment_id IN (${paymentPlaceholders})`,
+              paymentIds
+            );
+            deletedCounts.invoices = invoiceResult.affectedRows;
+          }
+
+          // Delete payments
+          const [paymentResult] = await connection.execute(
+            `DELETE FROM payment WHERE appointment_id IN (${placeholders})`,
+            appointmentIds
+          );
+          deletedCounts.payments = paymentResult.affectedRows;
+
+          // Delete treatments
+          const [treatmentResult] = await connection.execute(
+            `DELETE FROM treatment WHERE appointment_id IN (${placeholders})`,
+            appointmentIds
+          );
+          deletedCounts.treatments = treatmentResult.affectedRows;
+        }
+
+        // Delete appointments
+        const [appointmentResult] = await connection.execute(
+          `DELETE FROM appointment WHERE doctor_id = ?`,
+          [staff_id]
+        );
+        deletedCounts.appointments = appointmentResult.affectedRows;
+
+        // Delete from doctor table
+        const [doctorResult] = await connection.execute(
+          `DELETE FROM doctor WHERE staff_id = ?`,
+          [staff_id]
+        );
+        deletedCounts.doctors = doctorResult.affectedRows;
+      }
+    }
+
+    // Delete the staff member
+    const [result] = await connection.execute(`DELETE FROM staff WHERE staff_id = ?`, [staff_id]);
+
+    await connection.commit();
+
+    console.log(`✅ Staff deleted: ${staff_id} (${staffCategory})`);
+    console.log(`📊 Deleted counts:`, deletedCounts);
+
+    res.status(200).json({ 
+      message: "Staff member and all associated data successfully deleted",
+      staff_id: staff_id,
+      category: staffCategory,
+      deleted: deletedCounts
+    });
   }
   catch (err) {
-    res.status(500).json({ error: "error deleting staff" });
+    await connection.rollback();
+    console.error('Error deleting staff:', err);
+    res.status(500).json({ error: "Error deleting staff", details: err.message });
+  } finally {
+    connection.release();
   }
 });
 

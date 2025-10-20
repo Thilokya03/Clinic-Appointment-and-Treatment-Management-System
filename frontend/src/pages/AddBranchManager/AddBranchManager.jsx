@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./addbranchmanager.css";
@@ -15,9 +15,42 @@ export default function AddBranchManager() {
     nic: "",
     branch_id: ""
   });
+  const [branches, setBranches] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Fetch branches on component mount
+  useEffect(() => {
+    fetchBranches();
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const fetchBranches = async () => {
+    try {
+      const token = localStorage.getItem('catms_token');
+      const response = await axios.get('http://localhost:3000/api/branch', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBranches(response.data);
+    } catch (err) {
+      console.error('Error fetching branches:', err);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -25,6 +58,26 @@ export default function AddBranchManager() {
       [e.target.name]: e.target.value
     });
   };
+
+  const handleBranchSelect = (branch) => {
+    setSelectedBranch(branch);
+    setSearchTerm(branch.name);
+    setFormData({ ...formData, branch_id: branch.branch_id });
+    setShowDropdown(false);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setShowDropdown(true);
+    if (!e.target.value) {
+      setSelectedBranch(null);
+      setFormData({ ...formData, branch_id: "" });
+    }
+  };
+
+  const filteredBranches = branches.filter(branch =>
+    branch.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -187,17 +240,46 @@ export default function AddBranchManager() {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="branch_id">Branch ID</label>
-            <input
-              type="text"
-              id="branch_id"
-              name="branch_id"
-              value={formData.branch_id}
-              onChange={handleChange}
-              required
-              placeholder="Enter branch ID"
-            />
+          <div className="form-group" ref={dropdownRef}>
+            <label htmlFor="branch_search">Branch <span className="required">*</span></label>
+            <div className="search-dropdown">
+              <input
+                type="text"
+                id="branch_search"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={() => setShowDropdown(true)}
+                required
+                placeholder="Search branch by name..."
+                autoComplete="off"
+              />
+              {showDropdown && filteredBranches.length > 0 && (
+                <div className="dropdown-menu">
+                  {filteredBranches.map((branch) => (
+                    <div
+                      key={branch.branch_id}
+                      className="dropdown-item"
+                      onClick={() => handleBranchSelect(branch)}
+                    >
+                      <div className="branch-info">
+                        <span className="branch-name">{branch.name}</span>
+                        <span className="branch-id">ID: {branch.branch_id}</span>
+                      </div>
+                      {branch.address && (
+                        <span className="branch-address">{branch.address}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {showDropdown && searchTerm && filteredBranches.length === 0 && (
+                <div className="dropdown-menu">
+                  <div className="dropdown-item no-results">
+                    No branches found
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {error && (
