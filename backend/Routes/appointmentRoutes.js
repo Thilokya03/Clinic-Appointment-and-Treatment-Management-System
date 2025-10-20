@@ -77,11 +77,39 @@ router.get('/patient/:id', authenticate, async(req, res) =>{
 
 router.get('/doctor/:id',staffAuth(['Doctor', 'Admin']), async(req, res) =>{//TEST PASSSSSSSSSSSS
     const doctor_id = req.user.id;
+    console.log('🔍 Fetching appointments for doctor:', doctor_id);
+    console.log('👤 User object:', req.user);
+    
     try{
-        const [row] = await db.execute(`SELECT * FROM appointment WHERE doctor_id = ?`, [doctor_id]);
-        res.json(row)
+        const [row] = await db.execute(
+            `SELECT 
+                a.appointment_id,
+                a.patient_id,
+                a.status,
+                a.appointment_date,
+                a.start_time,
+                a.end_time,
+                a.notes,
+                a.appointment_fee,
+                a.schedule_id,
+                p.name as patient_name,
+                p.phone_no as patient_phone,
+                p.nic as patient_nic,
+                ds.doctor_id,
+                ds.fee as schedule_fee
+             FROM appointment a 
+             INNER JOIN doctor_schedule ds ON a.schedule_id = ds.schedule_id
+             LEFT JOIN patient p ON a.patient_id = p.patient_id 
+             WHERE ds.doctor_id = ? 
+             ORDER BY a.appointment_date DESC, a.start_time DESC`, 
+            [doctor_id]
+        );
+        
+        console.log('✅ Found appointments:', row.length);
+        res.json(row);
     }catch(err){
-        res.status(500).json({error: "errer fetching appointments"});
+        console.error('❌ Error fetching appointments:', err);
+        res.status(500).json({error: "Error fetching appointments", details: err.message});
     }
 });
 
@@ -99,16 +127,77 @@ router.get('/:id',patientAuth, async(req, res) =>{ // TEST PASSSSSSSS
 
 //*********************************UPDATE/RESCEDULE appointment******************************* */
 
+router.put('/:id', staffAuth(['Doctor', 'Admin']), async(req, res) => {
+    const appointment_id = req.params.id;
+    const { appointment_date, start_time, end_time, notes, status } = req.body;
+    
+    try {
+        // Check if appointment exists
+        const [existing] = await db.execute(
+            `SELECT * FROM appointment WHERE appointment_id = ?`,
+            [appointment_id]
+        );
+        
+        if (existing.length === 0) {
+            return res.status(404).json({ error: 'Appointment not found' });
+        }
+        
+        // Build update query dynamically based on provided fields
+        let updateFields = [];
+        let values = [];
+        
+        if (appointment_date) {
+            updateFields.push('appointment_date = ?');
+            values.push(appointment_date);
+        }
+        if (start_time) {
+            updateFields.push('start_time = ?');
+            values.push(start_time);
+        }
+        if (end_time) {
+            updateFields.push('end_time = ?');
+            values.push(end_time);
+        }
+        if (notes !== undefined) {
+            updateFields.push('notes = ?');
+            values.push(notes);
+        }
+        if (status) {
+            updateFields.push('status = ?');
+            values.push(status);
+        }
+        
+        if (updateFields.length === 0) {
+            return res.status(400).json({ error: 'No fields to update' });
+        }
+        
+        values.push(appointment_id);
+        
+        await db.execute(
+            `UPDATE appointment SET ${updateFields.join(', ')} WHERE appointment_id = ?`,
+            values
+        );
+        
+        console.log('✅ Appointment updated:', { appointment_id, fields: updateFields });
+        
+        res.json({ message: 'Appointment updated successfully' });
+    } catch (err) {
+        console.error('Error updating appointment:', err);
+        res.status(500).json({ error: 'Error updating appointment', details: err.message });
+    }
+});
 
+//********************************* GET all appointments (for staff) ********************************* */
 
-
-
-
-
-
-
-
-
+router.get('/', authenticate, async(req, res) => {
+    try {
+        const [rows] = await db.execute(`SELECT * FROM appointment ORDER BY appointment_date DESC, start_time DESC`);
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching all appointments:', err);
+        res.status(500).json({ error: 'Error fetching appointments' });
+    }
+});
 
 //********************************* DELETE an appointment******************************************/
 

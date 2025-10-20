@@ -369,7 +369,7 @@ router.put('/:id/reschedule', staffAuth(['Admin', 'Branch Manager', 'Doctor']), 
 });
 
 //*************************** DELETE schedule ******************
-router.delete('/:id', staffAuth(['Admin', 'Branch Manager']), async (req, res) => {
+router.delete('/:id', staffAuth(['Admin', 'Branch Manager', 'Doctor']), async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -381,6 +381,11 @@ router.delete('/:id', staffAuth(['Admin', 'Branch Manager']), async (req, res) =
 
         if (existing.length === 0) {
             return res.status(404).json({ error: 'Schedule not found' });
+        }
+
+        // If user is a doctor, verify they own this schedule
+        if (req.user.role === 'doctor' && existing[0].doctor_id !== req.user.id) {
+            return res.status(403).json({ error: 'You can only delete your own schedules' });
         }
 
         // Check if there are appointments

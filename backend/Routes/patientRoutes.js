@@ -142,6 +142,21 @@ router.delete('/delete', authenticate, async(req, res) => {
   }
 });
 
+// **********************************************GET all patients (for staff search)*****************************
+
+router.get('/all', authenticate, async(req, res) => {
+  try {
+    const [rows] = await db.execute(
+      'SELECT patient_id, username, name, phone_no, gender, age, nic, email FROM patient ORDER BY name'
+    );
+    
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching all patients:', err);
+    res.status(500).json({error: 'Server error while fetching patients'});
+  }
+});
+
 // **********************************************GET a patient*****************************
 
 router.get('/', authenticate, async(req, res) => { // TEST PASS

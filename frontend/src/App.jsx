@@ -21,6 +21,7 @@ import SetAppointment from "./pages/SetAppointment/SetAppointment";
 import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
 import About from "./pages/About/About";
+import Reports from "./pages/Reports/Reports";
 
 // Import Auth Context and Protected Route
 import { AuthProvider } from "./context/AuthContext";
@@ -114,6 +115,12 @@ export default function App() {
               <Route path="addstaff" element={
                 <ProtectedRoute allowedRoles={['admin', 'branch_manager']}>
                   <AddStaff />
+                </ProtectedRoute>
+              } />
+
+              <Route path="reports" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <Reports />
                 </ProtectedRoute>
               } />
 
