@@ -1,219 +1,140 @@
-import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Home.css";
-import {
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
-  Typography,
-  Container,
-  Grid,
-  Paper,
-  Box,
-  Button,
-  Divider,
-  Snackbar,
-  Alert,
-} from "@mui/material";
-import {
-  CalendarMonth,
-  EventAvailable,
-  Assignment,
-  ReceiptLong,
-  AddCircleOutline,
-  LocalHospital,
-} from "@mui/icons-material";
-
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: "#3b82f6" },   // blue-500
-    secondary: { main: "#6366f1" }, // indigo-500
-  },
-  shape: { borderRadius: 14 },
-  components: {
-    MuiPaper: { styleOverrides: { root: { borderRadius: 18 } } },
-  },
-});
 
 export default function Home() {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [toast, setToast] = useState({ open: false, message: "", severity: "info" });
-  const [role, setRole] = useState("patient");
-  const [email, setEmail] = useState("");
-
-  // Pull role/email saved by Login.jsx
-  useEffect(() => {
-    const r = localStorage.getItem("catms_login_role") || "patient";
-    const e = localStorage.getItem("catms_login_email") || "";
-    setRole(r);
-    setEmail(e);
-  }, []);
-
-  const roleLabel = useMemo(
-    () => (role === "staff" ? "Staff" : role === "doctor" ? "Doctor" : "Patient"),
-    [role]
-  );
-
-  const openMenu = (e) => setAnchorEl(e.currentTarget);
-  const closeMenu = () => setAnchorEl(null);
-
-  const go = (path, msg) => {
-    // Hook to your router here if desired:
-    // navigate(path)
-    setToast({ open: true, message: msg || `Navigate → ${path}`, severity: "info" });
-    // window.location.href = path; // uncomment if you want a hard navigation
-  };
-
-  const logout = () => {
-    localStorage.removeItem("catms_login_email");
-    localStorage.removeItem("catms_login_role");
-    setToast({ open: true, message: "Logged out.", severity: "success" });
-    // window.location.href = "/login";
-  };
-
-  const closeToast = (_, reason) => {
-    if (reason === "clickaway") return;
-    setToast((t) => ({ ...t, open: false }));
-  };
-
-  // Quick actions vary by role
-  const quickActions = useMemo(() => {
-    if (role === "staff") {
-      return [
-        { icon: <AddCircleOutline />, text: "Create Appointment", onClick: () => go("/appointments/new") },
-        { icon: <EventAvailable />, text: "Today’s Schedule", onClick: () => go("/schedule/today") },
-        { icon: <LocalHospital />, text: "Walk-in Check-in", onClick: () => go("/walkins") },
-        { icon: <ReceiptLong />, text: "Billing & Payments", onClick: () => go("/billing") },
-      ];
-    }
-    if (role === "doctor") {
-      return [
-        { icon: <CalendarMonth />, text: "My Appointments", onClick: () => go("/doctor/appointments") },
-        { icon: <Assignment />, text: "Treatment Notes", onClick: () => go("/doctor/treatments") },
-        { icon: <ReceiptLong />, text: "My Revenue", onClick: () => go("/reports/doctor-revenue") },
-        { icon: <EventAvailable />, text: "On-Call / Today", onClick: () => go("/doctor/today") },
-      ];
-    }
-    // patient
-    return [
-      { icon: <AddCircleOutline />, text: "Book Appointment", onClick: () => go("/bookappointment") },
-      { icon: <CalendarMonth />, text: "My Appointments", onClick: () => go("/appointments/mine") },
-      { icon: <Assignment />, text: "Prescriptions & Treatments", onClick: () => go("/treatments") },
-      { icon: <ReceiptLong />, text: "Invoices & Payments", onClick: () => go("/invoices") },
-    ];
-  }, [role]);
+  const navigate = useNavigate();
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <div className="home-bg">
-        
+    <div className="hospital-home">
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-overlay">
+          <div className="hero-content">
+            <h1 className="hero-title">Welcome to City Central Hospital</h1>
+            <p className="hero-subtitle">Excellence in Healthcare, Compassion in Service</p>
+            <p className="hero-description">
+              Providing world-class medical care with state-of-the-art facilities and experienced professionals
+            </p>
+            <div className="hero-buttons">
+              <button className="btn-primary" onClick={() => navigate("/register")}>
+                Book Appointment
+              </button>
+              <button className="btn-secondary" onClick={() => navigate("/login")}>
+                Patient Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        {/* Content */}
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-          {/* Welcome */}
-          <Grid container spacing={15} alignItems="stretch">
-            <Grid item xs={12} md={7}>
-              <Paper className="hero-card" elevation={8}>
-                <Typography variant="h5" fontWeight={800}>
-                  Welcome back{email ? `, ${email.split("@")[0]}` : ""} 👋
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Manage appointments, treatments, and billing from one place.
-                </Typography>
-                <Box sx={{ display: "flex", gap: 1.5, mt: 2, flexWrap: "wrap" }}>
-                  <Button
-                    variant="contained"
-                    onClick={() =>
-                      go(
-                        role === "patient" ? "/appointments/book" :
-                        role === "staff"   ? "/appointments/new" :
-                                             "/doctor/appointments",
-                        "Quick Action"
-                      )
-                    }
-                  >
-                    Quick Action
-                  </Button>
-                  <Button variant="outlined" onClick={() => go("/reports")}>
-                    View Reports
-                  </Button>
-                </Box>
-              </Paper>
-            </Grid>
+      {/* Stats Section */}
+      <section className="stats-section">
+        <div className="container">
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-number">50+</div>
+              <div className="stat-label">Expert Doctors</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number">25,000+</div>
+              <div className="stat-label">Happy Patients</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number">15+</div>
+              <div className="stat-label">Departments</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number">24/7</div>
+              <div className="stat-label">Emergency Care</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Today snapshot */}
-            <Grid item xs={12} md={5}>
-              <Paper className="tiny-card" elevation={6}>
-                <Typography variant="subtitle1" fontWeight={700}>Today</Typography>
-                <Divider sx={{ my: 1.5 }} />
-                <Box className="today-row">
-                  <CalendarMonth /> <span>Appointments</span>
-                  <strong className="push">8</strong>
-                </Box>
-                <Box className="today-row">
-                  <EventAvailable /> <span>Completed</span>
-                  <strong className="push">3</strong>
-                </Box>
-                <Box className="today-row">
-                  <Assignment /> <span>Treatments</span>
-                  <strong className="push">5</strong>
-                </Box>
-              </Paper>
-            </Grid>
-          </Grid>
+      {/* Services Section */}
+      <section className="services-section">
+        <div className="container">
+          <h2 className="section-title">Our Medical Services</h2>
+          <p className="section-subtitle">Comprehensive healthcare services for your well-being</p>
+          <div className="services-grid">
+            <div className="service-card">
+              <div className="service-icon">🏥</div>
+              <h3>Emergency Care</h3>
+              <p>24/7 emergency medical services with rapid response team</p>
+            </div>
+            <div className="service-card">
+              <div className="service-icon">❤️</div>
+              <h3>Cardiology</h3>
+              <p>Advanced cardiac care and treatment facilities</p>
+            </div>
+            <div className="service-card">
+              <div className="service-icon">🧠</div>
+              <h3>Neurology</h3>
+              <p>Expert neurological diagnosis and treatment</p>
+            </div>
+            <div className="service-card">
+              <div className="service-icon">👶</div>
+              <h3>Pediatrics</h3>
+              <p>Specialized care for infants and children</p>
+            </div>
+            <div className="service-card">
+              <div className="service-icon">🦴</div>
+              <h3>Orthopedics</h3>
+              <p>Bone and joint treatment with modern techniques</p>
+            </div>
+            <div className="service-card">
+              <div className="service-icon">🔬</div>
+              <h3>Laboratory</h3>
+              <p>State-of-the-art diagnostic laboratory services</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          {/* Quick Actions */}
-          <Typography variant="subtitle1" fontWeight={800} sx={{ mt: 4, mb: 1 }}>
-            Quick actions
-          </Typography>
-          <Grid container spacing={2}>
-            {quickActions.map((qa, i) => (
-              <Grid item xs={12} sm={6} md={3} key={i}>
-                <Paper className="action-card" onClick={qa.onClick} elevation={4}>
-                  <div className="action-icon">{qa.icon}</div>
-                  <div className="action-text">{qa.text}</div>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
+      {/* Features Section */}
+      <section className="features-section">
+        <div className="container">
+          <h2 className="section-title">Why Choose Us</h2>
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon">👨‍⚕️</div>
+              <h3>Expert Physicians</h3>
+              <p>Board-certified doctors with years of experience in their specialties</p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">🏗️</div>
+              <h3>Modern Facilities</h3>
+              <p>Advanced medical equipment and comfortable patient rooms</p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">💊</div>
+              <h3>Quality Treatment</h3>
+              <p>Evidence-based medicine and personalized care plans</p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">📱</div>
+              <h3>Online Services</h3>
+              <p>Easy appointment booking and digital health records access</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          {/* Announcements / placeholder */}
-          <Typography variant="subtitle1" fontWeight={800} sx={{ mt: 4, mb: 1 }}>
-            Announcements
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Paper className="note-card" elevation={3}>
-                <Typography variant="subtitle2" fontWeight={700}>System maintenance</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Scheduled on Sunday 2:00–3:00 AM. Expect brief downtime.
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Paper className="note-card" elevation={3}>
-                <Typography variant="subtitle2" fontWeight={700}>New feature</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Insurance coverage report now includes per-treatment breakdowns.
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </div>
-
-      {/* Snackbar / Toast */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={2500}
-        onClose={closeToast}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert onClose={closeToast} severity={toast.severity} variant="filled" elevation={3} sx={{ width: "100%" }}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
-    </ThemeProvider>
+      {/* CTA Section */}
+      <section className="cta-section">
+        <div className="container">
+          <h2 className="cta-title">Ready to Get Started?</h2>
+          <p className="cta-text">Join thousands of satisfied patients who trust us with their health</p>
+          <div className="cta-buttons">
+            <button className="btn-cta-primary" onClick={() => navigate("/register")}>
+              Register Now
+            </button>
+            <button className="btn-cta-secondary" onClick={() => navigate("/about")}>
+              Learn More
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

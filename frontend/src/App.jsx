@@ -15,6 +15,7 @@ import AddDoctor from "./pages/AddDoctor/AddDoctor";
 import AddStaff from "./pages/AddStaff/AddStaff";
 import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
+import About from "./pages/About/About";
 
 // Import Auth Context and Protected Route
 import { AuthProvider } from "./context/AuthContext";
@@ -106,6 +107,9 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/register" element={<Register />} />
             <Route path="/doctors" element={<Doctors />} />
+            <Route path="/patient" element={<Patient />} />
+            <Route path="/staff" element={<Staff />} />
+            <Route path="/about" element={<About />} />
           </Route>
         </Routes>
       </AuthProvider>
