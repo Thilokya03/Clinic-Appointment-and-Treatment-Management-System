@@ -8,7 +8,8 @@ const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
 
 
 // ******************************** GET All Branches ****************************
-router.get('/', staffAuth(['Admin', 'Branch Manager', 'Super Admin']), async(req, res) =>{
+// Allow all staff categories to view branches (needed for doctor schedule form)
+router.get('/', staffAuth(['Admin', 'Branch Manager', 'Super Admin', 'Doctor', 'Nurse', 'Other']), async(req, res) =>{
     try{
         const [rows] = await db.execute(`
             SELECT b.*, s.name as manager_name, s.staff_id as manager_id

@@ -137,6 +137,11 @@ const navigationByRole = {
       end: true 
     },
     { 
+      label: "Staff Management", 
+      href: "/dashboard/staff", 
+      icon: <LuUsers /> 
+    },
+    { 
       label: "Appointments", 
       href: "/dashboard/appointments", 
       icon: <RxCalendar /> 

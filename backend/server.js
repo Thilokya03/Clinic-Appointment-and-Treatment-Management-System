@@ -14,12 +14,25 @@ app.use(cors({
 app.use(express.json());
 
 //-----Import routes-------
+console.log('Loading routes...');
 const staffRoutes = require("./Routes/staffRoutes");
+console.log('✓ staffRoutes loaded');
 const patientRoutes = require("./Routes/patientRoutes");
+console.log('✓ patientRoutes loaded');
 const branchRoutes = require("./Routes/branchRoutes")
+console.log('✓ branchRoutes loaded');
 const appointmentRoutes = require("./Routes/appointmentRoutes");
+console.log('✓ appointmentRoutes loaded');
 const paymentRoutes = require("./Routes/paymentRoutes");
+console.log('✓ paymentRoutes loaded');
 const treatmentRoutes = require("./Routes/treatmentRoutes");
+console.log('✓ treatmentRoutes loaded');
+const insuranceRoutes = require("./Routes/insuranceRoutes");
+console.log('✓ insuranceRoutes loaded');
+const treatmentCatalogRoutes = require("./Routes/treatmentCatalogRoutes");
+console.log('✓ treatmentCatalogRoutes loaded');
+const doctorScheduleRoutes = require("./Routes/doctorScheduleRoutes");
+console.log('✓ doctorScheduleRoutes loaded');
 //-------------------------
 
 
@@ -31,8 +44,18 @@ app.use("/api/branch", branchRoutes);
 app.use("/api/appointment", appointmentRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/treatment", treatmentRoutes);
+app.use("/api/insurance", insuranceRoutes);
+app.use("/api/treatment-catalog", treatmentCatalogRoutes);
+app.use("/api/doctor-schedule", doctorScheduleRoutes);
 //-------------------------
 
-app.listen(3000, () => {
-    console.log("server running at http://localhost:3000");
+const PORT = 3000;
+const server = app.listen(PORT, () => {
+    console.log(`server running at http://localhost:${PORT}`);
+});
+
+// Handle server errors
+server.on('error', (error) => {
+    console.error('Server error:', error);
+    process.exit(1);
 });
