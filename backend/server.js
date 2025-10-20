@@ -20,6 +20,7 @@ const branchRoutes = require("./Routes/branchRoutes")
 const appointmentRoutes = require("./Routes/appointmentRoutes");
 const paymentRoutes = require("./Routes/paymentRoutes");
 const treatmentRoutes = require("./Routes/treatmentRoutes");
+const forgotPasswordRoutes = require('./Routes/forgotpasswordRoutes');
 //-------------------------
 
 
@@ -31,6 +32,7 @@ app.use("/api/branch", branchRoutes);
 app.use("/api/appointment", appointmentRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/treatment", treatmentRoutes);
+app.use('/api/auth', forgotPasswordRoutes);
 //-------------------------
 
 app.listen(3000, () => {
