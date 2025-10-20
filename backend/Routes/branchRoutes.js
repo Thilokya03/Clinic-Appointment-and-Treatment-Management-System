@@ -7,7 +7,7 @@ const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
 
 
 // ******************************** ADD Branch ****************************
-router.post('/',staffAuth(['Admin']), async(req, res) =>{ // TEST PASSSSSSSSSSSS
+router.post('/',staffAuth(['Admin']), async(req, res) =>{ 
     const {branch_id, name, address} = req.body;
     try{
         await db.execute(`INSERT INTO branch (branch_id, name, address) VALUES (?, ?, ?)`, [branch_id, name, address]);

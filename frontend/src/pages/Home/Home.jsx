@@ -112,7 +112,7 @@ export default function Home() {
         {/* Content */}
         <Container maxWidth="lg" sx={{ py: 4 }}>
           {/* Welcome */}
-          <Grid container spacing={2} alignItems="stretch">
+          <Grid container spacing={15} alignItems="stretch">
             <Grid item xs={12} md={7}>
               <Paper className="hero-card" elevation={8}>
                 <Typography variant="h5" fontWeight={800}>
