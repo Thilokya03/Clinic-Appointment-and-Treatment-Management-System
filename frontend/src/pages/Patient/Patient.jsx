@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import "./patient.css";
+import "./Patient.css";
 import PatientCard from "../../compornent/PatientCard/PatientCard"; 
 import {
   TextField,
