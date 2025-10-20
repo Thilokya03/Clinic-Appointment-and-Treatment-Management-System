@@ -4,14 +4,56 @@ const db = require("../db");
 const { authenticate, staffAuth, patientAuth } = require('../middlewares/auth');
 
 //********************************ADD new appointment********************************* */
-router.post('/',patientAuth, async(req, res) =>{ // TEST PASSSSSSSSS
+router.post('/', authenticate, async(req, res) =>{ 
     const {appointment_id, patient_id, doctor_id, status, appointment_date, start_time, end_time, notes, appointment_fee} = req.body;
+    
+    // Validation
+    if (!appointment_id || !patient_id || !doctor_id || !appointment_date || !start_time || !end_time) {
+        return res.status(400).json({error: 'Please provide all required fields'});
+    }
+    
     try{
-        await db.execute(`INSERT INTO appointment (appointment_id, patient_id, doctor_id, status, appointment_date, start_time, end_time, notes, appointment_fee) VALUES (?, ?, ?,?, ?, ?,?, ?, ?)`, 
-            [appointment_id, patient_id, doctor_id, status, appointment_date, start_time, end_time, notes, appointment_fee]);
-        res.status(201).json({message:"appointment added Successfully"});
+        // Check if doctor exists
+        const [doctor] = await db.execute(
+            `SELECT * FROM doctor WHERE staff_id = ?`,
+            [doctor_id]
+        );
+        
+        if (doctor.length === 0) {
+            return res.status(404).json({error: 'Doctor not found'});
+        }
+        
+        // Check if patient exists
+        const [patient] = await db.execute(
+            `SELECT * FROM patient WHERE patient_id = ?`,
+            [patient_id]
+        );
+        
+        if (patient.length === 0) {
+            return res.status(404).json({error: 'Patient not found'});
+        }
+        
+        await db.execute(
+            `INSERT INTO appointment (appointment_id, patient_id, doctor_id, status, appointment_date, start_time, end_time, notes, appointment_fee) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+            [appointment_id, patient_id, doctor_id, status || 'Scheduled', appointment_date, start_time, end_time, notes, appointment_fee || 0.00]
+        );
+        
+        console.log('✅ Appointment created:', {
+            appointment_id,
+            patient_id,
+            doctor_id,
+            appointment_date,
+            start_time
+        });
+        
+        res.status(201).json({
+            message: "Appointment added successfully",
+            appointment_id
+        });
     }catch(err){
-        res.status(500).json({error:err});
+        console.error('Error creating appointment:', err);
+        res.status(500).json({error: 'Error creating appointment', details: err.message});
     }
 });
 

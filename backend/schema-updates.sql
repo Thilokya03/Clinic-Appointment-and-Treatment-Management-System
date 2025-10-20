@@ -22,3 +22,9 @@ ON DUPLICATE KEY UPDATE branch_id=branch_id;
 
 -- Note: Use the create-branch-manager.js script to create branch manager accounts
 -- with properly hashed passwords
+
+-- 5. Add branch_id column to appointment table
+ALTER TABLE appointment ADD COLUMN IF NOT EXISTS branch_id varchar(5) NOT NULL DEFAULT 'B0001';
+ALTER TABLE appointment ADD CONSTRAINT fk_appt_branch 
+  FOREIGN KEY (branch_id) REFERENCES branch(branch_id) 
+  ON DELETE RESTRICT ON UPDATE CASCADE;

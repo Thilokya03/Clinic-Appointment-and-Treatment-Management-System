@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./addbranchmanager.css";
@@ -13,26 +13,9 @@ export default function AddBranchManager() {
     phone: "",
     branch_id: ""
   });
-  const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    fetchBranches();
-  }, []);
-
-  const fetchBranches = async () => {
-    try {
-      const token = localStorage.getItem('catms_token');
-      const response = await axios.get('http://localhost:3000/api/branch', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setBranches(response.data);
-    } catch (err) {
-      console.error('Error fetching branches:', err);
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({
@@ -48,7 +31,7 @@ export default function AddBranchManager() {
 
     try {
       const token = localStorage.getItem('catms_token');
-      await axios.post('http://localhost:3000/api/branch/managers', formData, {
+      await axios.post('/api/branchmanager', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuccess(true);
@@ -57,7 +40,7 @@ export default function AddBranchManager() {
       }, 1500);
     } catch (err) {
       console.error('Error adding branch manager:', err);
-      setError(err.response?.data?.error || err.response?.data?.message || 'Failed to add branch manager');
+      setError(err.response?.data?.message || 'Failed to add branch manager');
     } finally {
       setLoading(false);
     }
@@ -140,21 +123,16 @@ export default function AddBranchManager() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="branch_id">Branch</label>
-            <select
+            <label htmlFor="branch_id">Branch ID</label>
+            <input
+              type="text"
               id="branch_id"
               name="branch_id"
               value={formData.branch_id}
               onChange={handleChange}
               required
-            >
-              <option value="">Select a branch</option>
-              {branches.map((branch) => (
-                <option key={branch.branch_id} value={branch.branch_id}>
-                  {branch.name} ({branch.branch_id})
-                </option>
-              ))}
-            </select>
+              placeholder="Enter branch ID"
+            />
           </div>
 
           {error && (
