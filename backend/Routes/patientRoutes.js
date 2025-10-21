@@ -157,6 +157,106 @@ router.get('/all', authenticate, async(req, res) => {
   }
 });
 
+// **********************************************SEARCH Patient with Balance*****************************
+
+router.get('/search', authenticate, async(req, res) => {
+  const { search } = req.query; // Can search by ID, name, phone, or NIC
+  
+  try {
+    let query = `
+      SELECT 
+        p.patient_id,
+        p.username,
+        p.name,
+        p.phone_no,
+        p.gender,
+        p.age,
+        p.nic,
+        p.email,
+        COALESCE(SUM(pay.total_amount), 0) as total_billed,
+        COALESCE(SUM(pay.insurance_paid_amount + pay.patient_paid_amount), 0) as total_paid,
+        COALESCE(SUM(pay.Due_payment), 0) as total_outstanding
+      FROM patient p
+      LEFT JOIN payment pay ON p.patient_id = pay.patient_id
+    `;
+    
+    const params = [];
+    
+    if (search && search.trim() !== '') {
+      query += ` WHERE p.patient_id LIKE ? OR p.name LIKE ? OR p.phone_no LIKE ? OR p.nic LIKE ?`;
+      const searchPattern = `%${search}%`;
+      params.push(searchPattern, searchPattern, searchPattern, searchPattern);
+    }
+    
+    query += ` GROUP BY p.patient_id ORDER BY p.name`;
+    
+    const [rows] = await db.execute(query, params);
+    
+    res.json(rows);
+  } catch (err) {
+    console.error('Error searching patients:', err);
+    res.status(500).json({error: 'Server error while searching patients'});
+  }
+});
+
+// **********************************************GET Patient Balance Details*****************************
+
+router.get('/balance/:patient_id', authenticate, async(req, res) => {
+  const { patient_id } = req.params;
+  
+  try {
+    // Get patient info
+    const [patientRows] = await db.execute(
+      'SELECT patient_id, username, name, phone_no, email FROM patient WHERE patient_id = ?',
+      [patient_id]
+    );
+    
+    if (patientRows.length === 0) {
+      return res.status(404).json({error: 'Patient not found'});
+    }
+    
+    // Get all payments with appointment details
+    const [paymentRows] = await db.execute(`
+      SELECT 
+        pay.payment_id,
+        pay.appointment_id,
+        a.appointment_date,
+        pay.total_amount,
+        pay.insurance_paid_amount,
+        pay.patient_paid_amount,
+        pay.discount_amount,
+        pay.Due_payment,
+        pay.status,
+        i.invoice_id,
+        i.amount as invoice_amount
+      FROM payment pay
+      JOIN appointment a ON pay.appointment_id = a.appointment_id
+      LEFT JOIN invoice i ON pay.payment_id = i.payment_id
+      WHERE pay.patient_id = ?
+      ORDER BY a.appointment_date DESC
+    `, [patient_id]);
+    
+    // Calculate totals
+    const totalBilled = paymentRows.reduce((sum, row) => sum + parseFloat(row.total_amount || 0), 0);
+    const totalPaid = paymentRows.reduce((sum, row) => sum + parseFloat(row.insurance_paid_amount || 0) + parseFloat(row.patient_paid_amount || 0), 0);
+    const totalOutstanding = paymentRows.reduce((sum, row) => sum + parseFloat(row.Due_payment || 0), 0);
+    
+    res.json({
+      patient: patientRows[0],
+      payments: paymentRows,
+      summary: {
+        total_billed: totalBilled.toFixed(2),
+        total_paid: totalPaid.toFixed(2),
+        total_outstanding: totalOutstanding.toFixed(2),
+        number_of_payments: paymentRows.length
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching patient balance:', err);
+    res.status(500).json({error: 'Server error'});
+  }
+});
+
 // **********************************************GET a patient*****************************
 
 router.get('/', authenticate, async(req, res) => { // TEST PASS

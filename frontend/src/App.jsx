@@ -22,6 +22,11 @@ import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
 import About from "./pages/About/About";
 import Reports from "./pages/Reports/Reports";
+import ManagePayment from "./pages/ManagePayment/ManagePayment";
+import PatientBalance from "./pages/PatientBalance/PatientBalance";
+import InsuranceClaim from "./pages/InsuranceClaim/InsuranceClaim";
+import PatientSearchAppointment from "./pages/PatientSearchAppointment/PatientSearchAppointment";
+import PatientPaymentHistory from "./pages/PatientPaymentHistory/PatientPaymentHistory";
 
 // Import Auth Context and Protected Route
 import { AuthProvider } from "./context/AuthContext";
@@ -100,6 +105,30 @@ export default function App() {
                 </ProtectedRoute>
               } />
 
+              <Route path="managepayment" element={
+                <ProtectedRoute allowedRoles={['admin', 'branch_manager', 'staff']}>
+                  <ManagePayment />
+                </ProtectedRoute>
+              } />
+
+              <Route path="patient-balance" element={
+                <ProtectedRoute allowedRoles={['admin', 'branch_manager', 'staff', 'nurse']}>
+                  <PatientBalance />
+                </ProtectedRoute>
+              } />
+
+              <Route path="patient-search-appointment" element={
+                <ProtectedRoute allowedRoles={['admin', 'branch_manager', 'staff', 'nurse']}>
+                  <PatientSearchAppointment />
+                </ProtectedRoute>
+              } />
+
+              <Route path="insurance-claims" element={
+                <ProtectedRoute allowedRoles={['admin', 'branch_manager', 'nurse']}>
+                  <InsuranceClaim />
+                </ProtectedRoute>
+              } />
+
               <Route path="manage" element={
                 <ProtectedRoute allowedRoles={['branch_manager']}>
                   <BranchManagers />
@@ -141,6 +170,12 @@ export default function App() {
               <Route path="book-appointment" element={
                 <ProtectedRoute>
                   <SetAppointment />
+                </ProtectedRoute>
+              } />
+
+              <Route path="my-payments" element={
+                <ProtectedRoute allowedRoles={['patient']}>
+                  <PatientPaymentHistory />
                 </ProtectedRoute>
               } />
             </Route>

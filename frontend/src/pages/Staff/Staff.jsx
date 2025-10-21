@@ -1,5 +1,6 @@
 // src/pages/Staff/Staff.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
   Box,
@@ -63,6 +64,7 @@ function TabPanel({ children, value, index, ...other }) {
 }
 
 const StaffPage = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const [tabValue, setTabValue] = useState(0);
@@ -631,10 +633,76 @@ const StaffPage = () => {
                     <Button
                       variant="contained"
                       startIcon={<Payment />}
-                      onClick={() => openAddDialog('payment')}
+                      onClick={() => navigate('/dashboard/managepayment')}
                       size="large"
                     >
                       Record Payment
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Book Appointment */}
+              <Card sx={{ mt: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
+                    Book Patient Appointment
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
+                    Search for a patient and book an appointment
+                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => navigate('/dashboard/patient-search-appointment')}
+                      size="large"
+                    >
+                      Book Appointment
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Patient Balance Search */}
+              <Card sx={{ mt: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
+                    Patient Balance Search
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
+                    Search for patients and view their outstanding balance
+                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => navigate('/dashboard/patient-balance')}
+                      size="large"
+                    >
+                      Search Patient Balance
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Insurance Claims */}
+              <Card sx={{ mt: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ mb: 1, textAlign: 'left' }}>
+                    Insurance Claims
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'left' }}>
+                    Submit and manage insurance claims for patient payments
+                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={() => navigate('/dashboard/insurance-claims')}
+                      size="large"
+                    >
+                      Manage Insurance Claims
                     </Button>
                   </Box>
                 </CardContent>

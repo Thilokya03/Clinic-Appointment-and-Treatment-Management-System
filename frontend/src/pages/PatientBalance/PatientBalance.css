@@ -1,0 +1,21 @@
+.patient-balance-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.patient-balance-container .MuiCard-root {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.patient-balance-container .MuiTableRow-root:hover {
+  background-color: #f0f7ff;
+}
+
+.patient-balance-container .MuiChip-root {
+  font-weight: 600;
+}
+
+.patient-balance-container .MuiDialog-paper {
+  border-radius: 12px;
+}
