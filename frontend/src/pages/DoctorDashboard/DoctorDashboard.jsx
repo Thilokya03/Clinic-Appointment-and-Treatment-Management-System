@@ -750,8 +750,8 @@ export default function DoctorDashboard() {
                           <TableRow>
                             <TableCell><strong>Treatment ID</strong></TableCell>
                             <TableCell><strong>Date</strong></TableCell>
-                            <TableCell><strong>Appointment ID</strong></TableCell>
-                            <TableCell><strong>Catalog ID</strong></TableCell>
+                            <TableCell><strong>Treatment Name</strong></TableCell>
+                            <TableCell><strong>Fee</strong></TableCell>
                             <TableCell><strong>Description</strong></TableCell>
                           </TableRow>
                         </TableHead>
@@ -762,8 +762,20 @@ export default function DoctorDashboard() {
                               <TableCell>
                                 {new Date(treatment.appointment_date).toLocaleDateString()}
                               </TableCell>
-                              <TableCell>{treatment.appointment_id}</TableCell>
-                              <TableCell>{treatment.catalog_id}</TableCell>
+                              <TableCell>
+                                <Chip 
+                                  label={treatment.treatment_name || 'N/A'} 
+                                  color="primary" 
+                                  size="small" 
+                                  variant="outlined"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                {treatment.treatment_fee 
+                                  ? `LKR ${parseFloat(treatment.treatment_fee).toFixed(2)}` 
+                                  : '-'
+                                }
+                              </TableCell>
                               <TableCell>{treatment.description || '-'}</TableCell>
                             </TableRow>
                           ))}

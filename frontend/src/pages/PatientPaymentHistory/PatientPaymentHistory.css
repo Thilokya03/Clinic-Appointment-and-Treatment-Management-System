@@ -1,0 +1,23 @@
+.payment-history-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 80vh;
+}
+
+.payment-history-container .MuiCard-root {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.payment-history-container .MuiTableHead-root {
+  background-color: #f5f5f5;
+}
+
+.payment-history-container .MuiTableCell-head {
+  font-weight: 600;
+  color: #333;
+}
+
+.payment-history-container .MuiTableRow-root:hover {
+  background-color: #f8f9fa;
+}

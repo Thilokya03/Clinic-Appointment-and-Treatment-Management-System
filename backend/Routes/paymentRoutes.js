@@ -46,7 +46,19 @@ router.post('/', staffAuth(['Admin', 'Doctor']), async(req, res) =>{ // TEST PAS
 //     }
 // });
 
-//**************************GET pateint payment***************************************** */
+//**************************GET all payments (for staff)***************************************** */
+
+router.get('/all', staffAuth(['Admin', 'Doctor', 'Nurse', 'Branch Manager', 'Super Admin']), async(req, res) =>{
+    try{
+        const [rows] = await db.execute(`SELECT * FROM payment ORDER BY payment_id DESC`);
+        res.json(rows);
+    }catch(err){
+        console.error('Error fetching all payments:', err);
+        res.status(500).json({error:"Error retrieving payment information"});
+    }
+});
+
+//**************************GET patient payment***************************************** */
 
 router.get('/',patientAuth, async(req, res) =>{ // TEST PASSSSSSSSS
     const patient_id = req.user.id;
@@ -55,7 +67,33 @@ router.get('/',patientAuth, async(req, res) =>{ // TEST PASSSSSSSSS
         const [row] = await db.execute(`SELECT * FROM payment WHERE patient_id = ?`, [patient_id]);
         res.json(row);
     }catch(err){
-        res.status(500).json({error:"Error retreiving payment information"});
+        console.error('Error fetching patient payments:', err);
+        res.status(500).json({error:"Error retrieving payment information"});
+    }
+});
+
+//**************************UPDATE payment (for staff)***************************************** */
+
+router.put('/:payment_id', staffAuth(['Admin', 'Doctor', 'Nurse', 'Branch Manager', 'Super Admin']), async(req, res) =>{
+    const { payment_id } = req.params;
+    const { insurance_paid_amount, patient_paid_amount, discount_amount, status, Due_payment } = req.body;
+
+    try{
+        await db.execute(
+            `UPDATE payment 
+             SET insurance_paid_amount = ?, 
+                 patient_paid_amount = ?, 
+                 discount_amount = ?,
+                 status = ?,
+                 Due_payment = ?
+             WHERE payment_id = ?`,
+            [insurance_paid_amount, patient_paid_amount, discount_amount, status, Due_payment, payment_id]
+        );
+        
+        res.status(200).json({message: "Payment updated successfully"});
+    }catch(err){
+        console.error('Error updating payment:', err);
+        res.status(500).json({error: err.message});
     }
 });
 

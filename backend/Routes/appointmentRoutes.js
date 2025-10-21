@@ -79,7 +79,7 @@ router.get('/patient/:id', authenticate, async(req, res) =>{
     console.log(req.user);
     try{
         const [rows] = await db.execute(`SELECT * FROM appointment WHERE patient_id = ?`, [patient_id]);
-        res.json([rows])
+        res.json(rows)
     }catch(err){
         res.status(500).json({error: err.message});
     }

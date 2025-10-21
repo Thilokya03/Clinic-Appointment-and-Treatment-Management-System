@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import {
   RxBell,
@@ -60,6 +61,7 @@ const initialFormState = {
 };
 
 export default function SetAppointment() {
+  const location = useLocation();
   const [form, setForm] = useState(initialFormState);
   const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
   const [banner, setBanner] = useState(null);
@@ -80,6 +82,26 @@ export default function SetAppointment() {
   const [loadingDates, setLoadingDates] = useState(false);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  // Handle pre-selected patient from navigation state
+  useEffect(() => {
+    if (location.state?.preSelected && location.state?.patientName) {
+      console.log('📋 Pre-selected patient:', location.state);
+      setForm(prev => ({
+        ...prev,
+        patientName: location.state.patientName
+      }));
+      
+      // Show success banner
+      setBanner({
+        type: "success",
+        message: `Patient "${location.state.patientName}" (ID: ${location.state.patientId}) selected. Please complete the appointment details.`
+      });
+      
+      // Auto-hide banner after 5 seconds
+      setTimeout(() => setBanner(null), 5000);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     fetchBranches();

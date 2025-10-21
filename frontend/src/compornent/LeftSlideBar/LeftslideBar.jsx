@@ -17,7 +17,10 @@ import {
   LuUsers, 
   LuStethoscope,
   LuClipboardList,
-  LuUserCog
+  LuUserCog,
+  LuWallet,
+  LuSearch,
+  LuFileText
 } from "react-icons/lu";
 import { FaHospital, FaUserTie } from "react-icons/fa";
 
@@ -41,6 +44,26 @@ const navigationByRole = {
       href: "/dashboard/branchmanagers", 
       icon: <LuUserCog /> 
     },
+    { 
+      label: "Manage Payments", 
+      href: "/dashboard/managepayment", 
+      icon: <LuWallet /> 
+    },
+    { 
+      label: "Book Appointment", 
+      href: "/dashboard/patient-search-appointment", 
+      icon: <RxCalendar /> 
+    },
+    { 
+      label: "Patient Balance", 
+      href: "/dashboard/patient-balance", 
+      icon: <LuSearch /> 
+    },
+    { 
+      label: "Insurance Claims", 
+      href: "/dashboard/insurance-claims", 
+      icon: <LuFileText /> 
+    },
   ],
 
   // Branch Manager
@@ -55,6 +78,26 @@ const navigationByRole = {
       label: "Manage Branch", 
       href: "/dashboard/manage", 
       icon: <LuBuilding2 /> 
+    },
+    { 
+      label: "Manage Payments", 
+      href: "/dashboard/managepayment", 
+      icon: <LuWallet /> 
+    },
+    { 
+      label: "Book Appointment", 
+      href: "/dashboard/patient-search-appointment", 
+      icon: <RxCalendar /> 
+    },
+    { 
+      label: "Patient Balance", 
+      href: "/dashboard/patient-balance", 
+      icon: <LuSearch /> 
+    },
+    { 
+      label: "Insurance Claims", 
+      href: "/dashboard/insurance-claims", 
+      icon: <LuFileText /> 
     },
   ],
 
@@ -97,6 +140,21 @@ const navigationByRole = {
       icon: <LuUsers /> 
     },
     { 
+      label: "Manage Payments", 
+      href: "/dashboard/managepayment", 
+      icon: <LuWallet /> 
+    },
+    { 
+      label: "Book Appointment", 
+      href: "/dashboard/patient-search-appointment", 
+      icon: <RxCalendar /> 
+    },
+    { 
+      label: "Patient Balance", 
+      href: "/dashboard/patient-balance", 
+      icon: <LuSearch /> 
+    },
+    { 
       label: "Appointments", 
       href: "/dashboard/appointments", 
       icon: <RxCalendar /> 
@@ -110,6 +168,56 @@ const navigationByRole = {
       label: "Tasks", 
       href: "/dashboard/tasks", 
       icon: <LuClipboardList /> 
+    },
+  ],
+
+  // Nurse (specific role)
+  nurse: [
+    { 
+      label: "Dashboard", 
+      href: "/dashboard", 
+      icon: <RxDashboard />, 
+      end: true 
+    },
+    { 
+      label: "Staff Management", 
+      href: "/dashboard/staff", 
+      icon: <LuUsers /> 
+    },
+    { 
+      label: "Manage Payments", 
+      href: "/dashboard/managepayment", 
+      icon: <LuWallet /> 
+    },
+    { 
+      label: "Book Appointment", 
+      href: "/dashboard/patient-search-appointment", 
+      icon: <RxCalendar /> 
+    },
+    { 
+      label: "Patient Balance", 
+      href: "/dashboard/patient-balance", 
+      icon: <LuSearch /> 
+    },
+    { 
+      label: "Patient Balance", 
+      href: "/dashboard/patient-balance", 
+      icon: <LuSearch /> 
+    },
+    { 
+      label: "Insurance Claims", 
+      href: "/dashboard/insurance-claims", 
+      icon: <LuFileText /> 
+    },
+    { 
+      label: "Appointments", 
+      href: "/dashboard/appointments", 
+      icon: <RxCalendar /> 
+    },
+    { 
+      label: "Patients", 
+      href: "/dashboard/patients", 
+      icon: <RxPerson /> 
     },
   ],
 

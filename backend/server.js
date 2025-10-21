@@ -46,6 +46,8 @@ const doctorScheduleRoutes = require("./Routes/doctorScheduleRoutes");
 console.log('✓ doctorScheduleRoutes loaded');
 const reportsRoutes = require("./Routes/reportsRoutes");
 console.log('✓ reportsRoutes loaded');
+const claimRoutes = require("./Routes/claimRoutes");
+console.log('✓ claimRoutes loaded');
 //-------------------------
 
 
@@ -62,6 +64,7 @@ app.use("/api/insurance", insuranceRoutes);
 app.use("/api/treatment-catalog", treatmentCatalogRoutes);
 app.use("/api/doctor-schedule", doctorScheduleRoutes);
 app.use("/api/reports", reportsRoutes);
+app.use("/api/claim", claimRoutes);
 //-------------------------
 
 const PORT = 3000;
