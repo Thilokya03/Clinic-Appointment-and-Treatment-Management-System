@@ -20,12 +20,7 @@ import {
   CardContent,
   CircularProgress,
   Alert,
-  Divider,
   Chip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from '@mui/material';
 import {
   Assessment,
@@ -35,7 +30,6 @@ import {
   MedicalServices,
   AccountBalance,
   Refresh,
-  Download,
   TrendingUp,
 } from '@mui/icons-material';
 import './Reports.css';
