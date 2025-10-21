@@ -38,6 +38,7 @@ import {
   Download,
   TrendingUp,
 } from '@mui/icons-material';
+import './Reports.css';
 
 // Tab Panel Component
 function TabPanel({ children, value, index }) {
@@ -239,20 +240,20 @@ export default function Reports() {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+      <Box className="reports-header" sx={{ mb: 4 }}>
+        <Box className="reports-title" sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           <Assessment sx={{ fontSize: 40, color: 'primary.main' }} />
           <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
             Reports & Analytics
           </Typography>
         </Box>
-        <Typography variant="h6" color="text.secondary">
+        <Typography className="reports-subtitle" variant="h6" color="text.secondary">
           Comprehensive reports for clinic management and decision making
         </Typography>
       </Box>
 
       {/* Tabs */}
-      <Paper sx={{ mb: 3 }}>
+      <Paper className="reports-tabs" sx={{ mb: 3 }}>
         <Tabs
           value={tabValue}
           onChange={(e, newValue) => setTabValue(newValue)}
@@ -329,11 +330,11 @@ export default function Reports() {
             </Grid>
 
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <Box className="loading-container" sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <TableContainer component={Paper} variant="outlined">
+              <TableContainer className="reports-table" component={Paper} variant="outlined">
                 <Table>
                   <TableHead>
                     <TableRow sx={{ bgcolor: 'grey.100' }}>
@@ -420,11 +421,11 @@ export default function Reports() {
             </Card>
 
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <Box className="loading-container" sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <TableContainer component={Paper} variant="outlined">
+              <TableContainer className="reports-table" component={Paper} variant="outlined">
                 <Table>
                   <TableHead>
                     <TableRow sx={{ bgcolor: 'grey.100' }}>
@@ -507,11 +508,11 @@ export default function Reports() {
             </Card>
 
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <Box className="loading-container" sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <TableContainer component={Paper} variant="outlined">
+              <TableContainer className="reports-table" component={Paper} variant="outlined">
                 <Table>
                   <TableHead>
                     <TableRow sx={{ bgcolor: 'grey.100' }}>
@@ -613,11 +614,11 @@ export default function Reports() {
             </Card>
 
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <Box className="loading-container" sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <TableContainer component={Paper} variant="outlined">
+              <TableContainer className="reports-table" component={Paper} variant="outlined">
                 <Table>
                   <TableHead>
                     <TableRow sx={{ bgcolor: 'grey.100' }}>
@@ -714,11 +715,11 @@ export default function Reports() {
             </Grid>
 
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <Box className="loading-container" sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <TableContainer component={Paper} variant="outlined">
+              <TableContainer className="reports-table" component={Paper} variant="outlined">
                 <Table>
                   <TableHead>
                     <TableRow sx={{ bgcolor: 'grey.100' }}>
