@@ -7,46 +7,32 @@ export default function StaffDashboard() {
 
   const dashboardCards = [
     {
-      title: "Add Patient",
-      description: "Register new patients into the system",
-      icon: "👤",
-      link: "/dashboard/add-patient",
-      color: "#2563eb"
-    },
-    {
       title: "Manage Payments",
       description: "Process and manage patient payments",
       icon: "💳",
-      link: "/dashboard/payments",
+      link: "/dashboard/managepayment",
       color: "#9333ea"
     },
     {
-      title: "Add Treatments",
-      description: "Record patient treatments and procedures",
-      icon: "💊",
-      link: "/dashboard/add-treatment",
+      title: "Book Appointment",
+      description: "Search patients and book appointments",
+      icon: "�",
+      link: "/dashboard/patient-search-appointment",
+      color: "#2563eb"
+    },
+    {
+      title: "Patient Balance",
+      description: "Search and view patient balances",
+      icon: "�",
+      link: "/dashboard/patient-balance",
       color: "#f97316"
     },
     {
-      title: "Doctor Schedule",
-      description: "Manage doctor appointment schedules",
-      icon: "📅",
-      link: "/dashboard/doctor-schedule",
-      color: "#10b981"
-    },
-    {
-      title: "Insurance Companies",
-      description: "Add and manage insurance providers",
+      title: "Insurance Claims",
+      description: "Manage insurance claims and approvals",
       icon: "🏢",
-      link: "/dashboard/insurance",
-      color: "#f59e0b"
-    },
-    {
-      title: "Treatment Catalogs",
-      description: "Manage treatment and service catalogs",
-      icon: "📚",
-      link: "/dashboard/treatment-catalog",
-      color: "#8b5cf6"
+      link: "/dashboard/insurance-claims",
+      color: "#10b981"
     }
   ];
 

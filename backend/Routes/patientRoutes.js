@@ -30,13 +30,25 @@ router.post('/signup', async (req, res) => { // TEST PASSSS
       return res.status(400).json({error: "Please provide username, email and password"});
     }
     try{
-      const [existingUser] = await db.execute(
-        `SELECT * FROM patient WHERE username = ? OR email = ?`, [username, email]
-      );
+      // Check for existing username or email (and NIC if provided)
+      let checkQuery = `SELECT * FROM patient WHERE username = ? OR email = ?`;
+      let checkParams = [username, email];
+      
+      if (nic && nic.trim() !== '') {
+        checkQuery += ` OR nic = ?`;
+        checkParams.push(nic);
+      }
+      
+      const [existingUser] = await db.execute(checkQuery, checkParams);
 
       if(existingUser.length > 0){
-        console.log('❌ User already exists:', username, email);
-        return res.status(400).json({error: "Username or email already in use"});
+        console.log('❌ User already exists:', username, email, nic);
+        const duplicate = existingUser[0];
+        let errorMsg = "User already exists. ";
+        if (duplicate.username === username) errorMsg += "Username is taken. ";
+        if (duplicate.email === email) errorMsg += "Email is already in use. ";
+        if (nic && duplicate.nic === nic) errorMsg += "NIC is already registered.";
+        return res.status(400).json({error: errorMsg.trim()});
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -49,7 +61,7 @@ router.post('/signup', async (req, res) => { // TEST PASSSS
       }
 
       await db.execute(
-        "INSERT INTO patient (patient_id, username, name, phone_no, gender, age, nic, email, password, emergency_contact_name, emergency_contact_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO patient (patient_id, username, name, phone_no, gender, age, nic, email, password, emergencyContactName, emergencyContactNo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [newPatientId, username, name, phone_no, gender, age, nic, email, hashedPassword, emergency_contact_name, emergency_contact_no]
       );
       
@@ -57,6 +69,12 @@ router.post('/signup', async (req, res) => { // TEST PASSSS
       res.status(201).json({message: "patient added successfully", patient_id: newPatientId});
     } catch (err){
       console.error('❌ Signup error:', err);
+      console.error('❌ Error details:', {
+        message: err.message,
+        code: err.code,
+        sqlMessage: err.sqlMessage,
+        sql: err.sql
+      });
       res.status(500).json({error: err.message || "Registration failed"});
     }
 });

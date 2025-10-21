@@ -103,11 +103,11 @@ export default function Register() {
   const [showPw, setShowPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
 
-  // Toast
+
   const [toast, setToast] = useState({
     open: false,
     message: "",
-    severity: "success", // 'error' | 'warning' | 'info' | 'success'
+    severity: "success",
   });
   const closeToast = (_, reason) => {
     if (reason === "clickaway") return;

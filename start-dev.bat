@@ -59,7 +59,23 @@ echo   Press Ctrl+C to stop all servers
 echo ========================================
 echo.
 
-REM Start both servers
-call npm run dev
+REM Start both servers in background and wait for them to start
+start "Backend Server" cmd /k "cd /d "%~dp0backend" && npm start"
+start "Frontend Server" cmd /k "cd /d "%~dp0frontend" && npm run dev"
 
-pause
+echo Waiting for servers to start...
+timeout /t 8 /nobreak >nul
+
+REM Open frontend in default browser
+echo Opening frontend in browser...
+start http://localhost:5173
+
+echo.
+echo Both servers are running!
+echo Press any key to stop all servers and exit...
+pause >nul
+
+REM Kill all node processes when user presses a key
+taskkill /F /IM node.exe >nul 2>&1
+
+exit /b 0

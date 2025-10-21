@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require("../db");
 const { staffAuth } = require('../middlewares/auth');
 
-// Report 1: Branch-wise appointment summary per day
+// Report 1: Branch-wise appointment summary per day (Admin only)
 router.get('/branch-appointments', staffAuth(['Admin']), async (req, res) => {
     const { date } = req.query;
     
@@ -35,6 +35,257 @@ router.get('/branch-appointments', staffAuth(['Admin']), async (req, res) => {
         console.error('❌ Error generating branch appointments report:', err);
         res.status(500).json({ 
             error: 'Error generating branch appointments report',
+            details: err.message 
+        });
+    }
+});
+
+// ============= BRANCH MANAGER REPORTS =============
+
+// Branch Manager Report 1: My branch appointment summary per day
+router.get('/my-branch-appointments', staffAuth(['Branch Manager']), async (req, res) => {
+    const { date } = req.query;
+    const branchId = req.user.branch_id;
+    
+    if (!date) {
+        return res.status(400).json({ error: 'Date parameter is required' });
+    }
+
+    try {
+        const [rows] = await db.execute(
+            `SELECT 
+                b.branch_id,
+                b.name as branch_name,
+                b.address,
+                b.phone_no as branch_phone,
+                SUM(CASE WHEN a.status = 'Scheduled' THEN 1 ELSE 0 END) as scheduled_count,
+                SUM(CASE WHEN a.status = 'Completed' THEN 1 ELSE 0 END) as completed_count,
+                SUM(CASE WHEN a.status = 'Cancelled' THEN 1 ELSE 0 END) as cancelled_count,
+                COUNT(DISTINCT ds.doctor_id) as total_doctors
+             FROM branch b
+             LEFT JOIN staff s ON s.branch_id = b.branch_id
+             LEFT JOIN doctor_schedule ds ON ds.doctor_id = s.staff_id
+             LEFT JOIN appointment a ON a.schedule_id = ds.schedule_id AND a.appointment_date = ?
+             WHERE b.branch_id = ? AND (s.category = 'Doctor' OR s.staff_id IS NULL)
+             GROUP BY b.branch_id, b.name, b.address, b.phone_no`,
+            [date, branchId]
+        );
+
+        console.log('✅ Branch Manager appointments report generated:', { date, branchId });
+        res.json(rows[0] || {
+            branch_id: branchId,
+            scheduled_count: 0,
+            completed_count: 0,
+            cancelled_count: 0,
+            total_doctors: 0
+        });
+    } catch (err) {
+        console.error('❌ Error generating branch manager appointments report:', err);
+        res.status(500).json({ 
+            error: 'Error generating appointments report',
+            details: err.message 
+        });
+    }
+});
+
+// Branch Manager Report 2: My branch doctor revenue
+router.get('/my-branch-doctor-revenue', staffAuth(['Branch Manager']), async (req, res) => {
+    const branchId = req.user.branch_id;
+    
+    try {
+        const [rows] = await db.execute(
+            `SELECT 
+                s.staff_id as doctor_id,
+                s.name as doctor_name,
+                d.speciality,
+                COALESCE(SUM(p.patient_paid_amount + p.insurance_paid_amount), 0) as total_revenue,
+                COUNT(DISTINCT a.appointment_id) as total_appointments
+             FROM staff s
+             INNER JOIN doctor d ON s.staff_id = d.staff_id
+             LEFT JOIN doctor_schedule ds ON ds.doctor_id = s.staff_id
+             LEFT JOIN appointment a ON a.schedule_id = ds.schedule_id
+             LEFT JOIN payment p ON p.appointment_id = a.appointment_id
+             WHERE s.category = 'Doctor' AND s.branch_id = ?
+             GROUP BY s.staff_id, s.name, d.speciality
+             ORDER BY total_revenue DESC`,
+            [branchId]
+        );
+
+        console.log('✅ Branch Manager doctor revenue report generated:', branchId);
+        res.json(rows);
+    } catch (err) {
+        console.error('❌ Error generating branch manager doctor revenue report:', err);
+        res.status(500).json({ 
+            error: 'Error generating doctor revenue report',
+            details: err.message 
+        });
+    }
+});
+
+// Branch Manager Report 3: My branch patients with outstanding balances
+router.get('/my-branch-outstanding-balances', staffAuth(['Branch Manager']), async (req, res) => {
+    const branchId = req.user.branch_id;
+    
+    try {
+        const [rows] = await db.execute(
+            `SELECT 
+                pt.patient_id,
+                pt.name,
+                pt.phone_no,
+                pt.email,
+                SUM(p.total_amount) as total_amount,
+                SUM(p.patient_paid_amount) as patient_paid_amount,
+                SUM(p.insurance_paid_amount) as insurance_paid_amount,
+                SUM(p.Due_payment) as Due_payment,
+                COUNT(DISTINCT a.appointment_id) as total_appointments
+             FROM patient pt
+             INNER JOIN appointment a ON a.patient_id = pt.patient_id
+             INNER JOIN doctor_schedule ds ON ds.schedule_id = a.schedule_id
+             INNER JOIN staff s ON s.staff_id = ds.doctor_id
+             INNER JOIN payment p ON p.appointment_id = a.appointment_id
+             WHERE s.branch_id = ? AND p.Due_payment > 0
+             GROUP BY pt.patient_id, pt.name, pt.phone_no, pt.email
+             ORDER BY Due_payment DESC`,
+            [branchId]
+        );
+
+        console.log('✅ Branch Manager outstanding balances report generated:', branchId);
+        res.json(rows);
+    } catch (err) {
+        console.error('❌ Error generating branch manager outstanding balances report:', err);
+        res.status(500).json({ 
+            error: 'Error generating outstanding balances report',
+            details: err.message 
+        });
+    }
+});
+
+// Branch Manager Report 4: My branch treatment statistics
+router.get('/my-branch-treatment-stats', staffAuth(['Branch Manager']), async (req, res) => {
+    const { start_date, end_date } = req.query;
+    const branchId = req.user.branch_id;
+    
+    if (!start_date || !end_date) {
+        return res.status(400).json({ 
+            error: 'Both start_date and end_date parameters are required' 
+        });
+    }
+
+    try {
+        const [rows] = await db.execute(
+            `SELECT 
+                tc.treatment_name,
+                tc.treatment_fee as treatment_cost,
+                COUNT(t.treatment_id) as treatment_count,
+                SUM(tc.treatment_fee) as total_revenue
+             FROM treatment_catalog tc
+             INNER JOIN treatment t ON t.catalog_id = tc.catalog_id
+             INNER JOIN appointment a ON a.appointment_id = t.appointment_id
+             INNER JOIN doctor_schedule ds ON ds.schedule_id = a.schedule_id
+             INNER JOIN staff s ON s.staff_id = ds.doctor_id
+             WHERE s.branch_id = ? AND a.appointment_date BETWEEN ? AND ?
+             GROUP BY tc.catalog_id, tc.treatment_name, tc.treatment_fee
+             ORDER BY treatment_count DESC`,
+            [branchId, start_date, end_date]
+        );
+
+        console.log('✅ Branch Manager treatment statistics generated:', { branchId, start_date, end_date });
+        res.json(rows);
+    } catch (err) {
+        console.error('❌ Error generating branch manager treatment statistics:', err);
+        res.status(500).json({ 
+            error: 'Error generating treatment statistics',
+            details: err.message 
+        });
+    }
+});
+
+// Branch Manager Report 5: My branch summary dashboard
+router.get('/my-branch-summary', staffAuth(['Branch Manager']), async (req, res) => {
+    const branchId = req.user.branch_id;
+    
+    try {
+        // Get branch info
+        const [branchInfo] = await db.execute(
+            `SELECT branch_id, name, address, phone_no, email FROM branch WHERE branch_id = ?`,
+            [branchId]
+        );
+
+        // Get total appointments for this branch
+        const [appointments] = await db.execute(
+            `SELECT COUNT(DISTINCT a.appointment_id) as total 
+             FROM appointment a
+             INNER JOIN doctor_schedule ds ON ds.schedule_id = a.schedule_id
+             INNER JOIN staff s ON s.staff_id = ds.doctor_id
+             WHERE s.branch_id = ?`,
+            [branchId]
+        );
+
+        // Get total revenue for this branch
+        const [revenue] = await db.execute(
+            `SELECT COALESCE(SUM(p.patient_paid_amount + p.insurance_paid_amount), 0) as total 
+             FROM payment p
+             INNER JOIN appointment a ON a.appointment_id = p.appointment_id
+             INNER JOIN doctor_schedule ds ON ds.schedule_id = a.schedule_id
+             INNER JOIN staff s ON s.staff_id = ds.doctor_id
+             WHERE s.branch_id = ?`,
+            [branchId]
+        );
+
+        // Get outstanding balance for this branch
+        const [outstanding] = await db.execute(
+            `SELECT COALESCE(SUM(p.Due_payment), 0) as total 
+             FROM payment p
+             INNER JOIN appointment a ON a.appointment_id = p.appointment_id
+             INNER JOIN doctor_schedule ds ON ds.schedule_id = a.schedule_id
+             INNER JOIN staff s ON s.staff_id = ds.doctor_id
+             WHERE s.branch_id = ? AND p.Due_payment > 0`,
+            [branchId]
+        );
+
+        // Get total unique patients for this branch
+        const [patients] = await db.execute(
+            `SELECT COUNT(DISTINCT a.patient_id) as total 
+             FROM appointment a
+             INNER JOIN doctor_schedule ds ON ds.schedule_id = a.schedule_id
+             INNER JOIN staff s ON s.staff_id = ds.doctor_id
+             WHERE s.branch_id = ?`,
+            [branchId]
+        );
+
+        // Get total doctors in this branch
+        const [doctors] = await db.execute(
+            `SELECT COUNT(*) as total 
+             FROM staff s
+             INNER JOIN doctor d ON s.staff_id = d.staff_id
+             WHERE s.branch_id = ? AND s.category = 'Doctor'`,
+            [branchId]
+        );
+
+        // Get total staff in this branch
+        const [staff] = await db.execute(
+            `SELECT COUNT(*) as total 
+             FROM staff 
+             WHERE branch_id = ?`,
+            [branchId]
+        );
+
+        const summary = {
+            branch: branchInfo[0] || {},
+            total_appointments: appointments[0].total,
+            total_revenue: parseFloat(revenue[0].total),
+            outstanding_balance: parseFloat(outstanding[0].total),
+            total_patients: patients[0].total,
+            total_doctors: doctors[0].total,
+            total_staff: staff[0].total
+        };
+
+        console.log('✅ Branch Manager summary report generated:', branchId);
+        res.json(summary);
+    } catch (err) {
+        console.error('❌ Error generating branch manager summary report:', err);
+        res.status(500).json({ 
+            error: 'Error generating summary report',
             details: err.message 
         });
     }

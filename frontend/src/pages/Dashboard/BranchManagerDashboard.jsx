@@ -48,18 +48,60 @@ export default function BranchManagerDashboard() {
 
   const dashboardCards = [
     {
-      title: "Manage Doctors",
-      description: "Add, edit, and manage doctors in your branch",
-      icon: "👨‍⚕️",
-      link: "/dashboard/doctors",
+      title: "Manage Branch",
+      description: "View and manage branch information",
+      icon: "🏥",
+      link: "/dashboard/manage",
       color: "#2563eb"
     },
     {
-      title: "Generate Reports",
+      title: "Branch Reports",
       description: "View and generate branch performance reports",
       icon: "📊",
-      link: "/dashboard/reports",
+      link: "/dashboard/branch-reports",
       color: "#f97316"
+    },
+    {
+      title: "Manage Payments",
+      description: "Process and manage patient payments",
+      icon: "💳",
+      link: "/dashboard/managepayment",
+      color: "#9333ea"
+    },
+    {
+      title: "Book Appointment",
+      description: "Search patients and book appointments",
+      icon: "📅",
+      link: "/dashboard/patient-search-appointment",
+      color: "#10b981"
+    },
+    {
+      title: "Patient Balance",
+      description: "Search and view patient balances",
+      icon: "💰",
+      link: "/dashboard/patient-balance",
+      color: "#f59e0b"
+    },
+    {
+      title: "Insurance Claims",
+      description: "Manage insurance claims and approvals",
+      icon: "🏢",
+      link: "/dashboard/insurance-claims",
+      color: "#8b5cf6"
+    },
+    {
+      title: "Add Doctor",
+      description: "Add new doctors to your branch",
+      icon: "👨‍⚕️",
+      link: "/dashboard/adddoctor",
+      color: "#ec4899"
+    },
+    {
+      title: "Add Staff",
+      description: "Add new staff members to your branch",
+      icon: "👥",
+      link: "/dashboard/addstaff",
+      color: "#06b6d4"
     }
   ];
 

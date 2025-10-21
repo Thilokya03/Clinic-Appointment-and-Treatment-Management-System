@@ -12,27 +12,6 @@ export default function DoctorDashboard() {
       icon: "📅",
       link: "/dashboard/doctorchange",
       color: "#2563eb"
-    },
-    {
-      title: "Patient History",
-      description: "View patient medical records and history",
-      icon: "📋",
-      link: "/dashboard/patient-history",
-      color: "#9333ea"
-    },
-    {
-      title: "My Schedule",
-      description: "View your upcoming appointments",
-      icon: "🗓️",
-      link: "/dashboard/my-schedule",
-      color: "#f97316"
-    },
-    {
-      title: "Prescriptions",
-      description: "Manage patient prescriptions",
-      icon: "💊",
-      link: "/dashboard/prescriptions",
-      color: "#10b981"
     }
   ];
 

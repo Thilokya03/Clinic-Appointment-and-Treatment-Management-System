@@ -40,9 +40,14 @@ const navigationByRole = {
       icon: <LuBuilding2 /> 
     },
     { 
-      label: "Manage Branch Managers", 
+      label: "Branch Managers", 
       href: "/dashboard/branchmanagers", 
       icon: <LuUserCog /> 
+    },
+    { 
+      label: "Staff Management", 
+      href: "/dashboard/staff", 
+      icon: <LuUsers /> 
     },
     { 
       label: "Manage Payments", 
@@ -63,6 +68,11 @@ const navigationByRole = {
       label: "Insurance Claims", 
       href: "/dashboard/insurance-claims", 
       icon: <LuFileText /> 
+    },
+    { 
+      label: "Reports", 
+      href: "/dashboard/reports", 
+      icon: <LuClipboardList /> 
     },
   ],
 
@@ -80,6 +90,16 @@ const navigationByRole = {
       icon: <LuBuilding2 /> 
     },
     { 
+      label: "Add Doctor", 
+      href: "/dashboard/adddoctor", 
+      icon: <LuStethoscope /> 
+    },
+    { 
+      label: "Add Staff", 
+      href: "/dashboard/addstaff", 
+      icon: <LuUserPlus /> 
+    },
+    { 
       label: "Manage Payments", 
       href: "/dashboard/managepayment", 
       icon: <LuWallet /> 
@@ -99,6 +119,11 @@ const navigationByRole = {
       href: "/dashboard/insurance-claims", 
       icon: <LuFileText /> 
     },
+    { 
+      label: "Branch Reports", 
+      href: "/dashboard/branch-reports", 
+      icon: <LuClipboardList /> 
+    },
   ],
 
   // Doctor
@@ -110,19 +135,9 @@ const navigationByRole = {
       end: true 
     },
     { 
-      label: "My Schedule", 
+      label: "Manage Schedule", 
       href: "/dashboard/doctorchange", 
       icon: <RxCalendar /> 
-    },
-    { 
-      label: "Appointments", 
-      href: "/dashboard/appointments", 
-      icon: <LuClipboardList /> 
-    },
-    { 
-      label: "Patients", 
-      href: "/dashboard/patients", 
-      icon: <RxPerson /> 
     },
   ],
 
@@ -155,19 +170,9 @@ const navigationByRole = {
       icon: <LuSearch /> 
     },
     { 
-      label: "Appointments", 
-      href: "/dashboard/appointments", 
-      icon: <RxCalendar /> 
-    },
-    { 
-      label: "Patients", 
-      href: "/dashboard/patients", 
-      icon: <RxPerson /> 
-    },
-    { 
-      label: "Tasks", 
-      href: "/dashboard/tasks", 
-      icon: <LuClipboardList /> 
+      label: "Insurance Claims", 
+      href: "/dashboard/insurance-claims", 
+      icon: <LuFileText /> 
     },
   ],
 
@@ -200,24 +205,9 @@ const navigationByRole = {
       icon: <LuSearch /> 
     },
     { 
-      label: "Patient Balance", 
-      href: "/dashboard/patient-balance", 
-      icon: <LuSearch /> 
-    },
-    { 
       label: "Insurance Claims", 
       href: "/dashboard/insurance-claims", 
       icon: <LuFileText /> 
-    },
-    { 
-      label: "Appointments", 
-      href: "/dashboard/appointments", 
-      icon: <RxCalendar /> 
-    },
-    { 
-      label: "Patients", 
-      href: "/dashboard/patients", 
-      icon: <RxPerson /> 
     },
   ],
 
@@ -231,18 +221,13 @@ const navigationByRole = {
     },
     { 
       label: "Book Appointment", 
-      href: "/dashboard/book", 
+      href: "/dashboard/book-appointment", 
       icon: <RxCalendar /> 
     },
     { 
-      label: "My Appointments", 
-      href: "/dashboard/myappointments", 
-      icon: <LuClipboardList /> 
-    },
-    { 
-      label: "Medical Records", 
-      href: "/dashboard/records", 
-      icon: <FaHospital /> 
+      label: "Payment History", 
+      href: "/dashboard/my-payments", 
+      icon: <LuWallet /> 
     },
   ],
 };

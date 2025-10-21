@@ -262,6 +262,22 @@ export default function Login() {
                 </Link>
               </Typography>
 
+              <Divider sx={{ my: 2 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Quick Links
+                </Typography>
+              </Divider>
+
+              <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
+                <Link component={RouterLink} to="/patient" underline="hover" variant="body2">
+                  View Patients
+                </Link>
+                <Typography variant="body2" color="text.secondary">•</Typography>
+                <Link component={RouterLink} to="/staff" underline="hover" variant="body2">
+                  View Staff
+                </Link>
+              </Box>
+
               <Typography variant="caption" color="text.secondary" display="block" align="center" mt={3}>
                 (c) {new Date().getFullYear()} MedSync | Security | Privacy | Terms
               </Typography>

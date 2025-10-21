@@ -4,8 +4,10 @@ const db = require("../db");
 const { staffAuth, patientAuth } = require('../middlewares/auth');
 
 //*************************** ADD Insurance Claim ****************** */
-router.post('/', staffAuth(['Admin', 'Branch Manager', 'Nurse']), async(req, res) => {
+router.post('/', staffAuth(['Admin', 'Branch Manager', 'Nurse', 'Other']), async(req, res) => {
     const { claim_id, insurance_id, percentage, payment_id } = req.body;
+
+    console.log('📝 Add claim request:', { claim_id, insurance_id, percentage, payment_id });
 
     if(!claim_id || !insurance_id || !payment_id){
         return res.status(400).json({error: "Missing required fields"});
@@ -43,6 +45,7 @@ router.post('/', staffAuth(['Admin', 'Branch Manager', 'Nurse']), async(req, res
             [claimAmount, payment_id]
         );
         
+        console.log('✅ Claim added successfully:', claim_id);
         res.status(201).json({
             message: "Insurance claim added successfully",
             claim_id: claim_id,
@@ -50,19 +53,19 @@ router.post('/', staffAuth(['Admin', 'Branch Manager', 'Nurse']), async(req, res
             percentage: claimPercentage
         });
     }catch(err){
-        console.error(err);
-        res.status(500).json({error: err.message});
+        console.error('❌ Error adding claim:', err);
+        res.status(500).json({error: err.message || "Error adding claim"});
     }
 });
 
 //*************************** GET All Claims (for staff) ****************** */
-router.get('/all', staffAuth(['Admin', 'Branch Manager', 'Nurse', 'Doctor']), async(req, res) => {
+router.get('/all', staffAuth(['Admin', 'Branch Manager', 'Nurse', 'Doctor', 'Other']), async(req, res) => {
     try{
         const [rows] = await db.execute(`
             SELECT 
                 ic.claim_id,
                 ic.insurance_id,
-                i.company_name,
+                i.name as company_name,
                 ic.percentage,
                 ic.payment_id,
                 p.total_amount,
@@ -78,19 +81,19 @@ router.get('/all', staffAuth(['Admin', 'Branch Manager', 'Nurse', 'Doctor']), as
         res.json(rows);
     }catch(err){
         console.error('Error fetching claims:', err);
-        res.status(500).json({error: "Error retrieving claims"});
+        res.status(500).json({error: err.message || "Error retrieving claims"});
     }
 });
 
 //*************************** GET Claims by Payment ID ****************** */
-router.get('/payment/:payment_id', staffAuth(['Admin', 'Branch Manager', 'Nurse', 'Doctor']), async(req, res) => {
+router.get('/payment/:payment_id', staffAuth(['Admin', 'Branch Manager', 'Nurse', 'Doctor', 'Other']), async(req, res) => {
     const { payment_id } = req.params;
     try{
         const [rows] = await db.execute(`
             SELECT 
                 ic.claim_id,
                 ic.insurance_id,
-                i.company_name,
+                i.name as company_name,
                 ic.percentage,
                 (p.total_amount * ic.percentage / 100) as claim_amount
             FROM insurance_claim ic
@@ -101,7 +104,7 @@ router.get('/payment/:payment_id', staffAuth(['Admin', 'Branch Manager', 'Nurse'
         res.json(rows);
     }catch(err){
         console.error('Error fetching claims:', err);
-        res.status(500).json({error: "Error retrieving claims"});
+        res.status(500).json({error: err.message || "Error retrieving claims"});
     }
 });
 

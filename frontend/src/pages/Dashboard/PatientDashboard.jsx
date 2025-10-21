@@ -7,13 +7,6 @@ export default function PatientDashboard() {
 
   const dashboardCards = [
     {
-      title: "Patient History",
-      description: "View your medical records and history",
-      icon: "📋",
-      link: "/dashboard/my-history",
-      color: "#2563eb"
-    },
-    {
       title: "Book Appointment",
       description: "Schedule a new appointment with a doctor",
       icon: "📅",
@@ -21,18 +14,11 @@ export default function PatientDashboard() {
       color: "#9333ea"
     },
     {
-      title: "Manage Payments",
+      title: "Payment History",
       description: "View and manage your payment history",
       icon: "💳",
       link: "/dashboard/my-payments",
       color: "#f97316"
-    },
-    {
-      title: "Prescriptions",
-      description: "Access your prescriptions and medications",
-      icon: "💊",
-      link: "/dashboard/my-prescriptions",
-      color: "#10b981"
     }
   ];
 

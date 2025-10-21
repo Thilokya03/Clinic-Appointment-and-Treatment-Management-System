@@ -413,7 +413,8 @@ router.post('/signin', async (req, res) => { // TEST PASS
         id: staff.staff_id,
         username: staff.username,
         category: staff.category,
-        role: userRole
+        role: userRole,
+        branch_id: staff.branch_id  // Add branch_id to payload
       }
     };
 
@@ -424,7 +425,7 @@ router.post('/signin', async (req, res) => { // TEST PASS
       { expiresIn: '6h' },
       (err, token) => {
         if (err) throw err;
-        console.log('✅ Login successful:', { username: staff.username, role: userRole });
+        console.log('✅ Login successful:', { username: staff.username, role: userRole, branch_id: staff.branch_id });
         res.json({
           message: "Login Successfull",
           token,
@@ -434,7 +435,8 @@ router.post('/signin', async (req, res) => { // TEST PASS
             name: staff.name,
             email: staff.email,
             category: staff.category,
-            role: userRole
+            role: userRole,
+            branch_id: staff.branch_id  // Add branch_id to response
           }
         });
       }

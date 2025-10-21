@@ -22,6 +22,7 @@ import DoctorDashboard from "./pages/DoctorDashboard/DoctorDashboard";
 import DoctorChangeShedule from "./pages/DoctorChangeShedule/DoctorChangeShedule";
 import About from "./pages/About/About";
 import Reports from "./pages/Reports/Reports";
+import BranchManagerReports from "./pages/Reports/BranchManagerReports";
 import ManagePayment from "./pages/ManagePayment/ManagePayment";
 import PatientBalance from "./pages/PatientBalance/PatientBalance";
 import InsuranceClaim from "./pages/InsuranceClaim/InsuranceClaim";
@@ -150,6 +151,12 @@ export default function App() {
               <Route path="reports" element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <Reports />
+                </ProtectedRoute>
+              } />
+
+              <Route path="branch-reports" element={
+                <ProtectedRoute allowedRoles={['branch_manager']}>
+                  <BranchManagerReports />
                 </ProtectedRoute>
               } />
 

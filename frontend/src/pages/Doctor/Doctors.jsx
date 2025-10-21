@@ -12,6 +12,9 @@ import {
 } from "@mui/material";
 import { Search, Person, MedicalServices } from "@mui/icons-material";
 import axios from "axios";
+import MALE_DOCTOR_ICON from "../../../public/male-doctor.png";
+import FEMALE_DOCTOR_ICON from "../../../public/female-doctor.png";
+
 
 export default function Doctors() {
   const [searchType, setSearchType] = useState("name");
@@ -32,26 +35,18 @@ export default function Doctors() {
       const response = await axios.get('http://localhost:3000/api/staff/doctors');
       
       // Transform backend data to match frontend format
-      const transformedDoctors = response.data.map((doctor, index) => ({
+      const transformedDoctors = response.data.map((doctor) => ({
         id: doctor.staff_id,
-        image: `https://images.unsplash.com/photo-${getRandomDoctorImage(index)}?w=640`,
+        image: doctor.gender === 'Female' ? FEMALE_DOCTOR_ICON : MALE_DOCTOR_ICON,
         name: doctor.name,
         specialty: doctor.speciality,
         category: doctor.speciality,
         bio: `Expert ${doctor.speciality} specialist providing comprehensive care.`,
-        rating: (4.5 + Math.random() * 0.4).toFixed(1),
-        reviews: Math.floor(100 + Math.random() * 150),
-        experience: Math.floor(5 + Math.random() * 15),
-        languages: ["English", "Sinhala"],
         location: doctor.branch_name || "Main Branch",
-        nextAvailable: getRandomAvailability(),
-        consultationFee: `LKR ${(2500 + Math.floor(Math.random() * 2000)).toLocaleString()}`,
-        patientsServed: Math.floor(1000 + Math.random() * 4000),
         services: [doctor.speciality, "Consultation"],
-        acceptingNewPatients: Math.random() > 0.3,
-        url: `/appointmentsbook?doctor=${doctor.staff_id}`,
         phone: doctor.phone_no,
         email: doctor.email,
+        gender: doctor.gender,
       }));
 
       setDoctors(transformedDoctors);
@@ -62,29 +57,6 @@ export default function Doctors() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Helper function to get random doctor images
-  const getRandomDoctorImage = (index) => {
-    const imageIds = [
-      '1612349317150-e413f6a5b16d',
-      '1559839734-2b71ea197ec2',
-      '1591604021695-0c69b7c05981',
-      '1582750433449-648ed127bb54',
-      '1537368910025-700350fe46c7',
-      '1551601651-2a8555f1a136',
-    ];
-    return imageIds[index % imageIds.length];
-  };
-
-  // Helper function to generate random availability
-  const getRandomAvailability = () => {
-    const days = ['Today', 'Tomorrow', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const randomDay = days[Math.floor(Math.random() * days.length)];
-    const hours = Math.floor(Math.random() * 12) + 1;
-    const minutes = ['00', '15', '30', '45'][Math.floor(Math.random() * 4)];
-    const period = Math.random() > 0.5 ? 'AM' : 'PM';
-    return `${randomDay} - ${hours}:${minutes} ${period}`;
   };
 
   const specialtyOptions = useMemo(() => {
