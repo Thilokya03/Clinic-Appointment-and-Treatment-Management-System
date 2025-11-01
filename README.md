@@ -12,11 +12,6 @@ A comprehensive web-based clinic management system designed to streamline health
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Running the Application](#running-the-application)
-- [Project Structure](#project-structure)
-- [User Roles](#user-roles)
-- [API Documentation](#api-documentation)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## ✨ Features
 
